@@ -300,13 +300,13 @@ public class SpotBase extends AbstractEuclideanSpace implements Spot
 	@Override
 	public double realMin( final int d )
 	{
-		return getDoublePosition( d ) - getFeature( SpotBase.RADIUS );
+		return getDoublePosition( d ) - getFeature( Spot.RADIUS );
 	}
 
 	@Override
 	public double realMax( final int d )
 	{
-		return getDoublePosition( d ) + getFeature( SpotBase.RADIUS );
+		return getDoublePosition( d ) + getFeature( Spot.RADIUS );
 	}
 
 	@Override

@@ -23,13 +23,11 @@ package fiji.plugin.trackmate;
 
 import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.collect.ImmutableMap;
 
 import fiji.plugin.trackmate.util.AlphanumComparator;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -112,7 +110,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	 *            the type of pixels in the {@link RandomAccessible}.
 	 * @return an iterable.
 	 */
-	public < T extends RealType< T > > IterableInterval< T > iterable( RandomAccessible< T > ra, double calibration[] );
+	public < T extends RealType< T > > IterableInterval< T > iterable( RandomAccessible< T > ra, double[] calibration );
 
 	/**
 	 * Returns an iterable that will iterate over all the pixels contained in
@@ -355,7 +353,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	public static final String FRAME = "FRAME";
 
 	/** The position features. */
-	public final static String[] POSITION_FEATURES = new String[] { POSITION_X, POSITION_Y, POSITION_Z };
+	public static final String[] POSITION_FEATURES = new String[] { POSITION_X, POSITION_Y, POSITION_Z };
 
 	/**
 	 * The 8 privileged spot features that must be set by a spot detector:
@@ -363,11 +361,11 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	 * {@link #POSITION_Z}, {@link #POSITION_Z}, {@link #RADIUS},
 	 * {@link #FRAME}, {@link SpotCollection#VISIBILITY}.
 	 */
-	public final static Collection< String > FEATURES = Arrays.asList( QUALITY,
+	public static final Collection< String > FEATURES = List.of( QUALITY,
 			POSITION_X, POSITION_Y, POSITION_Z, POSITION_T, FRAME, RADIUS, SpotCollection.VISIBILITY );
 
 	/** The 8 privileged spot feature names. */
-	public final static Map< String, String > FEATURE_NAMES = ImmutableMap.of(
+	public static final Map< String, String > FEATURE_NAMES = Map.of(
 			POSITION_X, "X",
 			POSITION_Y, "Y",
 			POSITION_Z, "Z",
@@ -378,7 +376,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 			VISIBILITY, "Visibility" );
 
 	/** The 8 privileged spot feature short names. */
-	public final static Map< String, String > FEATURE_SHORT_NAMES = ImmutableMap.of(
+	public static final Map< String, String > FEATURE_SHORT_NAMES = Map.of(
 			POSITION_X, "X",
 			POSITION_Y, "Y",
 			POSITION_Z, "Z",
@@ -389,7 +387,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 			VISIBILITY, "Visibility" );
 
 	/** The 8 privileged spot feature dimensions. */
-	public final static Map< String, Dimension > FEATURE_DIMENSIONS = ImmutableMap.of(
+	public static final Map< String, Dimension > FEATURE_DIMENSIONS = Map.of(
 			POSITION_X, Dimension.POSITION,
 			POSITION_Y, Dimension.POSITION,
 			POSITION_Z, Dimension.POSITION,
@@ -400,7 +398,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 			VISIBILITY, Dimension.NONE );
 
 	/** The 8 privileged spot feature isInt flags. */
-	public final static Map< String, Boolean > IS_INT = ImmutableMap.of(
+	public static final Map< String, Boolean > IS_INT = Map.of(
 			POSITION_X, Boolean.FALSE,
 			POSITION_Y, Boolean.FALSE,
 			POSITION_Z, Boolean.FALSE,
@@ -632,7 +630,7 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	 */
 	public final static Comparator< Spot > nameComparator = new Comparator< Spot >()
 	{
-		private final Comparator< String > comparator = AlphanumComparator.instance;
+		private static final Comparator< String > comparator = AlphanumComparator.instance;
 
 		@Override
 		public int compare( final Spot o1, final Spot o2 )

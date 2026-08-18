@@ -294,9 +294,10 @@ public class SpotMesh extends SpotBase
 		final StringBuilder str = new StringBuilder( super.toString() );
 
 		str.append( "\nBounding-box" );
-		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "X", boundingBox.realMin( 0 ), boundingBox.realMax( 0 ) ) );
-		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Y", boundingBox.realMin( 1 ), boundingBox.realMax( 1 ) ) );
-		str.append( String.format( "\n%5s: %7.2f -> %7.2f", "Z", boundingBox.realMin( 2 ), boundingBox.realMax( 2 ) ) );
+		final String format = "\n%5s: %7.2f -> %7.2f";
+		str.append( String.format( format, "X", boundingBox.realMin( 0 ), boundingBox.realMax( 0 ) ) );
+		str.append( String.format( format, "Y", boundingBox.realMin( 1 ), boundingBox.realMax( 1 ) ) );
+		str.append( String.format( format, "Z", boundingBox.realMin( 2 ), boundingBox.realMax( 2 ) ) );
 
 		final net.imglib2.mesh.Vertices vertices = mesh.vertices();
 		final long nVertices = vertices.size();
