@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.model;
+package fiji.plugin.trackmate.visualization.editor.labkit.model;
 
 import bdv.tools.InitializeViewerState;
 import bdv.util.Affine3DHelpers;

@@ -19,10 +19,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
@@ -56,9 +56,9 @@ import bdv.viewer.DisplayMode;
 import bdv.viewer.NavigationActions;
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodEraseMode;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodFillMode;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMFloodFillController.FloodEraseMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMFloodFillController.FloodFillMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMImageLabelingModel;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.bdv.BdvAutoContrast;
 import sc.fiji.labkit.ui.bdv.BdvLayer;

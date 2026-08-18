@@ -20,10 +20,10 @@
  * #L%
  */
 
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Color;
 import java.awt.Insets;
@@ -44,10 +44,10 @@ import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.Actions;
 
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodEraseMode;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMFloodFillController.FloodFillMode;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.EraseBrushMode;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabelBrushController.PaintBrushMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMFloodFillController.FloodEraseMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMFloodFillController.FloodFillMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabelBrushController.EraseBrushMode;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabelBrushController.PaintBrushMode;
 import net.miginfocom.swing.MigLayout;
 import sc.fiji.labkit.ui.brush.PlanarModeController;
 

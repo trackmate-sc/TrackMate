@@ -19,10 +19,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
@@ -44,9 +44,9 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import bdv.util.Affine3DHelpers;
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
-import fiji.plugin.trackmate.gui.editor.labkit.model.UndoRedoStack;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMImageLabelingModel;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.UndoRedoStack;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;

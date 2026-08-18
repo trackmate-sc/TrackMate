@@ -65,10 +65,10 @@ import fiji.plugin.trackmate.gui.WindowManager;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.Threads;
 import fiji.plugin.trackmate.util.WrapLayout;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame;
 import ij.ImagePlus;
 
 /**

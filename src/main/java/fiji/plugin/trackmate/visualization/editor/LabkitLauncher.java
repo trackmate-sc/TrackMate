@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor;
+package fiji.plugin.trackmate.visualization.editor;
 
 import java.io.File;
 
@@ -35,12 +35,12 @@ import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
-import fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.EditorKeymapManager;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMLabKitModel;
 import ij.ImagePlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;

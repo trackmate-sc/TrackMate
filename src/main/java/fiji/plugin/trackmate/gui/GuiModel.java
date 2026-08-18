@@ -1,6 +1,6 @@
 package fiji.plugin.trackmate.gui;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.EDITOR_KEYMAP_HOME;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.EDITOR_KEYMAP_HOME;
 
 import org.scijava.object.ObjectService;
 import org.scijava.ui.behaviour.KeyPressedManager;
@@ -14,11 +14,11 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsManager;
-import fiji.plugin.trackmate.gui.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParams;
 import fiji.plugin.trackmate.visualization.hyperstack.behaviours.semiautotracking.SemiAutoTrackingParamsIO;
 import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
+import fiji.plugin.trackmate.visualization.editor.labkit.component.EditorKeymapManager;
 import fiji.plugin.trackmate.visualization.ui.KeyConfigContexts;
 import fiji.plugin.trackmate.visualization.ui.TrackMateActions;
 import fiji.plugin.trackmate.visualization.ui.TrackMateKeymapManager;

@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
 import java.util.function.Consumer;
 

@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -64,9 +64,9 @@ import bdv.ui.keymap.Keymap;
 import bdv.util.BdvOptions;
 import bdv.viewer.ViewerPanel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMLabKitModel;
 import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMImageLabelingModel;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMLabKitModel;
 import net.imglib2.Dimensions;
 import net.imglib2.util.Intervals;
 import net.miginfocom.swing.MigLayout;

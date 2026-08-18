@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit.util;
+package fiji.plugin.trackmate.visualization.editor.labkit.util;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;

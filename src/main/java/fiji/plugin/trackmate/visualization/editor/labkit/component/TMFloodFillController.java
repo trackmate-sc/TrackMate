@@ -19,10 +19,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.util.Collection;
 import java.util.Set;
@@ -46,8 +46,8 @@ import org.scijava.ui.behaviour.util.RunnableAction;
 
 import bdv.util.BdvHandle;
 import bdv.viewer.ViewerPanel;
-import fiji.plugin.trackmate.gui.editor.labkit.model.TMImageLabelingModel;
 import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.visualization.editor.labkit.model.TMImageLabelingModel;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import net.imglib2.Interval;
@@ -414,7 +414,7 @@ public class TMFloodFillController
 			final ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > target = Views.extendValue( image, seedValueChanged );
 			final DiamondShape shape = new DiamondShape( 1 );
 
-			return fiji.plugin.trackmate.gui.editor.labkit.util.FloodFill.fill( target, target, seed, shape, filter, operation );
+			return fiji.plugin.trackmate.visualization.editor.labkit.util.FloodFill.fill( target, target, seed, shape, filter, operation );
 		}
 
 		private static boolean activeLabelsAreEquals( final LabelingType< Label > a, final Set< Label > b )

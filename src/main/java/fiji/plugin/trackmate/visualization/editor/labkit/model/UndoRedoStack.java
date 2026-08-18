@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit.model;
+package fiji.plugin.trackmate.visualization.editor.labkit.model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

@@ -19,10 +19,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.gui.editor.labkit.component;
+package fiji.plugin.trackmate.visualization.editor.labkit.component;
 
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
-import static fiji.plugin.trackmate.gui.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_CONTEXT;
+import static fiji.plugin.trackmate.visualization.editor.labkit.component.TMLabKitFrame.KEY_CONFIG_SCOPE;
 
 import java.util.Comparator;
 import java.util.List;

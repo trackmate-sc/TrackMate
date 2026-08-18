@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.gui.editor.labkit.model;
+package fiji.plugin.trackmate.visualization.editor.labkit.model;
 
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
