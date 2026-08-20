@@ -62,7 +62,14 @@ public class HyperStackDisplayerActions
 		@Override
 		public void getCommandDescriptions( final CommandDescriptions descriptions )
 		{
-			descriptions.add( TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS, "Toggle the auto-linking mode." );
+			descriptions.add( TOGGLE_AUTO_LINKING, TOGGLE_AUTO_LINKING_KEYS, "Toggle the auto-linking mode.\n"
+					+ "When the auto-linking mode is on:\n"
+					+ "    - If a new spot is created (clicking outside "
+					+ "any existing spot), it is automatically linked to the spot in the "
+					+ "selection, if there is only one spot in the selection and if it is not "
+					+ "in the same frame.\n"
+					+ "    - The spot created is then put in the "
+					+ "selection, so that it can be linked from in the next spot creation." );
 			descriptions.add( NEXT_TIMEPOINT, NEXT_TIMEPOINT_KEYS, "Go to the next timepoint." );
 			descriptions.add( PREVIOUS_TIMEPOINT, PREVIOUS_TIMEPOINT_KEYS, "Go to the previous timepoint." );
 			descriptions.add( SEMI_AUTOMATIC_TRACKING, SEMI_AUTOMATIC_TRACKING_KEYS, "Run semi-automatic tracking on the selected spots." );
