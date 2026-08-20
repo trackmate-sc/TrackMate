@@ -83,8 +83,9 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 			// Keep track of the source.
 			this.source = spot;
 			overlay.source = source;
-			overlay.sourcePixelPos[ 0 ] = x;
-			overlay.sourcePixelPos[ 1 ] = y;
+			final RealLocalizable screenPos = toScreenCoords( spot );
+			overlay.sourcePixelPos[ 0 ] = ( int ) screenPos.getDoublePosition( 0 );
+			overlay.sourcePixelPos[ 1 ] = ( int ) screenPos.getDoublePosition( 1 );
 
 			// Move to next frame if forward, previous frame if backward.
 			targetFrame = backward ? frame - 1 : frame + 1;
