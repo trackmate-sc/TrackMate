@@ -161,7 +161,9 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 
 		private static final long serialVersionUID = 1L;
 
-		private static final Stroke sourceStroke = new BasicStroke( 2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[] { 5f, 5f }, 0.0f );
+		private static final Stroke sourceStroke = new BasicStroke( 1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[] { 5f, 5f }, 0.0f );
+
+		private static final Stroke lineStroke = new BasicStroke( 1f );
 
 		private static final Stroke targetStroke = new BasicStroke( 2f );
 
@@ -218,7 +220,7 @@ public class LinkSpotsBehaviour extends AbstractSpotEditBehaviour implements Dra
 				crossedLine.x2d = arrow.x2d;
 				crossedLine.y2d = arrow.y2d;
 
-				g2d.setStroke( targetStroke );
+				g2d.setStroke( lineStroke );
 				g2d.draw( crossedLine.getPath() );
 				if ( !crossedLine.crossed )
 					g2d.fill( arrow.getPath() );
