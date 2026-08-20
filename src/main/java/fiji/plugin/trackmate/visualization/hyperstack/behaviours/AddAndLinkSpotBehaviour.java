@@ -1,6 +1,9 @@
 package fiji.plugin.trackmate.visualization.hyperstack.behaviours;
 
+import java.util.Set;
+
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import ij.ImagePlus;
@@ -13,11 +16,14 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 
 	private static final String OVERLAY_NAME = "AddAndLinkSpotActionOverlay";
 
+	private final SelectionModel selectionModel;
+
 	private SpotBase newSpot;
 
-	public AddAndLinkSpotBehaviour( final Model model, final ImagePlus imp, final boolean backward )
+	public AddAndLinkSpotBehaviour( final Model model, final SelectionModel selectionModel, final ImagePlus imp, final boolean backward )
 	{
 		super( model, imp, backward );
+		this.selectionModel = selectionModel;
 	}
 
 	@Override
@@ -37,6 +43,32 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 			overlay.source = null;
 			targetFrame = imp.getT() - 1;
 			this.search = null;
+
+			// Is auto-linking mode enabled?
+			if ( SpotEditBehaviours.autoLinkingmode )
+			{
+				// Find one spot in the selection.
+				final Set< Spot > selection = selectionModel.getSpotSelection();
+				if ( selection.size() == 1 )
+				{
+					final Spot ls = selection.iterator().next();
+					// Cannot be on the same frame.
+					if ( ls.getFeature( Spot.FRAME ).intValue() != targetFrame )
+					{
+						this.source = ls;
+						overlay.source = source;
+						final RealLocalizable screenPos = toScreenCoords( source );
+						overlay.sourcePixelPos[ 0 ] = ( int ) Math.round( screenPos.getDoublePosition( 0 ) );
+						overlay.sourcePixelPos[ 1 ] = ( int ) Math.round( screenPos.getDoublePosition( 1 ) );
+					}
+				}
+				else
+				{
+					this.source = null;
+					overlay.source = null;
+				}
+
+			}
 		}
 		else
 		{
@@ -158,6 +190,12 @@ public class AddAndLinkSpotBehaviour extends LinkSpotsBehaviour
 			finally
 			{
 				model.endUpdate();
+				if ( SpotEditBehaviours.autoLinkingmode )
+				{
+					// Select the newly created spot.
+					selectionModel.clearSpotSelection();
+					selectionModel.addSpotToSelection( target );
+				}
 			}
 		}
 		finally

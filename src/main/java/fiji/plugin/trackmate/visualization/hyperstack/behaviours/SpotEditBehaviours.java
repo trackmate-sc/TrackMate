@@ -20,7 +20,7 @@ import net.imglib2.util.Util;
 
 public class SpotEditBehaviours
 {
-	
+
 	private static final String MOVE_SPOT = "move spot";
 	private static final String INCREASE_SPOT_RADIUS = "increase spot radius";
 	private static final String INCREASE_SPOT_RADIUS_FAST = "increase spot radius fast";
@@ -34,7 +34,7 @@ public class SpotEditBehaviours
 	private static final String ADD_AND_LINK_SPOTS_BACKWARD = "add and link spots backward";
 	private static final String CLICK_SELECT_SPOT = "click select spot";
 	private static final String CLICK_SELECT_ADD_SPOT = "click select add spot";
-	
+
 	private static final String[] MOVE_SPOT_KEYS = new String[] { "SPACE" };
 	private static final String[] INCREASE_SPOT_RADIUS_KEYS = new String[] { "E" };
 	private static final String[] INCREASE_SPOT_RADIUS_FAST_KEYS = new String[] { "shift E" };
@@ -66,8 +66,8 @@ public class SpotEditBehaviours
 		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, false ), LINK_SPOTS, LINK_SPOTS_KEYS );
 		behaviours.behaviour( new LinkSpotsBehaviour( model, imp, true ), LINK_SPOTS_BACKWARD, LINK_SPOTS_BACKWARD_KEYS );
 
-		behaviours.behaviour( new AddAndLinkSpotBehaviour( model, imp, false ), ADD_AND_LINK_SPOTS_FORWARD, ADD_AND_LINK_SPOTS_FORWARD_KEYS );
-		behaviours.behaviour( new AddAndLinkSpotBehaviour( model, imp, true ), ADD_AND_LINK_SPOTS_BACKWARD, ADD_AND_LINK_SPOTS_BACKWARD_KEYS );
+		behaviours.behaviour( new AddAndLinkSpotBehaviour( model, selectionModel, imp, false ), ADD_AND_LINK_SPOTS_FORWARD, ADD_AND_LINK_SPOTS_FORWARD_KEYS );
+		behaviours.behaviour( new AddAndLinkSpotBehaviour( model, selectionModel, imp, true ), ADD_AND_LINK_SPOTS_BACKWARD, ADD_AND_LINK_SPOTS_BACKWARD_KEYS );
 
 		behaviours.behaviour( new ClickSelectSpotBehaviour( model, selectionModel, imp ), CLICK_SELECT_SPOT, CLICK_SELECT_SPOT_KEYS );
 		behaviours.behaviour( new ClickSelectAddSpotBehaviour( model, selectionModel, imp ), CLICK_SELECT_ADD_SPOT, CLICK_SELECT_ADD_SPOT_KEYS );
