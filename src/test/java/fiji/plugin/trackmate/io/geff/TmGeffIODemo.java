@@ -12,12 +12,12 @@ import org.apache.commons.io.FileUtils;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
@@ -121,16 +121,14 @@ public class TmGeffIODemo
 		// Log
 		final String log = geffReader.getLog();
 
-		// Put them together in a TrackMate instance.
-		final TrackMate trackmate = new TrackMate( model, settings );
-		final SelectionModel selectionModel = new SelectionModel( model );
 
 		// Main view.
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
+		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
+		final TrackMateModelView displayer = new HyperStackDisplayer( guiModel );
 		displayer.render();
 
 		// Wizard.
-		final WizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		final WizardSequence sequence = new TrackMateWizardSequence( guiModel );
 		sequence.setCurrent( panelIdentifier );
 		final JFrame frame = sequence.run( "From GEFF: " + savePath );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
