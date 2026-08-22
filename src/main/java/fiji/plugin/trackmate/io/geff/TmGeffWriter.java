@@ -30,9 +30,12 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
+import org.mastodon.geff.GeffMetadata.DisplayHints;
+import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
 import org.mastodon.geff.PropMetadata;
+import org.mastodon.geff.VarlengthProperty;
 
 import com.google.gson.JsonElement;
 
@@ -90,8 +93,8 @@ public class TmGeffWriter
 		this.metadata = new GeffMetadata( GEFF_VERSION, true );
 		this.trackMetadata = new GeffMetadata( GEFF_VERSION, true );
 		this.trackmateInfo = new HashMap<>();
-//		final Map< String, Object > extra = Map.of( "trackmate", trackmateInfo );
-//		metadata.setExtra( extra );
+		final Map< String, Object > extra = Map.of( "trackmate", trackmateInfo );
+		metadata.setExtra( extra );
 		trackmateInfo.put( PLUGIN_VERSION_ATTRIBUTE_NAME, TrackMate.PLUGIN_NAME_VERSION );
 	}
 
@@ -155,13 +158,13 @@ public class TmGeffWriter
 		metadata.setGeffAxes( axes );
 
 		// Display hints
-//		DisplayHints displayHints = new DisplayHints()
-//				.displayHorizontal( POSITION_X )
-//				.displayVertical( POSITION_Y )
-//				.displayTime( FRAME );
-//		if ( !is2D )
-//			displayHints = displayHints.displayDepth( POSITION_Z );
-//		metadata.setDisplayHints( displayHints );
+		DisplayHints displayHints = new DisplayHints()
+				.displayHorizontal( POSITION_X )
+				.displayVertical( POSITION_Y )
+				.displayTime( FRAME );
+		if ( !is2D )
+			displayHints = displayHints.displayDepth( POSITION_Z );
+		metadata.setDisplayHints( displayHints );
 
 		// Spot features
 
@@ -281,7 +284,7 @@ public class TmGeffWriter
 			// Track name -> variable length property
 			final String trackName = trackModel.name( trackID );
 			final Object[] bytes = toByteArray( trackName );
-//			trackNode.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) ); // TODO
+			trackNode.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) ); // TODO
 
 			geffTrackNodes.add( trackNode );
 		}
@@ -295,13 +298,13 @@ public class TmGeffWriter
 		trackMetadata.setGeffAxes( trackAxes );
 
 		// Display hints
-//		DisplayHints trackDisplayHints = new DisplayHints()
-//				.displayHorizontal( TrackLocationAnalyzer.X_LOCATION )
-//				.displayVertical( TrackLocationAnalyzer.Y_LOCATION )
-//				.displayTime( TRACK_START );
-//		if ( !is2D )
-//			trackDisplayHints = trackDisplayHints.displayDepth( TrackLocationAnalyzer.Z_LOCATION );
-//		trackMetadata.setDisplayHints( trackDisplayHints );
+		DisplayHints trackDisplayHints = new DisplayHints()
+				.displayHorizontal( TrackLocationAnalyzer.X_LOCATION )
+				.displayVertical( TrackLocationAnalyzer.Y_LOCATION )
+				.displayTime( TRACK_START );
+		if ( !is2D )
+			trackDisplayHints = trackDisplayHints.displayDepth( TrackLocationAnalyzer.Z_LOCATION );
+		trackMetadata.setDisplayHints( trackDisplayHints );
 
 		// Track features
 
@@ -354,7 +357,7 @@ public class TmGeffWriter
 		// Make it relative to the save path
 		final Path imagePath = Paths.get( imagePathStr ).toAbsolutePath().normalize();
 		final Path savePath = Paths.get( geffPath ).toAbsolutePath().normalize();
-//		metadata.setRelatedObjects( new RelatedObjects().image( savePath.getParent().relativize( imagePath ).toString() ) );
+		metadata.setRelatedObjects( new RelatedObjects().image( savePath.getParent().relativize( imagePath ).toString() ) );
 	}
 
 	public void appendLog( final String log )
@@ -439,7 +442,7 @@ public class TmGeffWriter
 			if ( name != null )
 			{
 				final Object[] bytes = toByteArray( name );
-//				node.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) ); // TODO
+				node.setVarlengthProperty( NAME_PROP, new VarlengthProperty( NAME_PROP, "uint8", bytes ) ); // TODO
 			}
 		}
 
