@@ -192,7 +192,9 @@ public class GeffTestDeserializationTest extends GeffTestBase
 						"spotsRemoved",
 						"spotsMoved",
 						"spotsUpdated",
-						"eventCache" )
+						"eventCache",
+						// Undo / redo
+						"undoRedoStack" )
 				.isEqualTo( readBackModel );
 
 		/*
