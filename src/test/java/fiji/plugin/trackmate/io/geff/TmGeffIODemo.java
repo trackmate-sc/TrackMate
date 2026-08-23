@@ -36,14 +36,21 @@ public class TmGeffIODemo extends GeffTestBase
 
 	public static void main( final String[] args ) throws IOException
 	{
-		final String path = "samples/FakeTracks.xml";
-		// GeffTestDeserializationTest.SPOT_MIXED_PATH;
+//		final String path = "samples/FakeTracks.xml";
+		final String path = GeffTestDeserializationTest.SPOT_MIXED_PATH;
+
+		final String savePath = writeToGeff( path );
+		readBack( savePath );
+	}
+
+	public static String writeToGeff( final String path ) throws IOException
+	{
 		System.out.println( "Reading from " + path );
 		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
 		{
 			System.err.println( reader.getErrorMessage() );
-			return;
+			return null;
 		}
 		System.out.println( "Done." );
 		final String savePath = path.replace( ".xml", ".geff" );
@@ -67,13 +74,12 @@ public class TmGeffIODemo extends GeffTestBase
 		geffWriter.write();
 
 		System.out.println( "Done." );
-
-		System.out.println( "Reading the model back from " + savePath );
-		readBack( savePath );
+		return savePath;
 	}
 
 	private static void readBack( final String savePath ) throws IOException
 	{
+		System.out.println( "Reading the model back from " + savePath );
 		final TmGeffReader geffReader = new TmGeffReader( savePath );
 
 		// Model

@@ -53,7 +53,7 @@ public class GeffTestDeserializationTest extends GeffTestBase
 	 * A TrackMate XML file generated with TrackMate v8, containing 'SpotBase
 	 * and 'SpotRoi' spots.
 	 */
-	static final String SPOT_MIXED_PATH = GeffTestDeserializationTest.class
+	public static final String SPOT_MIXED_PATH = GeffTestDeserializationTest.class
 			.getResource( "MAX_Merged-mixed.xml" )
 			.getFile();
 
