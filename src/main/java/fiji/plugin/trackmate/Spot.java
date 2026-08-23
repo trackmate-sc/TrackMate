@@ -174,6 +174,9 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 			s.append( "Spot: " + name + "\n" );
 
 		// Frame
+		s.append( "In frame: " + getFeature( FRAME ).intValue() + '\n' );
+
+		// Time
 		s.append( "Time: " + getFeature( POSITION_T ) + '\n' );
 
 		// Coordinates
