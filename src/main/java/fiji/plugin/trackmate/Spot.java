@@ -128,17 +128,28 @@ public interface Spot extends RealLocalizable, RealPositionable, RealInterval, C
 	}
 
 	/**
-	 * @return the name for this Spot.
+	 * Returns the name for this Spot. If the spot has no name set (see
+	 * {@link #hasName()}), a default name will be generated from its ID.
+	 * 
+	 * @return the name.
 	 */
 	public String getName();
 
 	/**
-	 * Set the name of this Spot.
+	 * Sets the name of this Spot. Using <code>null</code> will remove the name.
 	 *
 	 * @param name
 	 *            the name to use.
 	 */
 	public void setName( final String name );
+
+	/**
+	 * Returns true if this spot has a name. If not a default name will be used
+	 * by {@link #getName()}.
+	 * 
+	 * @return
+	 */
+	public boolean hasName();
 
 	/**
 	 * Returns the unique ID of this spot. The ID is unique within a session.
