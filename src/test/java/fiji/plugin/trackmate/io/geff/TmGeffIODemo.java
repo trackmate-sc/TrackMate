@@ -31,12 +31,13 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 
-public class TmGeffIODemo
+public class TmGeffIODemo extends GeffTestBase
 {
 
 	public static void main( final String[] args ) throws IOException
 	{
-		final String path = GeffTestDeserializationTest.SPOT_MIXED_PATH;
+		final String path = "samples/FakeTracks.xml";
+		// GeffTestDeserializationTest.SPOT_MIXED_PATH;
 		System.out.println( "Reading from " + path );
 		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
