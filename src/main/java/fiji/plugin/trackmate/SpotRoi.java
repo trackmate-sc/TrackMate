@@ -324,6 +324,16 @@ public class SpotRoi extends SpotBase
 		return new SpotRoi( xc, yc, z, r, quality, null, xr, yr );
 	}
 
+	@Override
+	public String echo()
+	{
+		final StringBuilder s = new StringBuilder( super.echo() );
+		s.append( "Polygon points: " + nPoints() + '\n' );
+		s.append( "\tX: [" + realMin( 0 ) + ", " + realMax( 0 ) + "]\n" );
+		s.append( "\tY: [" + realMin( 1 ) + ", " + realMax( 1 ) + "]\n" );
+		return s.toString();
+	}
+
 	/*
 	 * UTILS.
 	 */
