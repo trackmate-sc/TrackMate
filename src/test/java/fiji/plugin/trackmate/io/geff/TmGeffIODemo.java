@@ -1,7 +1,5 @@
 package fiji.plugin.trackmate.io.geff;
 
-import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
-
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +17,7 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
@@ -37,49 +36,60 @@ public class TmGeffIODemo extends GeffTestBase
 	public static void main( final String[] args ) throws IOException
 	{
 //		final String path = "samples/FakeTracks.xml";
-		final String path = GeffTestDeserializationTest.SPOT_MIXED_PATH;
+//		final String path = GeffTestDeserializationTest.SPOT_MIXED_PATH;
+		final String path = "samples/CElegans3D-smoothed-mask-orig.xml";
 
-		final String savePath = writeToGeff( path );
-		readBack( savePath );
+		System.out.println( "Reading from " + path );
+		final GuiModel gm1 = loadFromXML( path );
+		if ( null == gm1 )
+			return;
+		System.out.println( "Done." );
+
+		gm1.getWindowManager().createBVV();
+
+		final String savePath = path.replace( ".xml", ".geff" );
+		System.out.println( "Deleting previous GEFF: " + savePath );
+		FileUtils.deleteDirectory( new File( savePath ) );
+		System.out.println( "Done." );
+
+		System.out.println( "Writing to " + savePath );
+		writeToGeff( gm1, savePath );
+		System.out.println( "Done." );
+
+		System.out.println( "Reading the model back from " + savePath );
+		final GuiModel gm2 = readBack( savePath );
+		System.out.println( "Done." );
+
+		gm2.getWindowManager().createBVV();
 	}
 
-	public static String writeToGeff( final String path ) throws IOException
+	public static GuiModel loadFromXML( final String path ) throws IOException
 	{
-		System.out.println( "Reading from " + path );
 		final TmXmlReader reader = new TmXmlReader( new File( path ) );
 		if ( !reader.isReadingOk() )
 		{
 			System.err.println( reader.getErrorMessage() );
 			return null;
 		}
-		System.out.println( "Done." );
-		final String savePath = path.replace( ".xml", ".geff" );
 
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		final Settings settings = reader.readSettings( imp );
-
-		System.out.println( "Deleting previous " + savePath );
-		FileUtils.deleteDirectory( new File( savePath ) );
-		System.out.println( "Done." );
-
-		System.out.println( "Writing to " + savePath );
-
-		final TmGeffWriter geffWriter = new TmGeffWriter( savePath );
-		geffWriter.appendModel( model );
-		geffWriter.appendSettings( settings );
-		geffWriter.appendDisplaySettings( reader.getDisplaySettings() );
-		geffWriter.appendLog( reader.getLog() );
-		geffWriter.appendGUIState( reader.getGUIState() );
-		geffWriter.write();
-
-		System.out.println( "Done." );
-		return savePath;
+		final DisplaySettings ds = reader.getDisplaySettings();
+		return new GuiModel( model, settings, ds );
 	}
 
-	private static void readBack( final String savePath ) throws IOException
+	public static void writeToGeff( final GuiModel gm, final String savePath ) throws IOException
 	{
-		System.out.println( "Reading the model back from " + savePath );
+		final TmGeffWriter geffWriter = new TmGeffWriter( savePath );
+		geffWriter.appendModel( gm.getModel() );
+		geffWriter.appendSettings( gm.getSettings() );
+		geffWriter.appendDisplaySettings( gm.getDisplaySettings() );
+		geffWriter.write();
+	}
+
+	private static GuiModel readBack( final String savePath ) throws IOException
+	{
 		final TmGeffReader geffReader = new TmGeffReader( savePath );
 
 		// Model
@@ -122,24 +132,24 @@ public class TmGeffIODemo extends GeffTestBase
 		// Display settings
 		final DisplaySettings displaySettings = geffReader.getDisplaySettings();
 
-		// GUI state
-		final String panelIdentifier = geffReader.getGUIState();
-
-		// Log
-		final String log = geffReader.getLog();
-
-
 		// Main view.
-		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
+		return new GuiModel( model, settings, displaySettings );
+	}
+
+	static void runGUI(
+			final GuiModel guiModel,
+			final String panelIdentifier,
+			final String log,
+			final String path )
+	{
+		// Wizard.
 		final TrackMateModelView displayer = new HyperStackDisplayer( guiModel );
 		displayer.render();
-
-		// Wizard.
 		final WizardSequence sequence = new TrackMateWizardSequence( guiModel );
 		sequence.setCurrent( panelIdentifier );
-		final JFrame frame = sequence.run( "From GEFF: " + savePath );
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+		final JFrame frame = sequence.run( "From: " + path );
+		frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, guiModel.getSettings().imp.getWindow() );
 
 		// Text
 		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();

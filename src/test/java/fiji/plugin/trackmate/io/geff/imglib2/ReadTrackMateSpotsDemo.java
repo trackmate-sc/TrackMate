@@ -25,6 +25,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.geff.GeffTestBase;
 import fiji.plugin.trackmate.io.geff.GeffTestDeserializationTest;
 import fiji.plugin.trackmate.io.geff.TmGeffIODemo;
@@ -41,7 +42,9 @@ public class ReadTrackMateSpotsDemo extends GeffTestBase
 		 */
 
 		final String xmlPath = GeffTestDeserializationTest.SPOT_MIXED_PATH;
-		final String path = TmGeffIODemo.writeToGeff( xmlPath );
+		final GuiModel gm = TmGeffIODemo.loadFromXML( xmlPath );
+		final String path = xmlPath.replace( ".xml", ".geff" );
+		TmGeffIODemo.writeToGeff( gm, path );
 
 		/*
 		 * METADATA
