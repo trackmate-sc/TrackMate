@@ -346,27 +346,15 @@ public class TmGeffReader
 			final double[] polygonX = node.getPolygonX();
 			final double[] polygonY = node.getPolygonY();
 			if ( polygonX != null && polygonY != null && polygonX.length > 0 && polygonY.length > 0 )
-			{
-				// Put coords relative to center
-				final double x = node.getX();
-				final double y = node.getY();
-				for ( int i = 0; i < polygonX.length; i++ )
-				{
-					polygonX[ i ] -= x;
-					polygonY[ i ] -= y;
-				}
 				spot = new SpotRoi( trackmateId, polygonX, polygonY );
-				spot.setPosition( x, 0 );
-				spot.setPosition( y, 1 );
-			}
 			else
-			{
 				spot = new SpotBase( trackmateId );
-				spot.setPosition( node.getX(), 0 );
-				spot.setPosition( node.getY(), 1 );
-			}
-			spot.putFeature( Spot.RADIUS, node.getRadius() );
+
+			spot.setPosition( node.getX(), 0 );
+			spot.setPosition( node.getY(), 1 );
 			spot.setPosition( is2D ? 0. : node.getZ(), 2 );
+			spot.putFeature( Spot.RADIUS, node.getRadius() );
+
 			spots.add( spot, frame );
 			spotIdMap.put( node.getId(), spot );
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );

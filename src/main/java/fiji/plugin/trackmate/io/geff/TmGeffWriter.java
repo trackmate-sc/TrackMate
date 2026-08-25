@@ -472,8 +472,9 @@ public class TmGeffWriter
 			final double[] polygonY = new double[ nPoints ];
 			for ( int i = 0; i < nPoints; i++ )
 			{
-				polygonX[ i ] = spot.x( i );
-				polygonY[ i ] = spot.y( i );
+				// Relative to spot center
+				polygonX[ i ] = spot.xr( i );
+				polygonY[ i ] = spot.yr( i );
 			}
 
 			final GeffNode node = new GeffNode.Builder()
