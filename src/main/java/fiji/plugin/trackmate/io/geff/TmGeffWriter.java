@@ -17,6 +17,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Spot.SpotVisitor;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
@@ -61,6 +63,7 @@ import fiji.plugin.trackmate.io.json.SettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
 
 public class TmGeffWriter
 {
@@ -488,6 +491,37 @@ public class TmGeffWriter
 			serializeFeatures( spot, node );
 			geffNodes.add( node );
 			spotToId.put( spot, geffId++ );
+		}
+
+		@Override
+		public void visit( final SpotMesh spot )
+		{
+			final GeffNode node = new GeffNode.Builder()
+					.id( geffId )
+					.timepoint( spot.getFeature( FRAME ).intValue() )
+					.x( spot.getDoublePosition( 0 ) )
+					.y( spot.getDoublePosition( 1 ) )
+					.z( spot.getDoublePosition( 2 ) )
+					.radius( spot.getFeature( RADIUS ).doubleValue() )
+					.build();
+			serializeFeatures( spot, node );
+
+			// Mesh: serialize the vertices and faces
+			final Vertices vertices = spot.getMesh().vertices();
+			toArray( vertices.verts() );
+
+			geffNodes.add( node );
+			spotToId.put( spot, geffId++ );
+
+		}
+
+		private static float[] toArray( final FloatBuffer b )
+		{
+			final int n = b.limit();
+			final float[] out = new float[ n ];
+			b.rewind();
+			b.get( out );
+			return out;
 		}
 	}
 
