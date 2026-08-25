@@ -40,7 +40,6 @@ import net.imglib2.mesh.alg.zslicer.RamerDouglasPeucker;
 import net.imglib2.mesh.alg.zslicer.Slice;
 import net.imglib2.mesh.alg.zslicer.ZSlicer;
 import net.imglib2.mesh.impl.nio.BufferMesh;
-import net.imglib2.mesh.view.ReadOnlyMesh;
 import net.imglib2.type.numeric.RealType;
 
 public class SpotMesh extends SpotBase
@@ -167,16 +166,16 @@ public class SpotMesh extends SpotBase
 	}
 
 	/**
-	 * Returns a read-only view of the mesh stored in this spot.
+	 * Exposes the mesh stored in this spot.
 	 * <p>
-	 * The coordinates of the vertices are relative to the spot center. That is:
-	 * the coordinates are centered on (0,0,0).
+	 * Don't modify the mesh, as it is used by the spot to compute its position
+	 * and radius. If you need to modify it, make a copy first.
 	 *
 	 * @return the mesh.
 	 */
-	public Mesh getMesh()
+	public BufferMesh getMesh()
 	{
-		return ReadOnlyMesh.readOnly( mesh );
+		return mesh;
 	}
 
 	@Override
