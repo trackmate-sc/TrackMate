@@ -18,6 +18,7 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ import fiji.plugin.trackmate.io.json.SettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import net.imglib2.mesh.impl.nio.BufferMesh.Triangles;
 import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
 
 public class TmGeffWriter
@@ -70,11 +72,13 @@ public class TmGeffWriter
 
 	private static final String GEFF_VERSION = "1.0.0";
 
-	static final String TRACKMATE_SPOT_ID_PROP = "trackmate_spot_id";
-
-	static final String NAME_PROP = "name";
-
 	static final String TRACK_GEFF_NAME = "tracks.geff";
+
+	static final String TRACKMATE_SPOT_ID_PROP = "trackmate_spot_id";
+	static final String NAME_PROP = "name";
+	static final String VERTICES_POS_PROP_NAME = "V";
+	static final String VERTICES_NORMALS_PROP_NAME = "Vn";
+	static final String TRIANGLES_FACES_PROP_NAME = "F";
 
 	private final String geffPath;
 
@@ -89,6 +93,14 @@ public class TmGeffWriter
 	private final List< GeffNode > geffTrackNodes = new ArrayList<>();
 
 	private final Map< String, Object > trackmateInfo;
+
+	/**
+	 * The chunk size to use when writing the GEFF file. The default is 8 kiB,
+	 * which is a good compromise between the fact that we don't want tpo have a
+	 * large GEFF file with many small properties, and we still have to
+	 * serialize a mesh.
+	 */
+	private int chunkSize = 8 * 1024; // 8 kiB;
 
 	public TmGeffWriter( final String zarrPath )
 	{
@@ -382,16 +394,27 @@ public class TmGeffWriter
 	public void write() throws IOException
 	{
 		// Core GEFF
-		GeffNode.writeToZarr( geffNodes, geffPath, metadata );
-		GeffEdge.writeToZarr( geffEdges, geffPath, metadata );
+		GeffNode.writeToZarr( geffNodes, geffPath, chunkSize, metadata );
+		GeffEdge.writeToZarr( geffEdges, geffPath, chunkSize, metadata );
 		GeffMetadata.writeToZarr( metadata, geffPath );
 
 		// Track GEFF
 		final String geffTracksPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
-		GeffNode.writeToZarr( geffTrackNodes, geffTracksPath, trackMetadata );
+		GeffNode.writeToZarr( geffTrackNodes, geffTracksPath, chunkSize, trackMetadata );
 		// Required to be a valid GEFF:
-		GeffEdge.writeToZarr( new ArrayList<>(), geffTracksPath, trackMetadata );
+		GeffEdge.writeToZarr( new ArrayList<>(), geffTracksPath, chunkSize, trackMetadata );
 		GeffMetadata.writeToZarr( trackMetadata, geffTracksPath );
+	}
+
+
+	public int getChunkSize()
+	{
+		return chunkSize;
+	}
+
+	public void setChunkSize( final int chunkSize )
+	{
+		this.chunkSize = chunkSize;
 	}
 
 	private class GeffSpotVisitor implements SpotVisitor
@@ -509,15 +532,69 @@ public class TmGeffWriter
 
 			// Mesh: serialize the vertices and faces
 			final Vertices vertices = spot.getMesh().vertices();
-			toArray( vertices.verts() );
+			final float[] V = toArray( vertices.verts() );
+			final float[] Vn = toArray( vertices.normals() );
+			final Triangles triangles = spot.getMesh().triangles();
+			final int[] F = toArray( triangles.indices() );
+
+			/*
+			 * Not really satisfying. We should be able to write arrays directly
+			 * of the buffer directly. This should probably be done with
+			 * GeffUtils.writeDoubleArray(List<T>, ToDoubleFunction<T>,
+			 * N5Writer, String, int) or make its float equivalent.
+			 */
+			final VarlengthProperty vPosProp = new VarlengthProperty( VERTICES_POS_PROP_NAME, "float32", toObjArray( V ) );
+			node.setVarlengthProperty( VERTICES_POS_PROP_NAME, vPosProp );
+			final VarlengthProperty vNormProp = new VarlengthProperty( VERTICES_NORMALS_PROP_NAME, "float32", toObjArray( Vn ) );
+			node.setVarlengthProperty( VERTICES_NORMALS_PROP_NAME, vNormProp );
+			final VarlengthProperty fProp = new VarlengthProperty( TRIANGLES_FACES_PROP_NAME, "int32", toObjArray( F ) );
+			node.setVarlengthProperty( TRIANGLES_FACES_PROP_NAME, fProp );
 
 			geffNodes.add( node );
 			spotToId.put( spot, geffId++ );
+		}
 
+		private Integer[] toObjArray( final int[] arr )
+		{
+			final Integer[] objectArray = new Integer[ arr.length ];
+			for ( int i = 0; i < arr.length; i++ )
+				objectArray[ i ] = arr[ i ];
+			return objectArray;
+		}
+
+		private static Float[] toObjArray( final float[] arr )
+		{
+			final Float[] objectArray = new Float[ arr.length ];
+			for ( int i = 0; i < arr.length; i++ )
+				objectArray[ i ] = arr[ i ];
+			return objectArray;
+		}
+
+		private static int[] toArray( final IntBuffer b )
+		{
+			try
+			{
+				return b.array();
+			}
+			catch ( final UnsupportedOperationException e )
+			{
+				// Some buffers are not backed by an array.
+			}
+			final int n = b.limit();
+			final int[] out = new int[ n ];
+			b.rewind();
+			b.get( out );
+			return out;
 		}
 
 		private static float[] toArray( final FloatBuffer b )
 		{
+			try
+			{
+				return b.array();
+			}
+			catch ( final UnsupportedOperationException e )
+			{}
 			final int n = b.limit();
 			final float[] out = new float[ n ];
 			b.rewind();
