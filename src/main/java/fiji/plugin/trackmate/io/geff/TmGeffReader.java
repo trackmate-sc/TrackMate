@@ -8,6 +8,9 @@ import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.NAME_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_SPOT_ID_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACK_GEFF_NAME;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRIANGLES_FACES_PROP_NAME;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.VERTICES_NORMALS_PROP_NAME;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter.VERTICES_POS_PROP_NAME;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +37,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
@@ -46,6 +50,9 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imglib2.mesh.impl.nio.BufferMesh;
+import net.imglib2.mesh.impl.nio.BufferMesh.Triangles;
+import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
 
 public class TmGeffReader
 {
@@ -298,11 +305,11 @@ public class TmGeffReader
 		int spaceDim = 0;
 		for ( final GeffAxis axis : geffAxes )
 		{
-			if ( spaceUnits == null && axis.getType().equals( GeffAxis.TYPE_SPACE ) )
-			{
+			if ( spaceUnits == null )
 				spaceUnits = axis.getUnit();
+
+			if ( axis.getType().equals( GeffAxis.TYPE_SPACE ) )
 				spaceDim++;
-			}
 
 			if ( timeUnits == null && axis.getType().equals( GeffAxis.TYPE_TIME ) )
 				timeUnits = axis.getUnit();
@@ -333,29 +340,42 @@ public class TmGeffReader
 			else
 				trackmateId = Spot.IDcounter.incrementAndGet();
 
-			// Frame
-			final int frame = node.getT();
-
-			// Deserialize
-			Spot spot = null;
-
-			// Is it a mesh?
-			// TODO
-
-			// Is it a polygon?
+			// Deserialize - get spot type according to the presence of properties
+			final Spot spot;
 			final double[] polygonX = node.getPolygonX();
 			final double[] polygonY = node.getPolygonY();
-			if ( polygonX != null && polygonY != null && polygonX.length > 0 && polygonY.length > 0 )
+			final Map< String, VarlengthProperty > varlengthProps = node.getVarlengthProperties();
+
+			// Is it a mesh?
+			final boolean hasMesh = varlengthProps.containsKey( VERTICES_POS_PROP_NAME )
+					&& varlengthProps.containsKey( VERTICES_NORMALS_PROP_NAME )
+					&& varlengthProps.containsKey( TRIANGLES_FACES_PROP_NAME );
+
+			if ( hasMesh )
+			{
+				final BufferMesh mesh = readMesh( node );
+
+				spot = new SpotMesh( trackmateId, mesh );
+			}
+			else if ( polygonX != null && polygonY != null && polygonX.length > 0 && polygonY.length > 0 )
+			{
+				// Is it a polygon?
 				spot = new SpotRoi( trackmateId, polygonX, polygonY );
+			}
 			else
+			{
 				spot = new SpotBase( trackmateId );
+			}
 
 			spot.setPosition( node.getX(), 0 );
 			spot.setPosition( node.getY(), 1 );
 			spot.setPosition( is2D ? 0. : node.getZ(), 2 );
 			spot.putFeature( Spot.RADIUS, node.getRadius() );
 
+			// Frame
+			final int frame = node.getT();
 			spots.add( spot, frame );
+
 			spotIdMap.put( node.getId(), spot );
 			spotTrackIDMap.put( spot, ( ( Number ) node.getProp( trackIdProp ) ).intValue() );
 
@@ -379,6 +399,41 @@ public class TmGeffReader
 
 		}
 		return spotIdMap;
+	}
+
+	private static BufferMesh readMesh( final GeffNode node )
+	{
+		final VarlengthProperty V = node.getVarlengthProperty( VERTICES_POS_PROP_NAME );
+		final VarlengthProperty Vn = node.getVarlengthProperty( VERTICES_NORMALS_PROP_NAME );
+		final int nVertices = V.getData().length / 3;
+		final VarlengthProperty F = node.getVarlengthProperty( TRIANGLES_FACES_PROP_NAME );
+		final int nTriangles = F.getData().length / 3;
+		final BufferMesh mesh = new BufferMesh( nVertices, nTriangles );
+
+		final Vertices vertices = mesh.vertices();
+		for ( int i = 0; i < nVertices; i++ )
+		{
+			final float x = ( ( Number ) V.getData()[ 3 * i ] ).floatValue();
+			final float y = ( ( Number ) V.getData()[ 3 * i + 1 ] ).floatValue();
+			final float z = ( ( Number ) V.getData()[ 3 * i + 2 ] ).floatValue();
+			final float nx = ( ( Number ) Vn.getData()[ 3 * i ] ).floatValue();
+			final float ny = ( ( Number ) Vn.getData()[ 3 * i + 1 ] ).floatValue();
+			final float nz = ( ( Number ) Vn.getData()[ 3 * i + 2 ] ).floatValue();
+			vertices.addf( x, y, z, nx, ny, nz, 0, 0 );
+		}
+
+		final Triangles triangles = mesh.triangles();
+		for ( int i = 0; i < nTriangles; i++ )
+		{
+			final int v0 = ( ( Number ) F.getData()[ 3 * i ] ).intValue();
+			final int v1 = ( ( Number ) F.getData()[ 3 * i + 1 ] ).intValue();
+			final int v2 = ( ( Number ) F.getData()[ 3 * i + 2 ] ).intValue();
+			final float nx = 0f;
+			final float ny = 0f;
+			final float nz = 0f;
+			triangles.add( v0, v1, v2, nx, ny, nz );
+		}
+		return mesh;
 	}
 
 	private static final String fromByteArray( final Object[] bytes )
