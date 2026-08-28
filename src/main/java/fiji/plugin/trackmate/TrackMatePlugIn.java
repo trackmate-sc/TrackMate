@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,21 +27,18 @@ import java.io.File;
 
 import javax.swing.JFrame;
 
-import org.scijava.object.ObjectService;
-
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelection;
+import fiji.plugin.trackmate.gui.featureselector.AnalyzerSelectionIO;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.SettingsPersistence;
-import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.Prefs;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 
@@ -96,16 +93,14 @@ public class TrackMatePlugIn implements PlugIn
 			// Main objects.
 			final Settings settings = createSettings( imp );
 			final Model model = createModel( imp );
-			final TrackMate trackmate = createTrackMate( model, settings );
-			final SelectionModel selectionModel = new SelectionModel( model );
 			final DisplaySettings displaySettings = createDisplaySettings();
+			final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
 
 			// Main view.
-			final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-			displayer.render();
+			guiModel.getWindowManager().createHyperStackDisplayer();
 
 			// Wizard.
-			final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+			final WizardSequence sequence = createSequence( guiModel );
 			final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
 			frame.setIconImage( TRACKMATE_ICON.getImage() );
 			GuiUtils.positionWindow( frame, imp.getWindow() );
@@ -126,18 +121,16 @@ public class TrackMatePlugIn implements PlugIn
 	 * Hook for subclassers: <br>
 	 * Will create and position the sequence that will be played by the wizard
 	 * launched by this plugin.
+	 * 
+	 * @param guiModel
+	 *            the {@link GuiModel} that will be used to store the data of
+	 *            the wizard.
 	 *
-	 * @param trackmate
-	 *            the {@link TrackMate} instance to use.
-	 * @param selectionModel
-	 *            the {@link SelectionModel} to use.
-	 * @param displaySettings
-	 *            the {@link DisplaySettings} to use.
 	 * @return a new sequence.
 	 */
-	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	protected WizardSequence createSequence( final GuiModel guiModel )
 	{
-		return new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		return new TrackMateWizardSequence( guiModel );
 	}
 
 	/**
@@ -146,7 +139,7 @@ public class TrackMatePlugIn implements PlugIn
 	 * {@link TrackMate} instance.
 	 *
 	 * @param imp
-	 *            the {@link ImagePlus} to operate on.
+	 *            the image the tracking data will be created on.
 	 * @return a new {@link Model} instance.
 	 */
 	protected Model createModel( final ImagePlus imp )
@@ -171,41 +164,11 @@ public class TrackMatePlugIn implements PlugIn
 	protected Settings createSettings( final ImagePlus imp )
 	{
 		// Persistence.
-		final Settings ls = SettingsPersistence.readLastUsedSettings( imp, Logger.DEFAULT_LOGGER );
-		// Force adding analyzers found at runtime
-		ls.addAllAnalyzers();
-		return ls;
-	}
-
-	/**
-	 * Hook for subclassers: <br>
-	 * Creates the TrackMate instance that will be controlled in the GUI.
-	 *
-	 * @param model
-	 *            the model to use.
-	 * @param settings
-	 *            the settings to use.
-	 * @return a new {@link TrackMate} instance.
-	 */
-	protected TrackMate createTrackMate( final Model model, final Settings settings )
-	{
-		/*
-		 * Since we are now sure that we will be working on this model with this
-		 * settings, we need to pass to the model the units from the settings.
-		 */
-		final String spaceUnits = settings.imp.getCalibration().getXUnit();
-		final String timeUnits = settings.imp.getCalibration().getTimeUnit();
-		model.setPhysicalUnits( spaceUnits, timeUnits );
-
-		final TrackMate trackmate = new TrackMate( model, settings );
-		final ObjectService objectService = TMUtils.getContext().service( ObjectService.class );
-		if ( objectService != null )
-			objectService.addObject( trackmate );
-
-		// Set the num of threads from IJ prefs.
-		trackmate.setNumThreads( Prefs.getThreads() );
-
-		return trackmate;
+		final Settings settings = SettingsPersistence.readLastUsedSettings( imp, Logger.DEFAULT_LOGGER );
+		// Add the analyzers configured by the user.
+		final AnalyzerSelection analyzerSelection = AnalyzerSelectionIO.readUserDefault();
+		analyzerSelection.configure( settings );
+		return settings;
 	}
 
 	protected DisplaySettings createDisplaySettings()

@@ -33,13 +33,13 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -48,12 +48,11 @@ public class SpotFeatureGrapherExample
 
 	public static void main( final String[] args )
 	{
-
 		// Load objects
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 		final TmXmlReader reader = new TmXmlReader( file );
 		final Model model = reader.getModel();
-		final SelectionModel selectionModel = new SelectionModel( model );
+		final GuiModel guiModel = new GuiModel( model );
 
 		final List< String > Y = new ArrayList<>( 1 );
 		Y.add( Spot.POSITION_T );
@@ -62,12 +61,10 @@ public class SpotFeatureGrapherExample
 			spots.add( it.next() );
 
 		final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+				guiModel,
 				spots,
 				Spot.POSITION_X,
 				Y,
-				model,
-				selectionModel,
-				DisplaySettings.defaultStyle().copy(),
 				true );
 		final JFrame frame = grapher.render();
 		frame.setLocationRelativeTo( null );
@@ -76,9 +73,8 @@ public class SpotFeatureGrapherExample
 		final TrackIndexAnalyzer analyzer = new TrackIndexAnalyzer();
 		analyzer.process( model.getTrackModel().trackIDs( true ), model );
 		// needed for trackScheme
-		final TrackScheme trackScheme = new TrackScheme( model, new SelectionModel( model ), DisplaySettings.defaultStyle().copy() );
+		final TrackScheme trackScheme = new TrackScheme( guiModel );
 		trackScheme.render();
-
 	}
 
 	/**
@@ -96,7 +92,7 @@ public class SpotFeatureGrapherExample
 			final double x = 100d + 100 * i / 100. * Math.cos( i / 100. * 5 * 2 * Math.PI );
 			final double y = 100d + 100 * i / 100. * Math.sin( i / 100. * 5 * 2 * Math.PI );
 			final double z = 0d;
-			final Spot spot = new Spot( x, y, z, 2d, -1d );
+			final Spot spot = new SpotBase( x, y, z, 2d, -1d );
 			spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 
 			spots.add( spot );

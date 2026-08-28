@@ -25,21 +25,19 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class SpotGaussianFittingAction extends AbstractTMAction
 {
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final java.awt.Frame parent )
+	public void execute( final GuiModel guiModel, final java.awt.Frame parent )
 	{
-		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel, logger );
+		final SpotFitterController controller = new SpotFitterController( guiModel, logger );
 		controller.show();
 	}
 

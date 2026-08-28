@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -68,9 +68,9 @@ package fiji.plugin.trackmate.util;
  * not optimal, and that for general heavy use refreshing, another solution must
  * be sought. In the meantime, it is recommended that this class is used for
  * simple purpose.
- *
+ * 
  * @author Albert Cardona
- *
+ * 
  */
 public class OnRequestUpdater extends Thread
 {
@@ -81,9 +81,9 @@ public class OnRequestUpdater extends Thread
 
 	/**
 	 * Constructor autostarts thread
-	 *
+	 * 
 	 * @param refreshable
-	 *            the refreshable target
+	 *            the refreshable to update.
 	 */
 	public OnRequestUpdater( final Refreshable refreshable )
 	{

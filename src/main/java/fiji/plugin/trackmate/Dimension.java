@@ -31,11 +31,64 @@ public enum Dimension
 	POSITION,
 	VELOCITY,
 	LENGTH,
-	AREA, TIME, ANGLE, RATE, // count per frames
-	ANGLE_RATE, STRING; // for non-numeric features
+	AREA,
+	VOLUME,
+	TIME,
+	ANGLE,
+	RATE, // count per frames
+	ANGLE_RATE,
+	STRING; // for non-numeric features
 
 	/*
 	 * We separated length and position so that x,y,z are plotted on a different
 	 * graph from spot sizes.
 	 */
+
+	/**
+	 * Returns a String unit for the given dimension. When suitable, the unit is
+	 * taken from the settings field, which contains the spatial and time units.
+	 * Otherwise, default units are used.
+	 *
+	 * @param spaceUnits
+	 *            the space units.
+	 * @param timeUnits
+	 *            the time units.
+	 * @return the units for the specified dimension.
+	 */
+	public String units( final String spaceUnits, final String timeUnits )
+	{
+		switch ( this )
+		{
+		case ANGLE:
+			return "radians";
+		case INTENSITY:
+			return "counts";
+		case INTENSITY_SQUARED:
+			return "counts^2";
+		case NONE:
+			return "";
+		case POSITION:
+		case LENGTH:
+			return spaceUnits;
+		case AREA:
+			return spaceUnits + "^2";
+		case VOLUME:
+			return spaceUnits + "^3";
+		case QUALITY:
+			return "quality";
+		case COST:
+			return "cost";
+		case TIME:
+			return timeUnits;
+		case VELOCITY:
+			return spaceUnits + "/" + timeUnits;
+		case RATE:
+			return "/" + timeUnits;
+		case ANGLE_RATE:
+			return "rad/" + timeUnits;
+		default:
+		case STRING:
+			return null;
+		}
+	}
 }

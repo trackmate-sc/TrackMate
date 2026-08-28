@@ -46,26 +46,25 @@ import javax.swing.SwingUtilities;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.EdgeFeatureGrapher;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.TrackFeatureGrapher;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
 import fiji.plugin.trackmate.util.Threads;
+import ij.ImagePlus;
 
 public class GrapherPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
-
-	private final TrackMate trackmate;
 
 	private final JPanel panelSpot;
 
@@ -79,10 +78,6 @@ public class GrapherPanel extends JPanel
 
 	private final FeaturePlotSelectionPanel trackFeatureSelectionPanel;
 
-	private final DisplaySettings displaySettings;
-
-	private final SelectionModel selectionModel;
-
 	private final JPanel panelSelection;
 
 	private final JRadioButton rdbtnAll;
@@ -93,36 +88,35 @@ public class GrapherPanel extends JPanel
 
 	private final JCheckBox chkboxConnectDots;
 
+	private final GuiModel guiModel;
+
 	/*
 	 * CONSTRUCTOR
 	 */
 
-	public GrapherPanel( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public GrapherPanel( final GuiModel guiModel )
 	{
-		this.trackmate = trackmate;
-		this.selectionModel = selectionModel;
-		this.displaySettings = displaySettings;
+		this.guiModel = guiModel;
 
 		setLayout( new BorderLayout( 0, 0 ) );
-
 		final JTabbedPane tabbedPane = new JTabbedPane( SwingConstants.TOP );
 		add( tabbedPane, BorderLayout.CENTER );
 
-		panelSpot = new JPanel();
+		this.panelSpot = new JPanel();
 		tabbedPane.addTab( "Spots", SPOT_ICON_64x64, panelSpot, null );
 		panelSpot.setLayout( new BorderLayout( 0, 0 ) );
 
-		panelEdges = new JPanel();
+		this.panelEdges = new JPanel();
 		tabbedPane.addTab( "Links", EDGE_ICON_64x64, panelEdges, null );
 		panelEdges.setLayout( new BorderLayout( 0, 0 ) );
 
-		panelTracks = new JPanel();
+		this.panelTracks = new JPanel();
 		tabbedPane.addTab( "Tracks", TRACK_ICON_64x64, panelTracks, null );
 		panelTracks.setLayout( new BorderLayout( 0, 0 ) );
 
-		final Map< String, String > spotFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.SPOTS, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > spotFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.SPOTS, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > spotFeatures = spotFeatureNames.keySet();
-		spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(
+		this.spotFeatureSelectionPanel = new FeaturePlotSelectionPanel(
 				"T",
 				"Mean intensity ch1",
 				spotFeatures,
@@ -132,9 +126,9 @@ public class GrapherPanel extends JPanel
 
 		// regen edge features
 		panelEdges.removeAll();
-		final Map< String, String > edgeFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.EDGES, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > edgeFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.EDGES, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > edgeFeatures = edgeFeatureNames.keySet();
-		edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel(
+		this.edgeFeatureSelectionPanel = new FeaturePlotSelectionPanel(
 				"Edge time",
 				"Speed",
 				edgeFeatures,
@@ -144,9 +138,9 @@ public class GrapherPanel extends JPanel
 
 		// regen trak features
 		panelTracks.removeAll();
-		final Map< String, String > trackFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.TRACKS, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > trackFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.TRACKS, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > trackFeatures = trackFeatureNames.keySet();
-		trackFeatureSelectionPanel = new FeaturePlotSelectionPanel(
+		this.trackFeatureSelectionPanel = new FeaturePlotSelectionPanel(
 				"Track index",
 				"Number of spots in track",
 				trackFeatures,
@@ -154,19 +148,19 @@ public class GrapherPanel extends JPanel
 				( xKey, yKeys ) -> Threads.run( () -> plotTrackFeatures( xKey, yKeys ) ) );
 		panelTracks.add( trackFeatureSelectionPanel );
 
-		panelSelection = new JPanel();
+		this.panelSelection = new JPanel();
 		panelSelection.setLayout( new BoxLayout( panelSelection, BoxLayout.LINE_AXIS ) );
 		add( panelSelection, BorderLayout.SOUTH );
 
-		rdbtnAll = new JRadioButton( "All" );
+		this.rdbtnAll = new JRadioButton( "All" );
 		rdbtnAll.setFont( rdbtnAll.getFont().deriveFont( rdbtnAll.getFont().getSize() - 2f ) );
 		panelSelection.add( rdbtnAll );
 
-		rdbtnSelection = new JRadioButton( "Selection" );
+		this.rdbtnSelection = new JRadioButton( "Selection" );
 		rdbtnSelection.setFont( rdbtnSelection.getFont().deriveFont( rdbtnSelection.getFont().getSize() - 2f ) );
 		panelSelection.add( rdbtnSelection );
 
-		rdbtnTracks = new JRadioButton( "Tracks of selection" );
+		this.rdbtnTracks = new JRadioButton( "Tracks of selection" );
 		rdbtnTracks.setFont( rdbtnTracks.getFont().deriveFont( rdbtnTracks.getFont().getSize() - 2f ) );
 		panelSelection.add( rdbtnTracks );
 
@@ -178,7 +172,7 @@ public class GrapherPanel extends JPanel
 
 		panelSelection.add( new JSeparator( SwingConstants.VERTICAL ) );
 
-		chkboxConnectDots = new JCheckBox( "Connect" );
+		this.chkboxConnectDots = new JCheckBox( "Connect" );
 		chkboxConnectDots.setFont( chkboxConnectDots.getFont().deriveFont( chkboxConnectDots.getFont().getSize() - 2f ) );
 		chkboxConnectDots.setSelected( true );
 		panelSelection.add( chkboxConnectDots );
@@ -201,6 +195,9 @@ public class GrapherPanel extends JPanel
 
 	private void plotSpotFeatures( final String xFeature, final List< String > yFeatures )
 	{
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+
 		final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( this, new Class[] { JLabel.class } );
 		enabler.disable();
 		try
@@ -208,9 +205,9 @@ public class GrapherPanel extends JPanel
 			final List< Spot > spots;
 			if ( rdbtnAll.isSelected() )
 			{
-				spots = new ArrayList<>( trackmate.getModel().getSpots().getNSpots( true ) );
-				for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-					spots.addAll( trackmate.getModel().getTrackModel().trackSpots( trackID ) );
+				spots = new ArrayList<>( model.getSpots().getNSpots( true ) );
+				for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
+					spots.addAll( model.getTrackModel().trackSpots( trackID ) );
 			}
 			else if ( rdbtnSelection.isSelected() )
 			{
@@ -226,16 +223,17 @@ public class GrapherPanel extends JPanel
 			final boolean addLines = chkboxConnectDots.isSelected();
 
 			final SpotFeatureGrapher grapher = new SpotFeatureGrapher(
+					guiModel,
 					spots,
 					xFeature,
 					yFeatures,
-					trackmate.getModel(),
-					selectionModel,
-					displaySettings,
 					addLines );
 			final JFrame frame = grapher.render();
 			frame.setIconImage( Icons.PLOT_ICON.getImage() );
-			frame.setTitle( trackmate.getSettings().imp.getShortTitle() + " spot features" );
+			
+			final ImagePlus imp = guiModel.getSettings().imp;
+			final String title = imp != null ? imp.getShortTitle() : "TrackMate";
+			frame.setTitle( title + " spot features" );
 			GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 			frame.setVisible( true );
 		}
@@ -247,6 +245,9 @@ public class GrapherPanel extends JPanel
 
 	private void plotEdgeFeatures( final String xFeature, final List< String > yFeatures )
 	{
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+
 		final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( this, new Class[] { JLabel.class } );
 		enabler.disable();
 		try
@@ -255,8 +256,8 @@ public class GrapherPanel extends JPanel
 			if ( rdbtnAll.isSelected() )
 			{
 				edges = new ArrayList<>();
-				for ( final Integer trackID : trackmate.getModel().getTrackModel().trackIDs( true ) )
-					edges.addAll( trackmate.getModel().getTrackModel().trackEdges( trackID ) );
+				for ( final Integer trackID : model.getTrackModel().trackIDs( true ) )
+					edges.addAll( model.getTrackModel().trackEdges( trackID ) );
 			}
 			else if ( rdbtnSelection.isSelected() )
 			{
@@ -272,16 +273,17 @@ public class GrapherPanel extends JPanel
 			final boolean addLines = chkboxConnectDots.isSelected();
 
 			final EdgeFeatureGrapher grapher = new EdgeFeatureGrapher(
+					guiModel,
 					edges,
 					xFeature,
 					yFeatures,
-					trackmate.getModel(),
-					selectionModel,
-					displaySettings,
 					addLines );
 			final JFrame frame = grapher.render();
 			frame.setIconImage( Icons.PLOT_ICON.getImage() );
-			frame.setTitle( trackmate.getSettings().imp.getShortTitle() + " edge features" );
+
+			final ImagePlus imp = guiModel.getSettings().imp;
+			final String title = imp != null ? imp.getShortTitle() : "TrackMate";
+			frame.setTitle( title + " edge features" );
 			GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 			frame.setVisible( true );
 			edgeFeatureSelectionPanel.setEnabled( true );
@@ -294,6 +296,9 @@ public class GrapherPanel extends JPanel
 
 	private void plotTrackFeatures( final String xFeature, final List< String > yFeatures )
 	{
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
+
 		final EverythingDisablerAndReenabler enabler = new EverythingDisablerAndReenabler( this, new Class[] { JLabel.class } );
 		enabler.disable();
 		try
@@ -301,28 +306,29 @@ public class GrapherPanel extends JPanel
 			final List< Integer > trackIDs;
 			if ( rdbtnAll.isSelected() )
 			{
-				trackIDs = new ArrayList<>( trackmate.getModel().getTrackModel().unsortedTrackIDs( true ) );
+				trackIDs = new ArrayList<>( model.getTrackModel().unsortedTrackIDs( true ) );
 			}
 			else
 			{
 				final Set< Integer > set = new HashSet<>();
 				for ( final Spot spot : selectionModel.getSpotSelection() )
-					set.add( trackmate.getModel().getTrackModel().trackIDOf( spot ) );
+					set.add( model.getTrackModel().trackIDOf( spot ) );
 				for ( final DefaultWeightedEdge edge : selectionModel.getEdgeSelection() )
-					set.add( trackmate.getModel().getTrackModel().trackIDOf( edge ) );
+					set.add( model.getTrackModel().trackIDOf( edge ) );
 				trackIDs = new ArrayList< >( set );
 			}
 
 			final TrackFeatureGrapher grapher = new TrackFeatureGrapher(
+					guiModel,
 					trackIDs,
 					xFeature,
-					yFeatures,
-					trackmate.getModel(),
-					selectionModel,
-					displaySettings );
+					yFeatures );
 			final JFrame frame = grapher.render();
 			frame.setIconImage( Icons.PLOT_ICON.getImage() );
-			frame.setTitle( trackmate.getSettings().imp.getShortTitle() + " track features" );
+
+			final ImagePlus imp = guiModel.getSettings().imp;
+			final String title = imp != null ? imp.getShortTitle() : "TrackMate";
+			frame.setTitle( title + " track features" );
 			GuiUtils.positionWindow( frame, SwingUtilities.getWindowAncestor( this ) );
 			frame.setVisible( true );
 		}

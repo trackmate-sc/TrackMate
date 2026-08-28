@@ -29,6 +29,7 @@ import org.jgrapht.traverse.GraphIterator;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.action.closegaps.CloseGapsByLinearInterpolation;
@@ -73,7 +74,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		final TrackModel trackModel = model.getTrackModel();
 
 		// Check if positions were interpolated in the right way
-		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
+		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDirectedDepthFirstIterator( spot0, false );
 
 		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } };
 
@@ -115,7 +116,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		final TrackModel trackModel = model.getTrackModel();
 
 		// Check if positions were interpolated in the right way
-		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, true );
+		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDirectedDepthFirstIterator( spot0, false );
 
 		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 4, 4 }, { 6, 6 }, { 8, 8 }, { 3, 3 }, { 4, 4 }, { 5, 5 } };
 
@@ -157,7 +158,7 @@ public class CloseGapsByLinearInterpolationActionTest
 		final TrackModel trackModel = model.getTrackModel();
 
 		// Check if positions were interpolated in the right way
-		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0, false );
+		final GraphIterator< Spot, DefaultWeightedEdge > spots = trackModel.getDepthFirstIterator( spot0 );
 
 		final double[][] referencePositions = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 4, 4 }, { 6, 6 }, { 8, 8 } };
 
@@ -180,8 +181,7 @@ public class CloseGapsByLinearInterpolationActionTest
 
 	private Spot createSpot( final double x, final double y, final double z )
 	{
-		final Spot newSpot = new Spot( x, y, z, 1.0, 1.0 );
-
+		final Spot newSpot = new SpotBase( x, y, z, 1.0, 1.0 );
 		newSpot.getFeatures().put( Spot.POSITION_T, 1.0 );
 		return newSpot;
 	}

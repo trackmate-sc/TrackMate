@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,8 +21,12 @@
  */
 package fiji.plugin.trackmate.visualization;
 
-import fiji.plugin.trackmate.Model;
+import java.awt.Window;
+
+import javax.swing.text.ViewFactory;
+
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public interface TrackMateModelView
 {
@@ -51,18 +55,18 @@ public interface TrackMateModelView
 
 	/**
 	 * Centers the view on the given spot.
-	 *
+	 * 
 	 * @param spot
-	 *            the spot to center on.
+	 *            the spot to center the view on.
 	 */
 	public void centerViewOn( final Spot spot );
 
 	/**
-	 * Returns the model displayed in this view.
-	 *
+	 * Returns the GUI model used in this view.
+	 * 
 	 * @return the model.
 	 */
-	public Model getModel();
+	public GuiModel getGuiModel();
 
 	/**
 	 * Returns the unique key that identifies this view.
@@ -75,4 +79,10 @@ public interface TrackMateModelView
 	 */
 	public String getKey();
 
+	/**
+	 * Returns the window that contains this view, if any.
+	 * 
+	 * @return the window.
+	 */
+	public Window getWindow();
 }

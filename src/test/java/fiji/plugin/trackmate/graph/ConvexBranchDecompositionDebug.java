@@ -22,12 +22,12 @@
 package fiji.plugin.trackmate.graph;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class ConvexBranchDecompositionDebug
@@ -35,17 +35,17 @@ public class ConvexBranchDecompositionDebug
 	public static void main( final String[] args )
 	{
 
-		final Spot sa0 = new Spot( 0, 0, 0, 1, -1, "SA_0" );
-		final Spot sa1 = new Spot( 0, 0, 0, 1, -1, "SA_1" );
-		final Spot sa3 = new Spot( 0, 0, 0, 1, -1, "SA_3" );
-		final Spot sa4 = new Spot( 0, 0, 0, 1, -1, "SA_4" );
+		final Spot sa0 = new SpotBase( 0, 0, 0, 1, -1, "SA_0" );
+		final Spot sa1 = new SpotBase( 0, 0, 0, 1, -1, "SA_1" );
+		final Spot sa3 = new SpotBase( 0, 0, 0, 1, -1, "SA_3" );
+		final Spot sa4 = new SpotBase( 0, 0, 0, 1, -1, "SA_4" );
 
-		final Spot sb0 = new Spot( 0, 0, 0, 1, -1, "SB_0" );
-		final Spot sb1 = new Spot( 0, 0, 0, 1, -1, "SB_1" );
-		final Spot sb3 = new Spot( 0, 0, 0, 1, -1, "SB_3" );
-		final Spot sb4 = new Spot( 0, 0, 0, 1, -1, "SB_4" );
+		final Spot sb0 = new SpotBase( 0, 0, 0, 1, -1, "SB_0" );
+		final Spot sb1 = new SpotBase( 0, 0, 0, 1, -1, "SB_1" );
+		final Spot sb3 = new SpotBase( 0, 0, 0, 1, -1, "SB_3" );
+		final Spot sb4 = new SpotBase( 0, 0, 0, 1, -1, "SB_4" );
 
-		final Spot nexus = new Spot( 0, 0, 0, 1, -1, "NEXUS" );
+		final Spot nexus = new SpotBase( 0, 0, 0, 1, -1, "NEXUS" );
 
 		final SpotCollection spots = new SpotCollection();
 		spots.add( sa0, 0 );
@@ -70,8 +70,8 @@ public class ConvexBranchDecompositionDebug
 		model.addEdge( sa3, sa4, -2 );
 		model.addEdge( sb3, sb4, -2 );
 
-		final SelectionModel sm = new SelectionModel( model );
-		final TrackScheme trackScheme = new TrackScheme( model, sm, DisplaySettings.defaultStyle().copy() );
+		final GuiModel guiModel = new GuiModel( model );
+		final TrackScheme trackScheme = new TrackScheme( guiModel );
 		trackScheme.render();
 
 		final TrackModel tm = model.getTrackModel();

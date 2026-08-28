@@ -28,6 +28,7 @@ jobs:
       - name: Execute the build
         run: .github/build.sh
         env:
+          MAVEN_OPTS: -Djava.awt.headless=true
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USER: ${{ secrets.MAVEN_USER }}

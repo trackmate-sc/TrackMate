@@ -25,7 +25,6 @@ import static fiji.plugin.trackmate.tracking.overlap.OverlapTrackerFactory.BASE_
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -205,7 +204,11 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 			final Map< Spot, Polygon2D > targetGeometries = createGeometry( spots.iterable( targetFrame, true ), method, enlargeFactor );
 
 			if ( sourceGeometries.isEmpty() || targetGeometries.isEmpty() )
+			{
+				sourceGeometries = targetGeometries;
+				logger.setProgress( ( double ) progress++ / spots.keySet().size() );
 				continue;
+			}
 
 			final ExecutorService executors = Threads.newFixedThreadPool( numThreads );
 			final List< Future< IoULink > > futures = new ArrayList<>();
@@ -299,18 +302,17 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 	{
 		final double xc = spot.getDoublePosition( 0 );
 		final double yc = spot.getDoublePosition( 1 );
-		final SpotRoi roi = spot.getRoi();
 		final SimplePolygon2D poly;
-		if ( roi == null )
+		if ( spot instanceof SpotRoi )
 		{
-			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue();
-			poly = new SimplePolygon2D( new Circle2D( xc, yc, radius ).asPolyline( 32 ) );
+			final SpotRoi roi = ( SpotRoi ) spot;
+			final double[][] out = roi.toArray( 0., 0., 1., 1. );
+			poly = new SimplePolygon2D( out[ 0 ], out[ 1 ] );
 		}
 		else
 		{
-			final double[] xcoords = roi.toPolygonX( 1., 0., xc, 1. );
-			final double[] ycoords = roi.toPolygonY( 1., 0., yc, 1. );
-			poly = new SimplePolygon2D( xcoords, ycoords );
+			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue();
+			poly = new SimplePolygon2D( new Circle2D( xc, yc, radius ).asPolyline( 32 ) );
 		}
 		return poly.transform( AffineTransform2D.createScaling( new Point2D( xc, yc ), scale, scale ) );
 	}
@@ -319,19 +321,19 @@ public class OverlapTracker extends MultiThreadedBenchmarkAlgorithm implements S
 	{
 		final double xc = spot.getDoublePosition( 0 );
 		final double yc = spot.getDoublePosition( 1 );
-		final SpotRoi roi = spot.getRoi();
-		if ( roi == null )
+		if ( spot instanceof SpotRoi )
 		{
-			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue() * scale;
-			return new Rectangle2D( xc - radius, yc - radius, 2 * radius, 2 * radius );
+			final SpotRoi roi = ( SpotRoi ) spot;
+			final double minX = roi.realMin( 0 ) * scale;
+			final double maxX = roi.realMax( 0 ) * scale;
+			final double minY = roi.realMin( 1 ) * scale;
+			final double maxY = roi.realMax( 1 ) * scale;
+			return new Rectangle2D( xc + minX, yc + minY, maxX - minX, maxY - minY );
 		}
 		else
 		{
-			final double minX = Arrays.stream( roi.x ).min().getAsDouble() * scale;
-			final double maxX = Arrays.stream( roi.x ).max().getAsDouble() * scale;
-			final double minY = Arrays.stream( roi.y ).min().getAsDouble() * scale;
-			final double maxY = Arrays.stream( roi.y ).max().getAsDouble() * scale;
-			return new Rectangle2D( xc + minX, yc + minY, maxX - minX, maxY - minY );
+			final double radius = spot.getFeature( Spot.RADIUS ).doubleValue() * scale;
+			return new Rectangle2D( xc - radius, yc - radius, 2 * radius, 2 * radius );
 		}
 	}
 

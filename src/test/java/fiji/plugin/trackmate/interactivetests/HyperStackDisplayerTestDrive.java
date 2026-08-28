@@ -26,14 +26,13 @@ import java.io.File;
 import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackDisplayMode;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 import ij.ImagePlus;
 
@@ -51,17 +50,15 @@ public class HyperStackDisplayerTestDrive
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		final Settings settings = reader.readSettings( imp );
-
 		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
 		ds.setSpotShowName( true );
 		ds.setTrackDisplayMode( TrackDisplayMode.LOCAL_BACKWARD );
+		final GuiModel guiModel = new GuiModel( model, settings, ds );
 
 		new ModelFeatureUpdater( model, settings );
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final HyperStackDisplayer displayer = new HyperStackDisplayer( model, selectionModel, imp, ds );
-		displayer.render();
+		guiModel.getWindowManager().createHyperStackDisplayer();
 
-		final TrackScheme trackScheme = new TrackScheme( model, selectionModel, ds );
+		final TrackScheme trackScheme = new TrackScheme( guiModel );
 		trackScheme.render();
 	}
 }

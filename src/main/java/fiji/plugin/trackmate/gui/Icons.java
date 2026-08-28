@@ -41,6 +41,8 @@ public class Icons
 
 	public static final ImageIcon TRACKMATE_ICON_16x16;
 
+	public static final ImageIcon TRACKMATE_ICON_64x64;
+
 	public static final ImageIcon TRACK_SCHEME_ICON_16x16;
 
 	public static final ImageIcon SPOT_ICON_64x64;
@@ -81,6 +83,10 @@ public class Icons
 		final Image image7 = EDGE_ICON.getImage();
 		final Image newimg7 = image7.getScaledInstance( 16, 16, java.awt.Image.SCALE_SMOOTH );
 		EDGE_ICON_16x16 = new ImageIcon( newimg7 );
+
+		final Image image8 = TRACKMATE_ICON.getImage();
+		final Image newimg8 = image8.getScaledInstance( 64, 64, java.awt.Image.SCALE_SMOOTH );
+		TRACKMATE_ICON_64x64 = new ImageIcon( newimg8 );
 	}
 
 	public static final ImageIcon SPOT_ICON_16x16 = new ImageIcon( Icons.class.getResource( "images/spot_icon_16x16.png" ) );
@@ -207,4 +213,9 @@ public class Icons
 
 	public static final ImageIcon SEGMENTATION_EDITOR_ICON_64x64 = new ImageIcon( Icons.class.getResource( "images/Segmentation-editor-logo_v2-64px.png" ) );
 
+	public static final ImageIcon BULLET_GREEN_ICON = new ImageIcon( Icons.class.getResource( "images/bullet_green.png" ) );
+
+	public static final ImageIcon QUESTION_ICON = new ImageIcon( Icons.class.getResource( "images/help.png" ) );
+
+	public static final ImageIcon BVV_ICON = new ImageIcon( Icons.class.getResource( "images/TrackMateBVV-logo-16x16.png" ) );
 }

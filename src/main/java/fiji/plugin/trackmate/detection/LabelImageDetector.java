@@ -73,6 +73,8 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 	 */
 	protected final boolean simplify;
 
+	private final double smoothingScale;
+
 	/*
 	 * CONSTRUCTORS
 	 */
@@ -81,12 +83,14 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 			final RandomAccessible< T > input,
 			final Interval interval,
 			final double[] calibration,
-			final boolean simplify )
+			final boolean simplify,
+			final double smoothingScale )
 	{
 		this.input = input;
 		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.simplify = simplify;
+		this.smoothingScale = smoothingScale;
 	}
 
 	@Override
@@ -135,9 +139,31 @@ public class LabelImageDetector< T extends RealType< T > & NativeType< T > > imp
 
 		final ImgLabeling< Integer, R > labeling = ImgLabeling.fromImageAndLabels( rai, indices );
 		if ( input.numDimensions() == 2 )
-			spots = MaskUtils.fromLabelingWithROI( labeling, interval, calibration, simplify, null );
+		{
+			spots = SpotRoiUtils.from2DLabelingWithROI(
+					labeling,
+					interval.minAsDoubleArray(),
+					calibration,
+					simplify,
+					smoothingScale,
+					null );
+		}
+		else if ( input.numDimensions() == 3 )
+		{
+			spots = SpotMeshUtils.from3DLabelingWithROI(
+					labeling,
+					interval.minAsDoubleArray(),
+					calibration,
+					simplify,
+					smoothingScale,
+					null );
+		}
 		else
-			spots = MaskUtils.fromLabeling( labeling, interval, calibration );
+		{
+			throw new IllegalArgumentException( BASE_ERROR_MESSAGE + "Can only process 2D or 3D images. Got a "
+					+ input.numDimensions() + "D image over: "
+					+ Util.printInterval( interval ) );
+		}
 	}
 
 	@Override

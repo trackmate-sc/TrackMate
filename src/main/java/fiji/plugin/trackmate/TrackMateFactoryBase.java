@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public interface TrackMateFactoryBase< F extends TrackMateFactoryBase< F > > ext
 	 * {@link SpotDetectorFactory} key.
 	 *
 	 * @param settings
-	 *            the map to marshal.
+	 *            the settings map to marshal.
 	 * @param element
 	 *            the JDom element to update.
 	 * @return an error message if marshaling was unsuccessful. If successful,
@@ -135,6 +135,22 @@ public interface TrackMateFactoryBase< F extends TrackMateFactoryBase< F > > ext
 				else if ( klass == Boolean.class )
 				{
 					value = att.getBooleanValue();
+				}
+				else if ( klass.isEnum() )
+				{
+					@SuppressWarnings( "unchecked" )
+					final Class< Enum< ? > > enumClass = ( Class< Enum< ? > > ) klass;
+					final Enum< ? >[] enums = enumClass.getEnumConstants();
+					Enum< ? > tmp = null;
+					for ( final Enum< ? > e : enums )
+					{
+						if ( e.toString().equals( att.getValue() ) )
+						{
+							tmp = e;
+							break;
+						}
+					}
+					value = tmp;
 				}
 				else
 				{

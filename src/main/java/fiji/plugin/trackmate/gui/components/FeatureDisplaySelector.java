@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -59,6 +59,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.Settings;
@@ -67,7 +69,6 @@ import fiji.plugin.trackmate.features.manual.ManualEdgeColorAnalyzer;
 import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 
@@ -139,12 +140,14 @@ public class FeatureDisplaySelector
 
 	/**
 	 * Returns a {@link CategoryJComboBox} that lets a user select among all
-	 * available features in TrackMate.
+	 * available features in TrackMate. The features are read from the model and
+	 * settings, and the model is listened to so that the combo-box is updated
+	 * when new features are added to the model.
 	 *
 	 * @param model
-	 *            the {@link Model} to read features already computed.
+	 *            the model to read existing features from.
 	 * @param settings
-	 *            the {@link Settings} to read features that can be computed.
+	 *            the settings to read configured features from.
 	 * @return a new {@link CategoryJComboBox}.
 	 */
 	public static final CategoryJComboBox< TrackMateObject, String > createComboBoxSelector( final Model model, final Settings settings )

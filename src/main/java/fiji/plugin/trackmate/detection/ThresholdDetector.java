@@ -61,10 +61,16 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 
 	protected final double threshold;
 
-	/**
-	 * If <code>true</code>, the contours will be smoothed and simplified.
-	 */
+	/** If <code>true</code>, the contours will be simplified. */
 	protected final boolean simplify;
+
+	/**
+	 * If strictly larger than 0, the mask will be smoothed before creating the
+	 * mesh, resulting in smoother meshes. The scale value sets the (Gaussian)
+	 * filter radius and is specified in physical units. If 0 or lower than 0,
+	 * no smoothing is applied.
+	 */
+	protected final double smoothingScale;
 
 	/*
 	 * CONSTRUCTORS
@@ -75,9 +81,11 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 			final Interval interval,
 			final double[] calibration,
 			final double threshold,
-			final boolean simplify )
+			final boolean simplify,
+			final double smoothingScale )
 	{
 		this.input = input;
+		this.smoothingScale = smoothingScale;
 		this.interval = DetectionUtils.squeeze( interval );
 		this.calibration = calibration;
 		this.threshold = threshold;
@@ -110,27 +118,15 @@ public class ThresholdDetector< T extends RealType< T > & NativeType< T > > impl
 	public boolean process()
 	{
 		final long start = System.currentTimeMillis();
-		if ( input.numDimensions() == 2 )
-		{
-			/*
-			 * 2D: we compute and store the contour.
-			 */
-			spots = MaskUtils.fromThresholdWithROI( input, interval, calibration, threshold, simplify, numThreads, null );
-
-		}
-		else if ( input.numDimensions() == 3 )
-		{
-			/*
-			 * 3D: We create spots of the same volume that of the region.
-			 */
-			spots = MaskUtils.fromThreshold( input, interval, calibration, threshold, numThreads );
-		}
-		else
-		{
-			errorMessage = baseErrorMessage + "Required a 2D or 3D input, got " + input.numDimensions() + "D.";
-			return false;
-		}
-
+		spots = MaskUtils.fromThresholdWithROI(
+				input,
+				interval,
+				calibration,
+				threshold,
+				simplify,
+				smoothingScale,
+				numThreads,
+				null );
 		final long end = System.currentTimeMillis();
 		this.processingTime = end - start;
 

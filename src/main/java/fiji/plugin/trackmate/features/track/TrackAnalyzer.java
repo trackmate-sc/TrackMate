@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -80,8 +80,8 @@ public interface TrackAnalyzer extends Benchmark, FeatureAnalyzer, MultiThreaded
 	 * <p>
 	 * Example of a non-local track feature: the rank of the track sorted by its
 	 * number of spots, compared to other tracks.
-	 *
-	 * @return true if this is a local track analyzer.
+	 * 
+	 * @return whether this analyzer is a local analyzer.
 	 */
 	public boolean isLocal();
 

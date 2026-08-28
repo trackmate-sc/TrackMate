@@ -70,7 +70,7 @@ public class SpotCollectionTest
 			final HashSet< Spot > spots = new HashSet<>( 100 );
 			for ( int j = 0; j < N_SPOTS; j++ )
 			{
-				final Spot spot = new Spot( j, j, j, 1d, -1d );
+				final Spot spot = new SpotBase( j, j, j, 1d, -1d );
 				spot.putFeature( Spot.POSITION_T, Double.valueOf( i ) );
 				spot.putFeature( Spot.QUALITY, Double.valueOf( j ) );
 				spot.putFeature( Spot.RADIUS, Double.valueOf( j / 2 ) );
@@ -101,7 +101,7 @@ public class SpotCollectionTest
 		}
 		// Add a spot to target frame
 		final int targetFrame = 1 + 2 * new Random().nextInt( 50 );
-		final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+		final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 		sc.add( spot, targetFrame );
 		// Test
 		for ( final Integer frame : frames )
@@ -221,7 +221,7 @@ public class SpotCollectionTest
 		final FeatureFilter filter = new FeatureFilter( Spot.QUALITY, 20d, false );
 		sc.filter( filter );
 
-		final Spot location = new Spot( 50.1, 50.1, 50.1, 1d, -1d );
+		final Spot location = new SpotBase( 50.1, 50.1, 50.1, 1d, -1d );
 		for ( final Integer frame : frames )
 		{
 			// Closest non-visible spot should be the one with QUALITY = 50
@@ -240,8 +240,8 @@ public class SpotCollectionTest
 		final FeatureFilter filter = new FeatureFilter( Spot.QUALITY, 20d, false );
 		sc.filter( filter );
 
-		final Spot location1 = new Spot( 50.1, 50.1, 50.1, 1d, -1d );
-		final Spot location2 = new Spot( 10.1, 10.1, 10.1, 1d, -1d );
+		final Spot location1 = new SpotBase( 50.1, 50.1, 50.1, 1d, -1d );
+		final Spot location2 = new SpotBase( 10.1, 10.1, 10.1, 1d, -1d );
 		for ( final Integer frame : frames )
 		{
 			// The closest non-visible spot should be the one with QUALITY = 50
@@ -391,7 +391,7 @@ public class SpotCollectionTest
 		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
-			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
+			spots.add( new SpotBase( -1d, -1d, -1d, 1d, -1d ) );
 		}
 		// Add it to a new frame
 		int targetFrame = 1000;
@@ -435,7 +435,7 @@ public class SpotCollectionTest
 		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
-			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
+			spots.add( new SpotBase( -1d, -1d, -1d, 1d, -1d ) );
 		}
 		// Add it to a new frame
 		final int targetFrame = -1;
@@ -456,7 +456,7 @@ public class SpotCollectionTest
 		final HashSet< Spot > spots = new HashSet<>( N_SPOTS_TO_ADD );
 		for ( int i = 0; i < N_SPOTS_TO_ADD; i++ )
 		{
-			spots.add( new Spot( -1d, -1d, -1d, 1d, -1d ) );
+			spots.add( new SpotBase( -1d, -1d, -1d, 1d, -1d ) );
 		}
 		// Add it to a new frame
 		final int targetFrame = 1000;

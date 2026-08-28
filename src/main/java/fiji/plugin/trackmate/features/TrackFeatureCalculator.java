@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -114,12 +114,11 @@ public class TrackFeatureCalculator extends MultiThreadedBenchmarkAlgorithm impl
 	/**
 	 * Calculates all the track features configured in the {@link Settings}
 	 * object for the specified tracks.
-	 *
+	 * 
 	 * @param trackIDs
-	 *            the ids of the tracks to compute features for.
+	 *            the IDs of the track to compute the features of.
 	 * @param doLogIt
-	 *            whether to log the feature computation progress to the model's
-	 *            logger.
+	 *            if <code>true</code> the computation will be logged.
 	 */
 	public void computeTrackFeatures( final Collection< Integer > trackIDs, final boolean doLogIt )
 	{
