@@ -4,7 +4,6 @@ import static org.scijava.ui.config.utils.GuiUtils.isLikelyUrl;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Image;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -53,7 +52,7 @@ public class GenericConfigPanel extends ConfigurationPanel
 		header.setLayout( new BoxLayout( header, BoxLayout.Y_AXIS ) );
 
 		final ImageIcon icon = ( config.getIcon() != null )
-				? new ImageIcon( config.getIcon().getScaledInstance( 64, 64, Image.SCALE_SMOOTH ) )
+				? GuiUtils.scaleImage( config.getIcon(), 64, 64 )
 				: null;
 		final JLabel lblDetector = new JLabel( config.getName(), icon, JLabel.RIGHT );
 		lblDetector.setFont( FONT.deriveFont( Font.BOLD ) );
