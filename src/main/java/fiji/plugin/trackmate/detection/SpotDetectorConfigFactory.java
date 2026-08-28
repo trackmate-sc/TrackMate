@@ -21,7 +21,11 @@
  */
 package fiji.plugin.trackmate.detection;
 
+import java.awt.Image;
+import java.util.List;
 import java.util.Map;
+
+import javax.swing.ImageIcon;
 
 import org.scijava.ui.config.Configurator;
 import org.scijava.ui.config.visitors.Maps;
@@ -65,5 +69,26 @@ public interface SpotDetectorConfigFactory< T extends RealType< T > & NativeType
 	public default Map< String, Object > getDefaultSettings()
 	{
 		return Maps.toMap( createConfig() );
+	}
+
+	@Override
+	default ImageIcon getIcon()
+	{
+		final List< Image > icons = createConfig().getIcons();
+		if ( null == icons || icons.isEmpty() )
+			return null;
+		return new ImageIcon( icons.get( 0 ) );
+	}
+
+	@Override
+	default String getName()
+	{
+		return createConfig().getName();
+	}
+
+	@Override
+	default String getInfoText()
+	{
+		return createConfig().getHelp();
 	}
 }
