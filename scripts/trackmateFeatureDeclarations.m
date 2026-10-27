@@ -39,13 +39,12 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
 %         units: 'pixels'
 
 % __
-% Jean-Yves Tinevez - 2016
+% Jean-Yves Tinevez & contributors - 2026
+arguments
+    filePath {mustBeTextScalar, mustBeFile}
+end
 
 
-    %% Import the XPath classes.
-    import javax.xml.xpath.*
-    
-    
     %% Constants definition.
     TRACKMATE_ELEMENT           = 'TrackMate';
     SPATIAL_UNITS_ATTRIBUTE     = 'spatialunits';
@@ -58,86 +57,143 @@ function [ sf, ef, tf ] = trackmateFeatureDeclarations(filePath)
         
     
     %% Open and check XML.
-    
-    try
-        xmlDoc = xmlread(filePath);
-    catch
-        error('Failed to read XML file %s.',filePath);
+    % Parsing a large file takes time. Cache the document until return.
+    global TRACKMATEISNOTENTRY TRACKMATEXMLDOC TRACKMATEDOCNAME %#ok<GVMIS>
+    if isempty(TRACKMATEISNOTENTRY)
+        TRACKMATEISNOTENTRY = true;
+        willClear = onCleanup(@()clear('global', 'TRACKMATEISNOTENTRY', 'TRACKMATEXMLDOC', 'TRACKMATEDOCNAME'));
+    else
+        willClear = onCleanup.empty;
     end
-    xmlRoot = xmlDoc.getFirstChild();
     
-    if ~strcmp(xmlRoot.getTagName, TRACKMATE_ELEMENT)
+    % Either being called by user, or being called by other functions and
+    % is the first run. Or somehow was used to work on another file.
+    if ~isempty(willClear) || isempty(TRACKMATEXMLDOC) || ~strcmp(TRACKMATEDOCNAME, filePath)
+        try
+            TRACKMATEXMLDOC = matlab.io.xml.dom.Parser().parseFile( filePath );
+        catch ME
+            switch ME.identifier
+                case 'MATLAB:UndefinedFunction'
+                    error('Your MATLAB is too old (pre-R2021a) to run this script.')
+                otherwise
+                    % Attach the error to facilitate debugging.
+                    error(ME.identifier, 'Failed to read XML file %s.',filePath);
+            end
+        end
+        TRACKMATEDOCNAME = filePath;
+    end
+
+    rootNode = TRACKMATEXMLDOC.getDocumentElement;
+    if isempty(rootNode) || ~strcmp(TRACKMATE_ELEMENT, rootNode.TagName)
         error('MATLAB:trackMateGraph:BadXMLFile', ...
             'File does not seem to be a proper TrackMate file.')
     end
     
-    factory = XPathFactory.newInstance;
-    xpath = factory.newXPath;
+    modelNode = rootNode.getFirstElementChild;
+    modelFound = false;
+    while ~isempty(modelNode)
+        if strcmp('Model', modelNode.TagName)
+            modelFound = true;
+            break
+        end
+        modelNode = modelNode.getNextElementSibling;
+    end
+
+    if ~modelFound
+        error('MATLAB:trackMateGraph:BadXMLFile', ...
+            'File does not seem to contain a valid Model element.')
+    end
     
     %% Retrieve physical units.
     
-    modelPath   =  xpath.compile('/TrackMate/Model');
-    modelNode   = modelPath.evaluate(xmlRoot, XPathConstants.NODESET).item(0);
-    spaceUnits  = char( modelNode.getAttribute( SPATIAL_UNITS_ATTRIBUTE ) );
-    timeUnits   = char( modelNode.getAttribute( TIME_UNITS_ATTRIBUTE ) );
+    % matlab.io.xml.dom.Element.getAttribute() returns character arrays
+    spaceUnits  = modelNode.getAttribute( SPATIAL_UNITS_ATTRIBUTE );
+    timeUnits   = modelNode.getAttribute( TIME_UNITS_ATTRIBUTE );
     
     %% XPath to retrieve spot feature declarations.
     
-    spotFeatureFilter = xpath.compile('/TrackMate/Model/FeatureDeclarations/SpotFeatures/Feature');
-    spotFeatureNodes = spotFeatureFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    nSpotFeatureNodes = spotFeatureNodes.getLength();
-    
-    sf = containers.Map();
-    for i = 1 : nSpotFeatureNodes
-        f = readFeature( spotFeatureNodes.item( i-1 ), spaceUnits, timeUnits );
-        sf( f.key ) = f;
-    end
+    % /TrackMate/Model/FeatureDeclarations/SpotFeatures/Feature
+    sf = makeFeatureTable('SpotFeatures', modelNode);
+    sf = transformFeatureTable(sf, spaceUnits, timeUnits);
     
     %% XPath to retrieve edge feature declarations.
     
-    edgeFeatureFilter = xpath.compile('/TrackMate/Model/FeatureDeclarations/EdgeFeatures/Feature');
-    edgeFeatureNodes = edgeFeatureFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    nEdgeFeatureNodes = edgeFeatureNodes.getLength();
-    
-    ef = containers.Map();
-    for i = 1 : nEdgeFeatureNodes
-        f = readFeature( edgeFeatureNodes.item( i-1 ), spaceUnits, timeUnits );
-        ef( f.key ) = f;
+    if nargout >= 2
+        % /TrackMate/Model/FeatureDeclarations/EdgeFeatures/Feature
+        ef = makeFeatureTable('EdgeFeatures', modelNode);
+        ef = transformFeatureTable(ef, spaceUnits, timeUnits);
     end
     
     %% XPath to retrieve track feature declarations.
     
-    trackFeatureFilter = xpath.compile('/TrackMate/Model/FeatureDeclarations/TrackFeatures/Feature');
-    trackFeatureNodes = trackFeatureFilter.evaluate(xmlDoc, XPathConstants.NODESET);
-    nTrackFeatureNodes = trackFeatureNodes.getLength();
-    
-    tf = containers.Map();
-    for i = 1 : nTrackFeatureNodes
-        f = readFeature( trackFeatureNodes.item( i-1 ), spaceUnits, timeUnits );
-        tf( f.key ) = f;
+    if nargout >= 3
+        % /TrackMate/Model/FeatureDeclarations/TrackFeatures/Feature
+        tf = makeFeatureTable('TrackFeatures', modelNode);
+        tf = transformFeatureTable(tf, spaceUnits, timeUnits);
     end
     
     
     
     %% Subfunctions.
     
-    function f = readFeature(featureNode, spaceUnits, timeUnits)
-       
-        key         = char( featureNode.getAttribute( FEATURE_KEY_ATTRIBUTE ) );
-        name        = char( featureNode.getAttribute( FEATURE_NAME_ATTRIBUTE ) );
-        shortName   = char( featureNode.getAttribute( FEATURE_SHORTNAME_ATTRIBUTE ) );
-        dimension   = char( featureNode.getAttribute( FEATURE_DIMENSION_ATTRIBUTE ) );
-        isInt       = strcmp( 'true', char( featureNode.getAttribute( FEATURE_ISINT_ATTRIBUTE ) ) );
-        units       = determineUnits( dimension, spaceUnits, timeUnits );
-        
-        f = struct();
-        f.key       = key;
-        f.name      = name;
-        f.shortName = shortName;
-        f.dimension = dimension;
-        f.isInt     = isInt;
-        f.units     = units;
-        
+    function ft = makeFeatureTable(featName, modelNode)
+        ft = table( 'Size', [0 5], ...
+            'VariableNames', {'key' 'name' 'shortName' 'dimension' 'isInt'}, ...
+            'VariableTypes', {'string' 'string' 'string' 'string' 'logical'} );
+
+        declNode = modelNode.getFirstElementChild;
+        while ~isempty(declNode)
+        if strcmp('FeatureDeclarations', declNode.TagName)
+            % FeatureDeclarations level
+            fDNode = declNode.getFirstElementChild;
+            while ~isempty(fDNode)
+            if strcmp(featName, fDNode.TagName)
+                % featName level
+                neFeatures = fDNode.getChildElementCount;
+                key = strings(neFeatures, 1);
+                name = strings(neFeatures, 1);
+                shortName = strings(neFeatures, 1);
+                dimension = strings(neFeatures, 1);
+                isInt = false(neFeatures, 1);
+
+                iFeat = 0;
+                featNode = fDNode.getFirstElementChild;
+                while ~isempty(featNode)
+                if strcmp('Feature', featNode.TagName)
+                    % Feature node
+                    iFeat = iFeat+1;
+                    key{iFeat} = featNode.getAttribute(FEATURE_KEY_ATTRIBUTE);
+                    name{iFeat} = featNode.getAttribute(FEATURE_NAME_ATTRIBUTE);
+                    shortName{iFeat} = featNode.getAttribute(FEATURE_SHORTNAME_ATTRIBUTE);
+                    dimension{iFeat} = featNode.getAttribute(FEATURE_DIMENSION_ATTRIBUTE);
+                    isInt(iFeat) = strcmp('true', featNode.getAttribute(FEATURE_ISINT_ATTRIBUTE));
+                end
+                featNode = featNode.getNextElementSibling;
+                end
+
+                t = table(key, name, shortName, dimension, isInt);
+                if iFeat < neFeatures
+                    t(iFeat+1:end, :) = [];
+                end
+                ft = vertcat(ft, t); %#ok<AGROW>
+            end
+            fDNode = fDNode.getNextElementSibling;
+            end
+        end
+        declNode = declNode.getNextElementSibling;
+        end
+
+        ft = convertvars(ft, 1:4, 'cellstr');
+    end
+
+    % Fill in the Units, and transform into Map
+    function featureMap = transformFeatureTable(featureTable, spaceUnits, timeUnits)
+        units = cellfun(@(dim)determineUnits(dim, spaceUnits, timeUnits), ...
+            featureTable.dimension, 'UniformOutput', false);
+        featureTable = addvars(featureTable, units, 'NewVariableNames', 'units');
+
+        featureStruct = table2struct(featureTable);
+        featureMap = containers.Map({featureStruct.key}.', num2cell(featureStruct));
     end
 
     function  units = determineUnits( dimension, spaceUnits, timeUnits )

@@ -63,68 +63,68 @@ function [tracks, metadata] = importTrackMateTracks(file, clipz, scalet)
 %   </particle>
 %   ...
 % </Tracks>
-%
-%
-% Jean-Yves Tinevez <jeanyves.tinevez@gmail.com> - 2013
 
-    %% Input 
-    
-    if nargin < 2
-        clipz = false;
-    end
-    
-    if nargin < 3
-        scalet = false;
-    end
 
+% __
+% Jean-Yves Tinevez & contributors - 2026
+arguments
+    file   {mustBeTextScalar, mustBeFile}
+    clipz  logical  {mustBeScalarOrEmpty} = false
+    scalet logical  {mustBeScalarOrEmpty} = false
+end
 
     %% Load and Test compliance
 
     try
-        doc = xmlread(file);
-    catch %#ok<CTCH>
-        error('Failed to read XML file %s.',file);
+        doc = matlab.io.xml.dom.Parser().parseFile(file);
+    catch ME
+        switch ME.identifier
+            case 'MATLAB:UndefinedFunction'
+                error('Your MATLAB is too old (pre-R2021a) to run this script.')
+            otherwise
+                error(ME.identifier,'Failed to read XML file %s.',file);
+        end
     end
     
     root = doc.getDocumentElement;
     
-    if ~strcmp(root.getTagName, 'Tracks')
+    if ~strcmp(root.TagName, 'Tracks')
         error('MATLAB:importTrackMateTracks:BadXMLFile', ...
             'File does not seem to be a proper track file.')
     end
     
     %% Get metadata
-    metadata.spaceUnits     = char( root.getAttribute('spaceUnits') );
-    metadata.timeUnits      = char( root.getAttribute('timeUnits') );
-    metadata.frameInterval  = str2double( root.getAttribute('frameInterval') );
-    metadata.date           = char( root.getAttribute('generationDateTime') );
-    metadata.source         = char( root.getAttribute('from') );
+    metadata.spaceUnits     = root.getAttribute('spaceUnits');
+    metadata.timeUnits      = root.getAttribute('timeUnits');
+    metadata.frameInterval  = double(string( root.getAttribute('frameInterval') ));
+    metadata.date           = root.getAttribute('generationDateTime');
+    metadata.source         = root.getAttribute('from');
     
     
     %% Parse 
     
-    nTracks = str2double( root.getAttribute('nTracks') );
+    nTracks = double(string( root.getAttribute('nTracks') ));
     tracks = cell(nTracks, 1);
     trackNodes = root.getElementsByTagName('particle');
     
     for i = 1 : nTracks
        
-        trackNode = trackNodes.item(i-1);
+        trackNode = trackNodes.node(i);
         detectionNodes = trackNode.getElementsByTagName('detection');
         
-        nSpots = str2double( trackNode.getAttribute('nSpots') );
-        nSpots = min( nSpots, detectionNodes.getLength() );
+        nSpots = double(string( trackNode.getAttribute('nSpots') ));
+        nSpots = min( nSpots, detectionNodes.Length );
         
-        A = NaN( nSpots, 4); % T, X, Y, Z
+        A = zeros( nSpots, 4); % T, X, Y, Z
         
         for j = 1 : nSpots
             
-            detectionNode = detectionNodes.item(j-1);
-            t = str2double(detectionNode.getAttribute('t'));
-            x = str2double(detectionNode.getAttribute('x'));
-            y = str2double(detectionNode.getAttribute('y'));
-            z = str2double(detectionNode.getAttribute('z'));
-            A(j, :) = [ t x y z ];
+            detectionNode = detectionNodes.node(j);
+            t = string(detectionNode.getAttribute('t'));
+            x = string(detectionNode.getAttribute('x'));
+            y = string(detectionNode.getAttribute('y'));
+            z = string(detectionNode.getAttribute('z'));
+            A(j, :) = double([ t x y z ]);
             
         end
         
