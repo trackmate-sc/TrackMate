@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -90,14 +90,14 @@ public class CondaPathConfigCommand implements Command
 		}
 		catch ( final IllegalArgumentException e )
 		{
-			findPath = "/usr/local/opt/micromamba/bin/micromamba";
+			findPath = "";
 		}
 
 		final String condaPath = prefs.get( CLIUtils.class, CLIUtils.CONDA_PATH_PREF_KEY, findPath );
-		final Path path = Paths.get( condaPath );
-		final Path parent = path.getParent();
+		final Path path = ( condaPath != null && !condaPath.isBlank() ) ? Paths.get( condaPath ) : null;
+		final Path parent = ( path != null ) ? path.getParent() : null;
 		final Path parentOfParent = ( parent != null ) ? parent.getParent() : null;
-		final String defaultValue = "/usr/local/opt/micromamba/";
+		final String defaultValue = "";
 
 		String condaRootPrefix = ( parentOfParent != null )
 				? parentOfParent.toString()
