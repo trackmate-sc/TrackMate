@@ -199,7 +199,7 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>config-ui</artifactId>
-			<version>0.0.7</version>
+			<version>0.0.10</version>
 		</dependency>
 
 		<!-- Logging dependencies -->
@@ -212,7 +212,7 @@
 		<dependency>
 			<groupId>org.litt</groupId>
 			<artifactId>geff</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
+			<version>1.1.2-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Fiji dependencies -->
