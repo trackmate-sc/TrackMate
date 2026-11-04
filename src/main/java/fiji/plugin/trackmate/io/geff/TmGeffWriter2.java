@@ -86,6 +86,9 @@ public class TmGeffWriter2
 
 	static final String TRACKMATE_SPOT_ID_PROP = "trackmate_spot_id";
 
+	/** The GEFF conventional name for the radius property. */
+	static final String RADIUS_PROP_NAME = "radius";
+
 	static final String NAME_PROP = "name";
 
 	static final String POLYGON_PROP = "polygon";
@@ -239,7 +242,7 @@ public class TmGeffWriter2
 			writer.add( "z", TmGeffWriter2::z );
 
 		// Radius, possibly missing.
-		writer.add( "radius", TmGeffWriter2::radius );
+		writer.add( RADIUS_PROP_NAME, TmGeffWriter2::radius );
 
 		// TrackMate ID and name.
 		writer.add( TRACKMATE_SPOT_ID_PROP, Spot::ID );
@@ -459,7 +462,7 @@ public class TmGeffWriter2
 				final Double r = fm.getTrackFeature( id, TRACK_MAX_DISTANCE_TRAVELED );
 				return ( r == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( r.doubleValue() / 2 );
 			};
-			trackWriter.add( "radius", radiusAccessor );
+			trackWriter.add( RADIUS_PROP_NAME, radiusAccessor );
 		}
 
 		// Visibility and name.
@@ -653,7 +656,7 @@ public class TmGeffWriter2
 		nodePropsMetadata.put( "y", new PropMetadata( "y", "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( POSITION_Y ), null ) );
 		if ( !is2D )
 			nodePropsMetadata.put( "z", new PropMetadata( "z", "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( POSITION_Z ), null ) );
-		nodePropsMetadata.put( "radius", new PropMetadata( "radius", "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( RADIUS ), "The radius of the spot" ) );
+		nodePropsMetadata.put( RADIUS_PROP_NAME, new PropMetadata( RADIUS_PROP_NAME, "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( RADIUS ), "The radius of the spot" ) );
 		nodePropsMetadata.put( TRACKMATE_SPOT_ID_PROP, new PropMetadata( TRACKMATE_SPOT_ID_PROP, "uint32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" ) );
 		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
 
@@ -703,7 +706,7 @@ public class TmGeffWriter2
 
 		// Shape declarations: declare which node property holds the shapes,
 		// as mandated by the GEFF specification.
-		metadata.setSphere( "radius" );
+		metadata.setSphere( RADIUS_PROP_NAME );
 		if ( hasMesh )
 			metadata.setMesh( new GeffMetadata.MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
 	}
@@ -772,7 +775,7 @@ public class TmGeffWriter2
 		if ( !is2D )
 			nodePropsMetadata.put( "z", new PropMetadata( "z", "float64", false, spaceUnits, fm.getTrackFeatureNames().get( TrackLocationAnalyzer.Z_LOCATION ), null ) );
 		if ( hasTrackRadius )
-			nodePropsMetadata.put( "radius", new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of excursion of the track" ) );
+			nodePropsMetadata.put( RADIUS_PROP_NAME, new PropMetadata( RADIUS_PROP_NAME, "float64", false, spaceUnits, "Radius", "The radius of excursion of the track" ) );
 		nodePropsMetadata.put( VISIBILITY, new PropMetadata( VISIBILITY, "uint32", false, null, Spot.FEATURE_NAMES.get( VISIBILITY ), "Whether the track is visible in the display" ) );
 		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Track name", "The name of the track" ) );
 
