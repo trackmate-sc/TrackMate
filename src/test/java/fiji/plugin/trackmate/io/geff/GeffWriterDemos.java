@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.io.geff.imglib2;
+package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.Spot.FRAME;
 import static fiji.plugin.trackmate.Spot.POSITION_X;
@@ -48,12 +48,11 @@ import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 
 /**
- * Shared code for the TrackMate GEFF writing demos
- * ({@link TrackMateImglibGeffWriterDemo},
- * {@link TrackMateAccessorGeffWriterDemo}): the GEFF metadata builder, the
- * read-back summary, and small buffer-to-array conversion helpers. Having all
- * of this in one place guarantees that the two demos — which differ only in
- * how they register the property accessors — write identical files.
+ * Shared code for the TrackMate GEFF writing demos: the GEFF metadata builder
+ * and the skip-set for {@link TrackMateImglibGeffWriterDemo}, and the
+ * read-back summary used by all the demos. ({@link TrackMateAccessorGeffWriterDemo}
+ * now delegates to {@link fiji.plugin.trackmate.io.geff.TmGeffWriter},
+ * which has its own copy of the registration logic in main sources.)
  */
 final class GeffWriterDemos
 {

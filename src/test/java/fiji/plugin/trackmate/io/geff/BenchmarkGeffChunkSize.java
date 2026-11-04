@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.mastodon.geff.imglib2.GeffException;
 
 import fiji.plugin.trackmate.gui.GuiModel;
 
@@ -18,7 +19,7 @@ import fiji.plugin.trackmate.gui.GuiModel;
 public class BenchmarkGeffChunkSize
 {
 
-	public static void main( final String[] args ) throws IOException
+	public static void main( final String[] args ) throws IOException, GeffException
 	{
 		final String path = "samples/CElegans3D-smoothed-mask-orig.xml";
 		final GuiModel gm1 = TmGeffIODemo.loadFromXML( path );

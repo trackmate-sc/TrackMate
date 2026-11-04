@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.io.geff.imglib2.heuristics;
+package fiji.plugin.trackmate.io.geff.heuristics;
 
 import java.util.ArrayList;
 import java.util.Arrays;

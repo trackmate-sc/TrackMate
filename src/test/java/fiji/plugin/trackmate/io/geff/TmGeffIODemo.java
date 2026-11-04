@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 
 import org.apache.commons.io.FileUtils;
+import org.mastodon.geff.imglib2.GeffException;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
@@ -33,7 +34,7 @@ import ij.ImagePlus;
 public class TmGeffIODemo extends GeffTestBase
 {
 
-	public static void main( final String[] args ) throws IOException
+	public static void main( final String[] args ) throws IOException, GeffException
 	{
 //		final String path = "samples/FakeTracks.xml";
 //		final String path = GeffTestDeserializationTest.SPOT_MIXED_PATH;
@@ -88,7 +89,7 @@ public class TmGeffIODemo extends GeffTestBase
 		geffWriter.write();
 	}
 
-	private static GuiModel readBack( final String savePath ) throws IOException
+	private static GuiModel readBack( final String savePath ) throws IOException, GeffException
 	{
 		final TmGeffReader geffReader = new TmGeffReader( savePath );
 

@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.io.geff.imglib2;
+package fiji.plugin.trackmate.io.geff;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,13 +7,11 @@ import org.apache.commons.io.FileUtils;
 import org.mastodon.geff.imglib2.GeffException;
 
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.geff.GeffTestBase;
-import fiji.plugin.trackmate.io.geff.TmGeffIODemo;
-import fiji.plugin.trackmate.io.geff.TmGeffWriter2;
+import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 
 /**
  * Serializes the {@link fiji.plugin.trackmate.SpotCollection} of a TrackMate
- * model into a GEFF file using {@link TmGeffWriter2}, the writer based on the
+ * model into a GEFF file using {@link TmGeffWriter}, the writer based on the
  * imglib2 writing API of the geff-java library
  * ({@code org.mastodon.geff.imglib2.GeffPropertyWriter}). This demo exercises
  * the writer as it would be used from the GUI save path: append the model,
@@ -22,7 +20,7 @@ import fiji.plugin.trackmate.io.geff.TmGeffWriter2;
  * Compared to {@link TrackMateImglibGeffWriterDemo} — which registers raw
  * lambdas by hand — the property registration logic (one accessor per GEFF
  * property, registered with method references, dispatching on the concrete
- * spot class) now lives in {@link TmGeffWriter2} itself.
+ * spot class) now lives in {@link TmGeffWriter} itself.
  */
 public class TrackMateAccessorGeffWriterDemo extends GeffTestBase
 {
@@ -43,7 +41,7 @@ public class TrackMateAccessorGeffWriterDemo extends GeffTestBase
 		FileUtils.deleteDirectory( new File( savePath ) );
 
 		System.out.println( "Writing to " + savePath );
-		final TmGeffWriter2 writer = new TmGeffWriter2( savePath );
+		final TmGeffWriter writer = new TmGeffWriter( savePath );
 		writer.appendModel( gm.getModel() );
 		writer.write();
 		System.out.println( "Done." );

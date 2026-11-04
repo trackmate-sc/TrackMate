@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.io.geff.imglib2;
+package fiji.plugin.trackmate.io.geff;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,14 +10,11 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.geff.GeffTestBase;
-import fiji.plugin.trackmate.io.geff.GeffTestDeserializationTest;
-import fiji.plugin.trackmate.io.geff.TmGeffIODemo;
-import fiji.plugin.trackmate.io.geff.TmGeffReader2;
-import fiji.plugin.trackmate.io.geff.TmGeffWriter2;
+import fiji.plugin.trackmate.io.geff.TmGeffReader;
+import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 
 /**
- * Round-trip demo for {@link TmGeffWriter2} and {@link TmGeffReader2}: load a
+ * Round-trip demo for {@link TmGeffWriter} and {@link TmGeffReader}: load a
  * model from XML, write it to a GEFF file, read it back, and print a summary.
  */
 public class TrackMateGeffReader2Demo extends GeffTestBase
@@ -40,13 +37,13 @@ public class TrackMateGeffReader2Demo extends GeffTestBase
 		FileUtils.deleteDirectory( new File( savePath ) );
 
 		System.out.println( "Writing to " + savePath );
-		final TmGeffWriter2 writer = new TmGeffWriter2( savePath );
+		final TmGeffWriter writer = new TmGeffWriter( savePath );
 		writer.appendModel( gm.getModel() );
 		writer.write();
 		System.out.println( "Done." );
 
 		System.out.println( "Reading back " + savePath );
-		final TmGeffReader2 reader = new TmGeffReader2( savePath );
+		final TmGeffReader reader = new TmGeffReader( savePath );
 		final Model model = reader.getModel();
 		System.out.println( "Done. " + model.getSpots().getNSpots( false ) + " spots read back." );
 
