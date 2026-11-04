@@ -1,6 +1,10 @@
 package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.Spot.FRAME;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.EDGE_COST;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.MESH_F_PROP;
@@ -14,6 +18,8 @@ import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.TRACKMATE_SPOT_ID_PROP
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +30,11 @@ import java.util.function.Supplier;
 
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffMetadata.RelatedObjects;
+import org.mastodon.geff.imglib2.Construction.EdgeConstructor;
 import org.mastodon.geff.imglib2.Construction.FromId;
 import org.mastodon.geff.imglib2.Construction.FromProperty;
 import org.mastodon.geff.imglib2.Construction.NodeConstructor;
@@ -38,6 +47,7 @@ import org.mastodon.geff.imglib2.IoUtils;
 import org.mastodon.geff.imglib2.Maybe;
 import org.mastodon.geff.imglib2.Suppliers;
 
+import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -172,7 +182,15 @@ public class TmGeffReader2
 		final TObjectIntMap< Spot > spotTrackIDMap = new TObjectIntHashMap<>();
 		readSpots( model, is2D, spotIdMap, spotTrackIDMap );
 
-		// TODO: Read edges.
+		// Edges: build the graph and the track membership maps. The graph is
+		// not wired into the model yet: TrackModel.from() needs the track
+		// visibility and names, which are read from the tracks sub-file (TODO:
+		// next step).
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap<>();
+		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>();
+		readEdges( model, is2D, spotIdMap, spotTrackIDMap, graph, connectedVertexSet, connectedEdgeSet );
+
 		// TODO: Read tracks.
 
 		// TODO: Read feature declarations.
@@ -322,6 +340,123 @@ public class TmGeffReader2
 		}
 	}
 
+	/**
+	 * Reads the edges of the GEFF file and builds the graph. The graph is not
+	 * wired into the model yet: {@link fiji.plugin.trackmate.TrackModel#from}
+	 * needs the track visibility and names, which are read from the tracks
+	 * sub-file in the next step.
+	 * <p>
+	 * Edge features are put back as-is, except the structural ones: the source
+	 * and target spot IDs are restored from the spots themselves, and the
+	 * {@code Z_LOCATION} feature is given a dummy value of 0 in 2D (it was not
+	 * serialized). The edge weight is taken from the {@code EDGE_COST} feature
+	 * if present.
+	 *
+	 * @param model
+	 *            the model being built (to access its feature model).
+	 * @param is2D
+	 *            whether the model is 2D.
+	 * @param spotIdMap
+	 *            the map from GEFF node id to spot, as built by
+	 *            {@link #readSpots}.
+	 * @param spotTrackIDMap
+	 *            the map from spot to TrackMate track id, as built by
+	 *            {@link #readSpots}.
+	 * @param graph
+	 *            the graph to populate.
+	 * @param connectedVertexSet
+	 *            the map from track id to the spots of the track, populated
+	 *            here from the spot lineage.
+	 * @param connectedEdgeSet
+	 *            the map from track id to the edges of the track, populated
+	 *            here.
+	 * @throws IOException
+	 *             if an I/O error occurs.
+	 * @throws GeffException
+	 *             if the file is not a valid GEFF file.
+	 */
+	private void readEdges(
+			final Model model,
+			final boolean is2D,
+			final TIntObjectMap< Spot > spotIdMap,
+			final TObjectIntMap< Spot > spotTrackIDMap,
+			final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph,
+			final Map< Integer, Set< Spot > > connectedVertexSet,
+			final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet ) throws IOException, GeffException
+	{
+		try (final N5Reader n5 = new N5ZarrReader( geffPath ))
+		{
+			// The file might not have any edge at all.
+			if ( !n5.datasetExists( "edges/ids" ) )
+				return;
+
+			final GeffProperties edgeProps = IoUtils.loadProperties( n5, ElementType.EDGE );
+
+			// Build the edges with the annotation framework.
+			final EdgeBuilder builder = new EdgeBuilder( spotIdMap, graph );
+			try
+			{
+				final ElementCreator creator = ElementCreator.of( builder, edgeProps );
+				for ( int i = 0; i < edgeProps.numElements(); i++ )
+					creator.createElement( i );
+			}
+			catch ( final IllegalAccessException | NoSuchMethodException | GeffException e )
+			{
+				throw ( e instanceof GeffException )
+						? ( GeffException ) e
+						: new GeffException( e );
+			}
+
+			/*
+			 * Post-processing pass: put back the edge features, the edge
+			 * weight, and the track membership from the spot lineage.
+			 */
+			final FeatureModel fm = model.getFeatureModel();
+			final List< DefaultWeightedEdge > edgeList = builder.edgeList();
+			for ( int i = 0; i < edgeProps.numElements(); i++ )
+			{
+				edgeProps.elementIndex().set( i );
+				final DefaultWeightedEdge edge = edgeList.get( i );
+				final Spot source = graph.getEdgeSource( edge );
+				final Spot target = graph.getEdgeTarget( edge );
+
+				// Structural features, from the spots themselves.
+				fm.putEdgeFeature( edge, SPOT_SOURCE_ID, Double.valueOf( source.ID() ) );
+				fm.putEdgeFeature( edge, SPOT_TARGET_ID, Double.valueOf( target.ID() ) );
+
+				// We did not serialize the Z location for the 2D case, but we
+				// need to put something back, because the feature model
+				// expects it to be there. This default value will be
+				// overwritten if the edge has a Z feature value.
+				if ( is2D )
+					fm.putEdgeFeature( edge, Z_LOCATION, Double.valueOf( 0. ) );
+
+				// All the other properties become features.
+				for ( final Map.Entry< String, GeffProperty< ? > > entry : edgeProps.properties().entrySet() )
+				{
+					final String key = entry.getKey();
+					if ( key.equals( SPOT_SOURCE_ID ) || key.equals( SPOT_TARGET_ID ) )
+						continue;
+					final GeffProperty< ? > prop = entry.getValue();
+					if ( prop.isVarlength() )
+						continue; // We do not know how to interpret it as a feature.
+					final java.util.function.DoubleSupplier value = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) );
+					fm.putEdgeFeature( edge, key, Double.valueOf( value.getAsDouble() ) );
+				}
+
+				// Edge weight.
+				final Double weight = fm.getEdgeFeature( edge, EDGE_COST );
+				graph.setEdgeWeight( edge, ( weight == null ) ? 1.0 : weight.doubleValue() );
+
+				// Track membership, from the spot lineage.
+				final int trackID = spotTrackIDMap.get( source );
+				connectedVertexSet.computeIfAbsent( trackID, k -> new HashSet<>() ).add( source );
+				connectedVertexSet.get( trackID ).add( target );
+				connectedEdgeSet.computeIfAbsent( trackID, k -> new HashSet<>() ).add( edge );
+			}
+		}
+	}
+
 	/*
 	 * SPOT BUILDERS.
 	 *
@@ -332,7 +467,6 @@ public class TmGeffReader2
 	 * mapping, other features) is done in the post-processing pass of
 	 * {@link #readSpots}.
 	 */
-
 	public abstract static class AbstractSpotBuilder
 	{
 		protected final SpotCollection spots;
@@ -523,5 +657,49 @@ public class TmGeffReader2
 			triangles.add( ( int ) f[ 3 * i ], ( int ) f[ 3 * i + 1 ], ( int ) f[ 3 * i + 2 ], 0f, 0f, 0f );
 
 		return mesh;
+	}
+
+	/*
+	 * EDGE BUILDER.
+	 *
+	 * Same annotation framework as for the spots, but with the
+	 * {@link EdgeConstructor} annotation, picked automatically by
+	 * {@link ElementCreator} because the properties have the EDGE element
+	 * type. The edge id is the fixed-length pair of GEFF node ids (source
+	 * first), bound as a {@code long[]} array.
+	 */
+
+	public static class EdgeBuilder
+	{
+
+		private final TIntObjectMap< Spot > spotIdMap;
+
+		private final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph;
+
+		/** The edges created by this builder, in creation order. */
+		final List< DefaultWeightedEdge > edgeList = new ArrayList<>();
+
+		EdgeBuilder( final TIntObjectMap< Spot > spotIdMap, final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph )
+		{
+			this.spotIdMap = spotIdMap;
+			this.graph = graph;
+		}
+
+		List< DefaultWeightedEdge > edgeList()
+		{
+			return edgeList;
+		}
+
+		@EdgeConstructor
+		public void addEdge( @FromId final long[] ids )
+		{
+			final Spot source = spotIdMap.get( ( int ) ids[ 0 ] );
+			final Spot target = spotIdMap.get( ( int ) ids[ 1 ] );
+			if ( source == null || target == null )
+				throw new IllegalStateException( "Edge refers to unknown GEFF node ids: [" + ids[ 0 ] + ", " + ids[ 1 ] + "]." );
+			graph.addVertex( source );
+			graph.addVertex( target );
+			edgeList.add( graph.addEdge( source, target ) );
+		}
 	}
 }
