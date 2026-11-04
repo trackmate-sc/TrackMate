@@ -10,8 +10,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.geff.TmGeffReader;
-import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 
 /**
  * Round-trip demo for {@link TmGeffWriter} and {@link TmGeffReader}: load a

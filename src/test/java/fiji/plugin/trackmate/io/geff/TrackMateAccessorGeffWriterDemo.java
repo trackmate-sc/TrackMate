@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.mastodon.geff.imglib2.GeffException;
 
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 
 /**
  * Serializes the {@link fiji.plugin.trackmate.SpotCollection} of a TrackMate
