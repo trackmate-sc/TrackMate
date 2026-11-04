@@ -261,14 +261,17 @@ public class TmGeffReader2
 		int spaceDim = 0;
 		for ( final var axis : metadata.getGeffAxesList() )
 		{
-			if ( spaceUnits == null )
-				spaceUnits = axis.getUnit();
-
 			if ( axis.getType().equals( org.mastodon.geff.GeffAxis.TYPE_SPACE ) )
+			{
 				spaceDim++;
-
-			if ( timeUnits == null && axis.getType().equals( org.mastodon.geff.GeffAxis.TYPE_TIME ) )
-				timeUnits = axis.getUnit();
+				if ( spaceUnits == null )
+					spaceUnits = axis.getUnit();
+			}
+			else if ( axis.getType().equals( org.mastodon.geff.GeffAxis.TYPE_TIME ) )
+			{
+				if ( timeUnits == null )
+					timeUnits = axis.getUnit();
+			}
 		}
 		model.setPhysicalUnits( spaceUnits, timeUnits );
 		final boolean is2D = spaceDim < 3;
