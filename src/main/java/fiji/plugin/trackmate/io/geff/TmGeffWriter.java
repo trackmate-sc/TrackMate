@@ -32,7 +32,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffEdge;
 import org.mastodon.geff.GeffMetadata;
-import org.mastodon.geff.GeffMetadata.DisplayHints;
+import org.mastodon.geff.GeffMetadata.GeffDisplayHints;
 import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.GeffNode;
 import org.mastodon.geff.GeffNode.Builder;
@@ -173,12 +173,12 @@ public class TmGeffWriter
 		metadata.setGeffAxes( axes );
 
 		// Display hints
-		DisplayHints displayHints = new DisplayHints()
-				.displayHorizontal( POSITION_X )
-				.displayVertical( POSITION_Y )
-				.displayTime( FRAME );
+		final GeffDisplayHints displayHints = new GeffDisplayHints();
+		displayHints.setDisplayHorizontal( POSITION_X );
+		displayHints.setDisplayVertical( POSITION_Y );
+		displayHints.setDisplayTime( FRAME );
 		if ( !is2D )
-			displayHints = displayHints.displayDepth( POSITION_Z );
+			displayHints.setDisplayDepth( POSITION_Z );
 		metadata.setDisplayHints( displayHints );
 
 		// Spot features
@@ -313,12 +313,12 @@ public class TmGeffWriter
 		trackMetadata.setGeffAxes( trackAxes );
 
 		// Display hints
-		DisplayHints trackDisplayHints = new DisplayHints()
-				.displayHorizontal( TrackLocationAnalyzer.X_LOCATION )
-				.displayVertical( TrackLocationAnalyzer.Y_LOCATION )
-				.displayTime( TRACK_START );
+		final GeffDisplayHints trackDisplayHints = new GeffDisplayHints();
+		trackDisplayHints.setDisplayHorizontal( TrackLocationAnalyzer.X_LOCATION );
+		trackDisplayHints.setDisplayVertical( TrackLocationAnalyzer.Y_LOCATION );
+		trackDisplayHints.setDisplayTime( TRACK_START );
 		if ( !is2D )
-			trackDisplayHints = trackDisplayHints.displayDepth( TrackLocationAnalyzer.Z_LOCATION );
+			trackDisplayHints.setDisplayDepth( TrackLocationAnalyzer.Z_LOCATION );
 		trackMetadata.setDisplayHints( trackDisplayHints );
 
 		// Track features
