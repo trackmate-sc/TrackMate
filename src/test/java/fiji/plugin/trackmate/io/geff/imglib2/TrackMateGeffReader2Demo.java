@@ -8,6 +8,7 @@ import org.mastodon.geff.imglib2.GeffException;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.geff.GeffTestBase;
 import fiji.plugin.trackmate.io.geff.GeffTestDeserializationTest;
@@ -18,7 +19,6 @@ import fiji.plugin.trackmate.io.geff.TmGeffWriter2;
 /**
  * Round-trip demo for {@link TmGeffWriter2} and {@link TmGeffReader2}: load a
  * model from XML, write it to a GEFF file, read it back, and print a summary.
- * At this stage only the spots are read back.
  */
 public class TrackMateGeffReader2Demo extends GeffTestBase
 {
@@ -49,6 +49,18 @@ public class TrackMateGeffReader2Demo extends GeffTestBase
 		final TmGeffReader2 reader = new TmGeffReader2( savePath );
 		final Model model = reader.getModel();
 		System.out.println( "Done. " + model.getSpots().getNSpots( false ) + " spots read back." );
+
+		// Tracks and edges.
+		final TrackModel tm = model.getTrackModel();
+		System.out.println( tm.nTracks( false ) + " tracks, " + tm.edgeSet().size() + " edges." );
+		for ( final Integer trackID : tm.trackIDs( false ) )
+		{
+			System.out.println( "Track " + trackID + " '" + tm.name( trackID ) + "'"
+					+ " visible=" + tm.isVisible( trackID )
+					+ " nSpots=" + tm.trackSpots( trackID ).size()
+					+ " nEdges=" + tm.trackEdges( trackID ).size()
+					+ " start=" + model.getFeatureModel().getTrackFeature( trackID, "TRACK_START" ) );
+		}
 
 		final Spot example = model.getSpots().iterable( true ).iterator().next();
 		System.out.println( "Example spot"

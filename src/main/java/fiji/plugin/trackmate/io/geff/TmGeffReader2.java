@@ -1,10 +1,15 @@
 package fiji.plugin.trackmate.io.geff;
 
 import static fiji.plugin.trackmate.Spot.FRAME;
+import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.EDGE_COST;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
+import static fiji.plugin.trackmate.features.track.TrackDurationAnalyzer.TRACK_START;
+import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.X_LOCATION;
+import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.Y_LOCATION;
+import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.MESH_F_PROP;
@@ -14,9 +19,13 @@ import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.NAME_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.POLYGON_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.RADIUS_PROP_NAME;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.TRACKMATE_SPOT_ID_PROP;
+import static fiji.plugin.trackmate.io.geff.TmGeffWriter2.TRACK_GEFF_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -55,6 +65,7 @@ import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
@@ -182,16 +193,37 @@ public class TmGeffReader2
 		final TObjectIntMap< Spot > spotTrackIDMap = new TObjectIntHashMap<>();
 		readSpots( model, is2D, spotIdMap, spotTrackIDMap );
 
-		// Edges: build the graph and the track membership maps. The graph is
-		// not wired into the model yet: TrackModel.from() needs the track
-		// visibility and names, which are read from the tracks sub-file (TODO:
-		// next step).
+		// Edges: build the graph and the track membership maps, which are
+		// derived from the spot lineage. The graph is not wired into the model
+		// yet: TrackModel.from() also needs the track visibility and names,
+		// which are read from the tracks sub-file afterwards.
 		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
 		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap<>();
 		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>();
 		readEdges( model, is2D, spotIdMap, spotTrackIDMap, graph, connectedVertexSet, connectedEdgeSet );
 
-		// TODO: Read tracks.
+		// Tracks sub-file: track visibility, names and feature values. It is
+		// absent when the model has no tracks.
+		final Map< Integer, Boolean > visibility = new HashMap<>();
+		final Map< Integer, String > savedTrackNames = new HashMap<>();
+		final boolean hasTracks = readTracks( model, visibility, savedTrackNames );
+
+		// Single-spot tracks: their spots are not referenced by any edge, so
+		// they are not in the connected vertex sets yet. Add them from the
+		// spot lineage (a set, so already-present spots are not added twice).
+		if ( hasTracks )
+		{
+			for ( final Spot spot : spotTrackIDMap.keySet() )
+			{
+				final int trackID = spotTrackIDMap.get( spot );
+				connectedVertexSet
+						.computeIfAbsent( Integer.valueOf( trackID ), k -> new HashSet<>() )
+						.add( spot );
+			}
+		}
+
+		// Wire the graph into the model.
+		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
 
 		// TODO: Read feature declarations.
 
@@ -333,7 +365,7 @@ public class TmGeffReader2
 					final GeffProperty< ? > prop = entry.getValue();
 					if ( prop.isVarlength() )
 						continue; // We do not know how to interpret it as a feature.
-					final java.util.function.DoubleSupplier value = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) );
+					final DoubleSupplier value = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) );
 					spot.putFeature( key, Double.valueOf( value.getAsDouble() ) );
 				}
 			}
@@ -440,7 +472,7 @@ public class TmGeffReader2
 					final GeffProperty< ? > prop = entry.getValue();
 					if ( prop.isVarlength() )
 						continue; // We do not know how to interpret it as a feature.
-					final java.util.function.DoubleSupplier value = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) );
+					final DoubleSupplier value = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) );
 					fm.putEdgeFeature( edge, key, Double.valueOf( value.getAsDouble() ) );
 				}
 
@@ -454,6 +486,169 @@ public class TmGeffReader2
 				connectedVertexSet.get( trackID ).add( target );
 				connectedEdgeSet.computeIfAbsent( trackID, k -> new HashSet<>() ).add( edge );
 			}
+		}
+	}
+
+	/**
+	 * Reads the tracks sub-GEFF file, if there is one, and fills the track
+	 * visibility and name maps, as well as the per-track feature values. The
+	 * sub-file is absent when the model has no tracks, in which case this
+	 * method returns immediately with empty maps.
+	 * <p>
+	 * The GEFF node ids of the sub-file are the TrackMate track ids. The
+	 * {@code VISIBILITY} and {@code name} properties are restored to the maps,
+	 * and the core {@code t}, {@code x}, {@code y}, {@code z} properties are
+	 * mapped back to the {@code TRACK_START}, {@code X_LOCATION},
+	 * {@code Y_LOCATION} and {@code Z_LOCATION} features. The {@code radius}
+	 * property is restored as twice the {@code TRACK_MAX_DISTANCE_TRAVELED}
+	 * feature, since it was repurposed as the sphere radius of the track node
+	 * on writing.
+	 * <p>
+	 * FIXME: The tracks sub-GEFF file is a TrackMate extension and must not be
+	 * required to read a GEFF file. When it is missing while the file has
+	 * edges, the tracks must be reconstructed from the graph instead of
+	 * leaving it in an incoherent state: group the edges into connected
+	 * components (e.g. with JGraphT {@code ConnectivityInspector}), assign
+	 * them fresh synthetic track ids, with default {@code true} visibility and
+	 * default {@code Track_<n>} names, and no per-track feature values.
+	 * Currently a foreign file with edges but without the sub-file is read
+	 * with all its edges orphaned (no track membership).
+	 *
+	 * @param model
+	 *            the model being built (to access its feature model).
+	 * @param visibility
+	 *            the map from track id to visibility, populated here. It must
+	 *            contain an entry for every track id, as
+	 *            {@link fiji.plugin.trackmate.TrackModel#from} expects it.
+	 * @param savedTrackNames
+	 *            the map from track id to track name, populated here.
+	 * @return whether the tracks sub-file exists and was read.
+	 * @throws IOException
+	 *             if an I/O error occurs.
+	 * @throws GeffException
+	 *             if the file is not a valid GEFF file.
+	 */
+	private boolean readTracks(
+			final Model model,
+			final Map< Integer, Boolean > visibility,
+			final Map< Integer, String > savedTrackNames ) throws IOException, GeffException
+	{
+		final Path trackGeffPath = Paths.get( geffPath, TRACK_GEFF_NAME );
+		if ( !Files.exists( trackGeffPath ) )
+			return false;
+
+		final FeatureModel fm = model.getFeatureModel();
+		try (final N5Reader n5 = new N5ZarrReader( trackGeffPath.toString() ))
+		{
+			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
+
+			// Same strictness as for the spots: we expect the properties we
+			// wrote to be present.
+			// TODO! Same relaxation needed as in readSpots: use the display
+			// hints to guess what is what.
+			for ( final String required : new String[] { VISIBILITY, NAME_PROP } )
+				if ( !props.properties().containsKey( required ) )
+					throw new GeffException( "Missing required node property: '" + required + "' in the tracks sub-file." );
+
+			// Build the track nodes with the annotation framework.
+			final TrackBuilder builder = new TrackBuilder( visibility, savedTrackNames );
+			try
+			{
+				final ElementCreator creator = ElementCreator.of( builder, props );
+				for ( int i = 0; i < props.numElements(); i++ )
+					creator.createElement( i );
+			}
+			catch ( final IllegalAccessException | NoSuchMethodException | GeffException e )
+			{
+				throw ( e instanceof GeffException )
+						? ( GeffException ) e
+						: new GeffException( e );
+			}
+
+			/*
+			 * Post-processing pass: put back the per-track feature values. The
+			 * core properties have GEFF-conventional names, and must be mapped
+			 * back to the TrackMate feature keys.
+			 */
+			final LongSupplier idSupplier = Suppliers.asLongSupplier( props.id() );
+			for ( int i = 0; i < props.numElements(); i++ )
+			{
+				props.elementIndex().set( i );
+				final int trackID = ( int ) idSupplier.getAsLong();
+
+				for ( final Map.Entry< String, GeffProperty< ? > > entry : props.properties().entrySet() )
+				{
+					final String key = entry.getKey();
+					if ( key.equals( VISIBILITY ) || key.equals( NAME_PROP ) )
+						continue;
+
+					final GeffProperty< ? > prop = entry.getValue();
+					if ( prop.isVarlength() )
+						continue; // We do not know how to interpret it as a feature.
+
+					if ( key.equals( RADIUS_PROP_NAME ) )
+					{
+						// The excursion radius was serialized as the sphere
+						// radius of the track node. Restore the TrackMate
+						// feature as twice it, and only when it is present.
+						final Maybe.MaybeDouble r = Suppliers.asMaybeDoubleSupplier( prop ).get();
+						if ( r.isPresent() )
+							fm.putTrackFeature( trackID, TRACK_MAX_DISTANCE_TRAVELED, Double.valueOf( 2. * r.get() ) );
+						continue;
+					}
+
+					// Map the GEFF-conventional core property names back to
+					// the TrackMate feature keys.
+					final String featureKey;
+					if ( key.equals( "t" ) )
+						featureKey = TRACK_START;
+					else if ( key.equals( "x" ) )
+						featureKey = X_LOCATION;
+					else if ( key.equals( "y" ) )
+						featureKey = Y_LOCATION;
+					else if ( key.equals( "z" ) )
+						featureKey = TrackLocationAnalyzer.Z_LOCATION;
+					else
+						featureKey = key;
+
+					final double val = Suppliers.asDoubleSupplier( prop.convert( DoubleType::new ) ).getAsDouble();
+					fm.putTrackFeature( trackID, featureKey, Double.valueOf( val ) );
+				}
+			}
+		}
+		return true;
+	}
+
+	/*
+	 * TRACK BUILDER.
+	 *
+	 * Same annotation framework as for the spots. We only bind the properties
+	 * needed to fill the visibility and name maps; the feature values are
+	 * restored in the post-processing pass of {@link #readTracks}.
+	 */
+	public static class TrackBuilder
+	{
+
+		private final Map< Integer, Boolean > visibility;
+
+		private final Map< Integer, String > savedTrackNames;
+
+		TrackBuilder( final Map< Integer, Boolean > visibility, final Map< Integer, String > savedTrackNames )
+		{
+			this.visibility = visibility;
+			this.savedTrackNames = savedTrackNames;
+		}
+
+		@NodeConstructor
+		public void addNode(
+				@FromId final long id,
+				@FromProperty( VISIBILITY ) final int visibilityFlag,
+				@FromProperty( NAME_PROP ) final Optional< String > name )
+		{
+			final int trackID = ( int ) id;
+			visibility.put( Integer.valueOf( trackID ), Boolean.valueOf( visibilityFlag > 0 ) );
+			if ( name.isPresent() )
+				savedTrackNames.put( Integer.valueOf( trackID ), name.get() );
 		}
 	}
 
