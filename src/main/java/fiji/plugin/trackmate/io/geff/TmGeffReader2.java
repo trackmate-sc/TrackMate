@@ -68,6 +68,7 @@ import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
@@ -225,9 +226,32 @@ public class TmGeffReader2
 		// Wire the graph into the model.
 		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
 
-		// TODO: Read feature declarations.
+		// Feature declarations, from the TrackMate extra metadata.
+		readFeatureDeclarations( model );
 
 		return model;
+	}
+
+	/**
+	 * Restores the feature declarations of the model from the TrackMate extra
+	 * metadata, using {@link FeatureModelIO#fromJsonTree}. If the extra
+	 * metadata is absent or does not contain the declarations, the feature
+	 * model is left without declarations (the feature values are restored
+	 * regardless).
+	 *
+	 * @param model
+	 *            the model being built.
+	 */
+	@SuppressWarnings( "unchecked" )
+	private void readFeatureDeclarations( final Model model )
+	{
+		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		if ( trackmateMD == null )
+			return;
+
+		final Object featureDeclarations = trackmateMD.get( "featureDeclarations" );
+		if ( featureDeclarations instanceof Map )
+			FeatureModelIO.fromJsonTree( ( Map< String, Object > ) featureDeclarations, model.getFeatureModel() );
 	}
 
 	private boolean readUnits( final Model model )

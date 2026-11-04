@@ -66,6 +66,12 @@ public class TrackMateGeffReader2Demo extends GeffTestBase
 		System.out.println( "Example spot"
 				+ " - class = " + example.getClass().getName() + "\n"
 				+ example.echo() );
+
+		// Feature declarations.
+		System.out.println( "Declared features: "
+				+ model.getFeatureModel().getSpotFeatures().size() + " spots, "
+				+ model.getFeatureModel().getEdgeFeatures().size() + " edges, "
+				+ model.getFeatureModel().getTrackFeatures().size() + " tracks." );
 		System.out.println( "Done." );
 	}
 }
