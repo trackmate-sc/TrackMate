@@ -49,6 +49,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
@@ -84,8 +85,8 @@ public class TmGeffWriter2
 	/**
 	 * Features not in the general props, because they are the core node
 	 * properties (written as {@code t}, {@code x}, {@code y}, {@code z} and the
-	 * {@code sphere} shape), or because they belong to the track
-	 * {@code track_node_props} metadata that we do not write yet
+	 * {@code sphere} shape), or because they are written as a dedicated node
+	 * property mapped to the GEFF {@code lineage} track node prop
 	 * ({@link TrackIndexAnalyzer#TRACK_ID}).
 	 */
 	private static final Set< String > SKIP_PROPS = Set.of( FRAME, POSITION_X, POSITION_Y, POSITION_Z, RADIUS, TRACK_ID );
@@ -132,6 +133,8 @@ public class TmGeffWriter2
 		final SpotCollection spots = model.getSpots();
 		final FeatureModel fm = model.getFeatureModel();
 		final boolean is2D = DetectionUtils.is2D( model );
+		final TrackModel trackModel = model.getTrackModel();
+		final boolean hasTracks = !trackModel.trackIDs( false ).isEmpty();
 
 		/*
 		 * Collect spots in a stable order, and build the map Spot -> GEFF id.
@@ -180,6 +183,16 @@ public class TmGeffWriter2
 		writer.add( TRACKMATE_SPOT_ID_PROP, Spot::ID );
 		writer.add( NAME_PROP, TmGeffWriter2::name );
 
+		// Track ID, mapped to the GEFF 'lineage' track node prop in the
+		// metadata. Possibly missing, for spots that are not part of a track.
+		// Only registered when the model has tracks; otherwise the property
+		// would consist of only missing values.
+		if ( hasTracks )
+		{
+			final ToMaybeIntFunction< Spot > trackIdAccessor = spot -> trackId( spot, trackModel );
+			writer.add( TRACK_ID, trackIdAccessor );
+		}
+
 		// Other spot features, possibly missing per spot. These accessors are
 		// lambdas capturing the feature key (method references are not
 		// possible for a dynamic key), and must be explicitly typed, as raw
@@ -221,7 +234,7 @@ public class TmGeffWriter2
 		 * Metadata: only property datasets are written by the
 		 * GeffPropertyWriter; we have to build the GEFF metadata ourselves.
 		 */
-		buildMetadata( model, is2D, featureKeys, hasRoi, hasMesh );
+		buildMetadata( model, is2D, featureKeys, hasTracks, hasRoi, hasMesh );
 	}
 
 	public void appendSettings( final Settings settings )
@@ -293,6 +306,7 @@ public class TmGeffWriter2
 			final Model model,
 			final boolean is2D,
 			final Set< String > featureKeys,
+			final boolean hasTracks,
 			final boolean hasRoi,
 			final boolean hasMesh )
 	{
@@ -336,6 +350,15 @@ public class TmGeffWriter2
 		nodePropsMetadata.put( "radius", new PropMetadata( "radius", "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( RADIUS ), "The radius of the spot" ) );
 		nodePropsMetadata.put( TRACKMATE_SPOT_ID_PROP, new PropMetadata( TRACKMATE_SPOT_ID_PROP, "uint32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" ) );
 		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
+
+		// Track ID, mapped to the GEFF 'lineage' track node prop. Only when
+		// the model has tracks (the property would consist of only missing
+		// values otherwise).
+		if ( hasTracks )
+		{
+			nodePropsMetadata.put( TRACK_ID, new PropMetadata( TRACK_ID, "uint32", false, null, "Track ID", "The TrackMate track ID of the spot" ) );
+			metadata.setTrackNodeProps( Map.of( "lineage", TRACK_ID ) );
+		}
 
 		for ( final String feature : featureKeys )
 		{
@@ -402,6 +425,16 @@ public class TmGeffWriter2
 	private static Maybe.MaybeString name( final Spot spot )
 	{
 		return spot.hasName() ? new Maybe.MaybeString( spot.getName() ) : new Maybe.MaybeString();
+	}
+
+	/**
+	 * Returns the track ID of the specified spot, or an empty {@link Maybe}
+	 * if the spot is not part of a track.
+	 */
+	private static Maybe.MaybeInt trackId( final Spot spot, final TrackModel trackModel )
+	{
+		final Integer trackID = trackModel.trackIDOf( spot );
+		return ( trackID == null ) ? new Maybe.MaybeInt() : new Maybe.MaybeInt( trackID.intValue() );
 	}
 
 	private static Maybe.MaybeInt featureAsInt( final Spot spot, final String feature )
