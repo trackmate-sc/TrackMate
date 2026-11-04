@@ -32,8 +32,9 @@ import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
+import org.janelia.saalfeldlab.n5.Compression;
 import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.saalfeldlab.n5.RawCompression;
+import org.janelia.saalfeldlab.n5.blosc.BloscCompression;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.mastodon.geff.GeffAxis;
@@ -133,6 +134,9 @@ public class TmGeffWriter2
 
 	/** The chunk size to use when writing the GEFF file. */
 	private int chunkSize = 8 * 1024; // 8 kiB;
+
+	/** The compression to use for writing the Zarr. */
+	private Compression compression = new BloscCompression();
 
 	/**
 	 * Creates a new writer that will write a GEFF file to the specified path (a
@@ -555,9 +559,9 @@ public class TmGeffWriter2
 		try (final N5Writer n5 = new N5ZarrWriter( geffPath ))
 		{
 			if ( spotWriter != null )
-				spotWriter.write( n5, new RawCompression(), chunkSize );
+				spotWriter.write( n5, compression, chunkSize );
 			if ( edgeWriter != null )
-				edgeWriter.write( n5, new RawCompression(), chunkSize );
+				edgeWriter.write( n5, compression, chunkSize );
 		}
 
 		// Metadata.
@@ -569,7 +573,7 @@ public class TmGeffWriter2
 			final String trackGeffPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
 			try (final N5Writer trackN5 = new N5ZarrWriter( trackGeffPath ))
 			{
-				trackWriter.write( trackN5, new RawCompression(), chunkSize );
+				trackWriter.write( trackN5, compression, chunkSize );
 			}
 			GeffMetadata.writeToZarr( trackMetadata, trackGeffPath );
 		}
@@ -583,6 +587,22 @@ public class TmGeffWriter2
 	public void setChunkSize( final int chunkSize )
 	{
 		this.chunkSize = chunkSize;
+	}
+
+	/**
+	 * Sets the compression to use to write the GEFF file.
+	 *
+	 * @param compression
+	 *            the compression to use.
+	 */
+	public void setCompression( final Compression compression )
+	{
+		this.compression = compression;
+	}
+
+	public Compression getCompression()
+	{
+		return compression;
 	}
 
 	private void buildMetadata(
