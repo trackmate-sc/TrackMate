@@ -56,6 +56,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
 import gnu.trove.map.TObjectIntMap;
@@ -235,6 +236,9 @@ public class TmGeffWriter2
 		 * GeffPropertyWriter; we have to build the GEFF metadata ourselves.
 		 */
 		buildMetadata( model, is2D, featureKeys, hasTracks, hasRoi, hasMesh );
+
+		// Feature declarations, as in TmGeffWriter.
+		trackmateInfo.put( "featureDeclarations", FeatureModelIO.toJsonTree( fm ) );
 	}
 
 	public void appendSettings( final Settings settings )
