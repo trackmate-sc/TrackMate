@@ -7,6 +7,7 @@ import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURC
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackDurationAnalyzer.TRACK_START;
+import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
 import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.X_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.Y_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
@@ -602,6 +603,13 @@ public class TmGeffReader2
 			{
 				props.elementIndex().set( i );
 				final int trackID = ( int ) idSupplier.getAsLong();
+
+				// TRACK_ID as a track feature.
+				fm.putTrackFeature( trackID, TRACK_ID, Double.valueOf( trackID ) );
+
+				// Put Z = 0 in 2D.
+				if ( !props.properties().containsKey( "z" ) )
+					fm.putTrackFeature( trackID, TrackLocationAnalyzer.Z_LOCATION, Double.valueOf( 0. ) );
 
 				for ( final Map.Entry< String, GeffProperty< ? > > entry : props.properties().entrySet() )
 				{
