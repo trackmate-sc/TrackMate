@@ -5,6 +5,9 @@ import static fiji.plugin.trackmate.Spot.POSITION_X;
 import static fiji.plugin.trackmate.Spot.POSITION_Y;
 import static fiji.plugin.trackmate.Spot.POSITION_Z;
 import static fiji.plugin.trackmate.Spot.RADIUS;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
+import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
@@ -27,12 +30,14 @@ import java.util.function.ToLongFunction;
 import org.janelia.saalfeldlab.n5.N5Writer;
 import org.janelia.saalfeldlab.n5.RawCompression;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.mastodon.geff.GeffAxis;
 import org.mastodon.geff.GeffMetadata;
 import org.mastodon.geff.GeffMetadata.GeffDisplayHints;
 import org.mastodon.geff.GeffMetadata.RelatedObjects;
 import org.mastodon.geff.PropMetadata;
 import org.mastodon.geff.imglib2.ElementType;
+import org.mastodon.geff.imglib2.FunctionTypes.ToLongArrayFunction;
 import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeDoubleFunction;
 import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeIntFunction;
 import org.mastodon.geff.imglib2.GeffPropertyWriter;
@@ -101,6 +106,12 @@ public class TmGeffWriter2
 	/** The spot writer configured by {@link #appendModel(Model)}. */
 	private GeffPropertyWriter< Spot > spotWriter;
 
+	/**
+	 * The edge writer configured by {@link #appendModel(Model)}, or
+	 * {@code null} if the model has no edges.
+	 */
+	private GeffPropertyWriter< DefaultWeightedEdge > edgeWriter;
+
 	/** The chunk size to use when writing the GEFF file. */
 	private int chunkSize = 8 * 1024; // 8 kiB;
 
@@ -153,12 +164,12 @@ public class TmGeffWriter2
 		 */
 		boolean hasRoi = false;
 		boolean hasMesh = false;
-		final Set< String > featureKeys = new LinkedHashSet<>();
+		final Set< String > spotFeatureKeys = new LinkedHashSet<>();
 		for ( final Spot spot : spotList )
 		{
 			hasRoi |= spot instanceof SpotRoi;
 			hasMesh |= spot instanceof SpotMesh;
-			featureKeys.addAll( spot.getFeatures().keySet() );
+			spotFeatureKeys.addAll( spot.getFeatures().keySet() );
 		}
 
 		// Initialize the property writer for the spots.
@@ -198,7 +209,7 @@ public class TmGeffWriter2
 		// lambdas capturing the feature key (method references are not
 		// possible for a dynamic key), and must be explicitly typed, as raw
 		// lambdas are ambiguous against the many add() overloads.
-		for ( final String feature : featureKeys )
+		for ( final String feature : spotFeatureKeys )
 		{
 			if ( SKIP_PROPS.contains( feature ) )
 				continue;
@@ -232,10 +243,78 @@ public class TmGeffWriter2
 		this.spotWriter = writer;
 
 		/*
+		 * Edges. We write the edges of all tracks as one flat set, regardless
+		 * of track membership: track membership is conveyed by the TRACK_ID
+		 * lineage node property written above. If the model has no edges, we do
+		 * not write the edges part at all.
+		 */
+		final Set< String > edgeFeatureKeys;
+		if ( trackModel.edgeSet().isEmpty() )
+		{
+			this.edgeWriter = null;
+			edgeFeatureKeys = Set.of();
+		}
+		else
+		{
+			final List< DefaultWeightedEdge > edgeList = new ArrayList<>( trackModel.edgeSet() );
+
+			/*
+			 * Determine the edge features that have an actual value in at least
+			 * one edge. We skip the spot source and target IDs, which are
+			 * structural (they are the edge ids themselves), and the edge Z
+			 * location in 2D.
+			 */
+			edgeFeatureKeys = new LinkedHashSet<>();
+			for ( final DefaultWeightedEdge edge : edgeList )
+				for ( final String feature : fm.getEdgeFeatures() )
+					if ( fm.getEdgeFeature( edge, feature ) != null )
+						edgeFeatureKeys.add( feature );
+			edgeFeatureKeys.remove( SPOT_SOURCE_ID );
+			edgeFeatureKeys.remove( SPOT_TARGET_ID );
+			if ( is2D )
+				edgeFeatureKeys.remove( Z_LOCATION );
+
+			final GeffPropertyWriter< DefaultWeightedEdge > edgeWriter = new GeffPropertyWriter<>( edgeList, ElementType.EDGE );
+
+			/*
+			 * Edge ids: the pair of node ids, source first. The source is
+			 * always the spot that is earlier in time, as in TmXmlWriter.
+			 */
+			final ToLongArrayFunction< DefaultWeightedEdge > edgeIdAccessor = edge -> {
+				final Spot source = trackModel.getEdgeSource( edge );
+				final Spot target = trackModel.getEdgeTarget( edge );
+				final boolean swap = source.getFeature( FRAME ).doubleValue() > target.getFeature( FRAME ).doubleValue();
+				return new long[] {
+						spotToId.get( swap ? target : source ),
+						spotToId.get( swap ? source : target ) };
+			};
+			edgeWriter.id( edgeIdAccessor, 2, "<u8" );
+
+			// Edge features, possibly missing per edge. Same lambda pattern
+			// as for the spot features.
+			for ( final String feature : edgeFeatureKeys )
+			{
+				final boolean isInt = fm.getEdgeFeatureIsInt().getOrDefault( feature, Boolean.FALSE ).booleanValue();
+				if ( isInt )
+				{
+					final ToMaybeIntFunction< DefaultWeightedEdge > accessor = edge -> edgeFeatureAsInt( edge, feature, fm );
+					edgeWriter.add( feature, accessor );
+				}
+				else
+				{
+					final ToMaybeDoubleFunction< DefaultWeightedEdge > accessor = edge -> edgeFeatureAsDouble( edge, feature, fm );
+					edgeWriter.add( feature, accessor );
+				}
+			}
+
+			this.edgeWriter = edgeWriter;
+		}
+
+		/*
 		 * Metadata: only property datasets are written by the
 		 * GeffPropertyWriter; we have to build the GEFF metadata ourselves.
 		 */
-		buildMetadata( model, is2D, featureKeys, hasTracks, hasRoi, hasMesh );
+		buildMetadata( model, is2D, spotFeatureKeys, edgeFeatureKeys, hasRoi, hasMesh, hasTracks );
 
 		// Feature declarations, as in TmGeffWriter.
 		trackmateInfo.put( "featureDeclarations", FeatureModelIO.toJsonTree( fm ) );
@@ -283,13 +362,13 @@ public class TmGeffWriter2
 	 */
 	public void write() throws IOException
 	{
-		if ( spotWriter != null )
+		// TODO: log?
+		try (final N5Writer n5 = new N5ZarrWriter( geffPath ))
 		{
-			// TODO: log?
-			try (final N5Writer n5 = new N5ZarrWriter( geffPath ))
-			{
+			if ( spotWriter != null )
 				spotWriter.write( n5, new RawCompression(), chunkSize );
-			}
+			if ( edgeWriter != null )
+				edgeWriter.write( n5, new RawCompression(), chunkSize );
 		}
 
 		// Metadata.
@@ -309,10 +388,11 @@ public class TmGeffWriter2
 	private void buildMetadata(
 			final Model model,
 			final boolean is2D,
-			final Set< String > featureKeys,
-			final boolean hasTracks,
+			final Set< String > spotFeatureKeys,
+			final Set< String > edgeFeatureKeys,
 			final boolean hasRoi,
-			final boolean hasMesh )
+			final boolean hasMesh,
+			final boolean hasTracks )
 	{
 		final FeatureModel fm = model.getFeatureModel();
 		final String spaceUnits = model.getSpaceUnits();
@@ -364,7 +444,7 @@ public class TmGeffWriter2
 			metadata.setTrackNodeProps( Map.of( "lineage", TRACK_ID ) );
 		}
 
-		for ( final String feature : featureKeys )
+		for ( final String feature : spotFeatureKeys )
 		{
 			if ( SKIP_PROPS.contains( feature ) )
 				continue;
@@ -386,6 +466,18 @@ public class TmGeffWriter2
 		}
 
 		metadata.setNodePropsMetadata( nodePropsMetadata );
+
+		// Edge properties metadata.
+		final Map< String, PropMetadata > edgePropsMetadata = new LinkedHashMap<>();
+		for ( final String feature : edgeFeatureKeys )
+		{
+			final String dType = fm.getEdgeFeatureIsInt().getOrDefault( feature, Boolean.FALSE ).booleanValue() ? "uint32" : "float64";
+			final Dimension dimension = fm.getEdgeFeatureDimensions().get( feature );
+			final String unit = ( dimension == null ) ? null : dimension.units( spaceUnits, timeUnits );
+			final String name = fm.getEdgeFeatureNames().get( feature );
+			edgePropsMetadata.put( feature, new PropMetadata( feature, dType, false, unit, name, null ) );
+		}
+		metadata.setEdgePropsMetadata( edgePropsMetadata );
 
 		// Shape declarations: declare which node property holds the shapes,
 		// as mandated by the GEFF specification.
@@ -432,8 +524,8 @@ public class TmGeffWriter2
 	}
 
 	/**
-	 * Returns the track ID of the specified spot, or an empty {@link Maybe}
-	 * if the spot is not part of a track.
+	 * Returns the track ID of the specified spot, or an empty {@link Maybe} if
+	 * the spot is not part of a track.
 	 */
 	private static Maybe.MaybeInt trackId( final Spot spot, final TrackModel trackModel )
 	{
@@ -450,6 +542,18 @@ public class TmGeffWriter2
 	private static Maybe.MaybeDouble featureAsDouble( final Spot spot, final String feature )
 	{
 		final Double v = spot.getFeature( feature );
+		return ( v == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( v.doubleValue() );
+	}
+
+	private static Maybe.MaybeInt edgeFeatureAsInt( final DefaultWeightedEdge edge, final String feature, final FeatureModel fm )
+	{
+		final Double v = fm.getEdgeFeature( edge, feature );
+		return ( v == null ) ? new Maybe.MaybeInt() : new Maybe.MaybeInt( v.intValue() );
+	}
+
+	private static Maybe.MaybeDouble edgeFeatureAsDouble( final DefaultWeightedEdge edge, final String feature, final FeatureModel fm )
+	{
+		final Double v = fm.getEdgeFeature( edge, feature );
 		return ( v == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( v.doubleValue() );
 	}
 
