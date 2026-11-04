@@ -8,10 +8,13 @@ import static fiji.plugin.trackmate.Spot.RADIUS;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_SOURCE_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer.SPOT_TARGET_ID;
 import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LOCATION;
+import static fiji.plugin.trackmate.features.track.TrackDurationAnalyzer.TRACK_START;
 import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
+import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.SpotCollection.VISIBILITY;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -25,6 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import org.janelia.saalfeldlab.n5.N5Writer;
@@ -40,6 +45,7 @@ import org.mastodon.geff.imglib2.ElementType;
 import org.mastodon.geff.imglib2.FunctionTypes.ToLongArrayFunction;
 import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeDoubleFunction;
 import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeIntFunction;
+import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeStringFunction;
 import org.mastodon.geff.imglib2.GeffPropertyWriter;
 import org.mastodon.geff.imglib2.Maybe;
 
@@ -58,6 +64,7 @@ import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.features.FeatureUtils;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
@@ -88,6 +95,9 @@ public class TmGeffWriter2
 
 	static final String MESH_F_PROP = "mesh_triangles";
 
+	/** Name of the sub-GEFF file that holds the track nodes (geffception). */
+	static final String TRACK_GEFF_NAME = "tracks.geff";
+
 	/**
 	 * Features not in the general props, because they are the core node
 	 * properties (written as {@code t}, {@code x}, {@code y}, {@code z} and the
@@ -112,6 +122,15 @@ public class TmGeffWriter2
 	 */
 	private GeffPropertyWriter< DefaultWeightedEdge > edgeWriter;
 
+	/**
+	 * The writer of the tracks sub-GEFF file configured by {@link
+	 * #appendModel(Model)}, or {@code null} if the model has no tracks.
+	 */
+	private GeffPropertyWriter< Integer > trackWriter;
+
+	/** The metadata of the tracks sub-GEFF file, or {@code null}. */
+	private GeffMetadata trackMetadata;
+
 	/** The chunk size to use when writing the GEFF file. */
 	private int chunkSize = 8 * 1024; // 8 kiB;
 
@@ -133,8 +152,6 @@ public class TmGeffWriter2
 
 	/**
 	 * The actual writing to disk is done by {@link #write()}.
-	 *
-	 * TODO: Also write the tracks!
 	 *
 	 * @param model
 	 *            the model whose {@link SpotCollection} to serialize.
@@ -311,6 +328,104 @@ public class TmGeffWriter2
 		}
 
 		/*
+		 * Tracks. We write the track features to a sub-GEFF file (geffception),
+		 * with one node per track: its start time, location, excursion radius,
+		 * visibility and name, plus all the other track features. The node ids
+		 * are the TrackMate track ids. If the model has no tracks, we do not
+		 * write the sub-file at all.
+		 */
+		if ( !hasTracks )
+		{
+			this.trackWriter = null;
+			this.trackMetadata = null;
+		}
+		else
+		{
+			final List< Integer > trackIDList = new ArrayList<>( trackModel.trackIDs( false ) );
+
+			/*
+			 * Determine the track features that have an actual value in at
+			 * least one track. We skip the ones that are written as core
+			 * properties (t, x, y, z), and the one that is repurposed as the
+			 * excursion radius of the track node.
+			 */
+			final Set< String > trackFeatureKeys = new LinkedHashSet<>();
+			for ( final Integer trackID : trackIDList )
+				for ( final String feature : fm.getTrackFeatures() )
+					if ( fm.getTrackFeature( trackID, feature ) != null )
+						trackFeatureKeys.add( feature );
+			trackFeatureKeys.remove( TRACK_ID );
+			trackFeatureKeys.remove( TRACK_START );
+			trackFeatureKeys.remove( TrackLocationAnalyzer.X_LOCATION );
+			trackFeatureKeys.remove( TrackLocationAnalyzer.Y_LOCATION );
+			trackFeatureKeys.remove( TrackLocationAnalyzer.Z_LOCATION );
+			// Repurposed as the radius of the track node, so that we can
+			// declare the sphere shape.
+			trackFeatureKeys.remove( TRACK_MAX_DISTANCE_TRAVELED );
+			final boolean hasTrackRadius = fm.getTrackFeatures().contains( TRACK_MAX_DISTANCE_TRAVELED );
+
+			final GeffPropertyWriter< Integer > trackWriter = new GeffPropertyWriter<>( trackIDList, ElementType.NODE );
+
+			// Ids: the track ids themselves.
+			final ToLongFunction< Integer > trackIdAccessor = Integer::longValue;
+			trackWriter.id( trackIdAccessor, "<u8" );
+
+			// Core properties: time (track start) and position (track
+			// location), with the GEFF conventional names.
+			final ToIntFunction< Integer > tAccessor = id -> ( int ) fm.getTrackFeature( id, TRACK_START ).doubleValue();
+			trackWriter.add( "t", tAccessor );
+			final ToDoubleFunction< Integer > xAccessor = id -> fm.getTrackFeature( id, TrackLocationAnalyzer.X_LOCATION ).doubleValue();
+			trackWriter.add( "x", xAccessor );
+			final ToDoubleFunction< Integer > yAccessor = id -> fm.getTrackFeature( id, TrackLocationAnalyzer.Y_LOCATION ).doubleValue();
+			trackWriter.add( "y", yAccessor );
+			if ( !is2D )
+			{
+				final ToDoubleFunction< Integer > zAccessor = id -> fm.getTrackFeature( id, TrackLocationAnalyzer.Z_LOCATION ).doubleValue();
+				trackWriter.add( "z", zAccessor );
+			}
+
+			// Excursion radius: half of the max distance traveled, as in
+			// TmGeffWriter. Possibly missing.
+			if ( hasTrackRadius )
+			{
+				final ToMaybeDoubleFunction< Integer > radiusAccessor = id -> {
+					final Double r = fm.getTrackFeature( id, TRACK_MAX_DISTANCE_TRAVELED );
+					return ( r == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( r.doubleValue() / 2 );
+				};
+				trackWriter.add( "radius", radiusAccessor );
+			}
+
+			// Visibility and name.
+			final ToIntFunction< Integer > visibilityAccessor = id -> trackModel.isVisible( id ) ? 1 : 0;
+			trackWriter.add( VISIBILITY, visibilityAccessor );
+			final ToMaybeStringFunction< Integer > trackNameAccessor = id -> {
+				final String n = trackModel.name( id );
+				return ( n == null ) ? new Maybe.MaybeString() : new Maybe.MaybeString( n );
+			};
+			trackWriter.add( NAME_PROP, trackNameAccessor );
+
+			// Other track features, possibly missing per track. Same lambda
+			// pattern as for the spot and edge features.
+			for ( final String feature : trackFeatureKeys )
+			{
+				final boolean isInt = fm.getTrackFeatureIsInt().getOrDefault( feature, Boolean.FALSE ).booleanValue();
+				if ( isInt )
+				{
+					final ToMaybeIntFunction< Integer > accessor = id -> trackFeatureAsInt( id, feature, fm );
+					trackWriter.add( feature, accessor );
+				}
+				else
+				{
+					final ToMaybeDoubleFunction< Integer > accessor = id -> trackFeatureAsDouble( id, feature, fm );
+					trackWriter.add( feature, accessor );
+				}
+			}
+
+			this.trackWriter = trackWriter;
+			this.trackMetadata = buildTrackMetadata( model, is2D, trackFeatureKeys, hasTrackRadius );
+		}
+
+		/*
 		 * Metadata: only property datasets are written by the
 		 * GeffPropertyWriter; we have to build the GEFF metadata ourselves.
 		 */
@@ -373,6 +488,17 @@ public class TmGeffWriter2
 
 		// Metadata.
 		GeffMetadata.writeToZarr( metadata, geffPath );
+
+		// Track sub-GEFF file (geffception), one node per track.
+		if ( trackWriter != null )
+		{
+			final String trackGeffPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
+			try (final N5Writer trackN5 = new N5ZarrWriter( trackGeffPath ))
+			{
+				trackWriter.write( trackN5, new RawCompression(), chunkSize );
+			}
+			GeffMetadata.writeToZarr( trackMetadata, trackGeffPath );
+		}
 	}
 
 	public int getChunkSize()
@@ -486,6 +612,88 @@ public class TmGeffWriter2
 			metadata.setMesh( new GeffMetadata.MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
 	}
 
+	/**
+	 * Builds the metadata of the tracks sub-GEFF file. It has one node per
+	 * track, with the core properties {@code t} (the track start), {@code x},
+	 * {@code y}, and possibly {@code z} (the track location), the {@code
+	 * radius} property derived from the excursion of the track, the
+	 * {@code name} property, the {@code VISIBILITY} property, and the other
+	 * track features. There are no edges in this file.
+	 *
+	 * @param model
+	 *            the model the properties come from.
+	 * @param is2D
+	 *            whether the model is 2D (no {@code z} axis).
+	 * @param trackFeatureKeys
+	 *            the track features present somewhere in the model, that are
+	 *            not written as core properties.
+	 * @param hasTrackRadius
+	 *            whether the {@code TRACK_MAX_DISTANCE_TRAVELED} feature is
+	 *            present (the {@code radius} property is written).
+	 * @return the {@link GeffMetadata} to write to the tracks sub-GEFF file.
+	 */
+	private GeffMetadata buildTrackMetadata(
+			final Model model,
+			final boolean is2D,
+			final Set< String > trackFeatureKeys,
+			final boolean hasTrackRadius )
+	{
+		final FeatureModel fm = model.getFeatureModel();
+		final String spaceUnits = model.getSpaceUnits();
+		final String timeUnits = model.getTimeUnits();
+
+		final GeffMetadata trackMetadata = new GeffMetadata( GEFF_VERSION, true );
+
+		// Axes. Same as for the spots, but over the track features.
+		final List< GeffAxis > axes = new ArrayList<>();
+		final double[] minMaxT = FeatureUtils.autoMinMax( model, TrackMateObject.TRACKS, TRACK_START, false );
+		axes.add( GeffAxis.createTimeAxis( "t", timeUnits, minMaxT[ 0 ], minMaxT[ 1 ] ) );
+		final String[] spaceFeatures = is2D
+				? new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION }
+				: new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION, TrackLocationAnalyzer.Z_LOCATION };
+		for ( int i = 0; i < spaceFeatures.length; i++ )
+		{
+			final double[] minMax = FeatureUtils.autoMinMax( model, TrackMateObject.TRACKS, spaceFeatures[ i ], false );
+			axes.add( GeffAxis.createSpaceAxis( "xyz".substring( i, i + 1 ), spaceUnits, minMax[ 0 ], minMax[ 1 ] ) );
+		}
+		trackMetadata.setGeffAxes( axes );
+
+		// Display hints.
+		final GeffDisplayHints displayHints = new GeffDisplayHints();
+		displayHints.setDisplayHorizontal( "x" );
+		displayHints.setDisplayVertical( "y" );
+		displayHints.setDisplayTime( "t" );
+		if ( !is2D )
+			displayHints.setDisplayDepth( "z" );
+		trackMetadata.setDisplayHints( displayHints );
+
+		// Node properties metadata.
+		final Map< String, Boolean > isInt = fm.getTrackFeatureIsInt();
+		final Map< String, PropMetadata > nodePropsMetadata = new LinkedHashMap<>();
+		nodePropsMetadata.put( "t", new PropMetadata( "t", "uint32", false, timeUnits, fm.getTrackFeatureNames().get( TRACK_START ), null ) );
+		nodePropsMetadata.put( "x", new PropMetadata( "x", "float64", false, spaceUnits, fm.getTrackFeatureNames().get( TrackLocationAnalyzer.X_LOCATION ), null ) );
+		nodePropsMetadata.put( "y", new PropMetadata( "y", "float64", false, spaceUnits, fm.getTrackFeatureNames().get( TrackLocationAnalyzer.Y_LOCATION ), null ) );
+		if ( !is2D )
+			nodePropsMetadata.put( "z", new PropMetadata( "z", "float64", false, spaceUnits, fm.getTrackFeatureNames().get( TrackLocationAnalyzer.Z_LOCATION ), null ) );
+		if ( hasTrackRadius )
+			nodePropsMetadata.put( "radius", new PropMetadata( "radius", "float64", false, spaceUnits, "Radius", "The radius of excursion of the track" ) );
+		nodePropsMetadata.put( VISIBILITY, new PropMetadata( VISIBILITY, "uint32", false, null, Spot.FEATURE_NAMES.get( VISIBILITY ), "Whether the track is visible in the display" ) );
+		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Track name", "The name of the track" ) );
+
+		for ( final String feature : trackFeatureKeys )
+		{
+			final String dType = isInt.getOrDefault( feature, Boolean.FALSE ).booleanValue() ? "uint32" : "float64";
+			final Dimension dimension = fm.getTrackFeatureDimensions().get( feature );
+			final String unit = ( dimension == null ) ? null : dimension.units( spaceUnits, timeUnits );
+			final String name = fm.getTrackFeatureNames().get( feature );
+			nodePropsMetadata.put( feature, new PropMetadata( feature, dType, false, unit, name, null ) );
+		}
+
+		trackMetadata.setNodePropsMetadata( nodePropsMetadata );
+
+		return trackMetadata;
+	}
+
 	/*
 	 * Static accessors, used as method references by the writer. The ones that
 	 * depend on the concrete spot class dispatch with instanceof. TODO: Move to
@@ -554,6 +762,18 @@ public class TmGeffWriter2
 	private static Maybe.MaybeDouble edgeFeatureAsDouble( final DefaultWeightedEdge edge, final String feature, final FeatureModel fm )
 	{
 		final Double v = fm.getEdgeFeature( edge, feature );
+		return ( v == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( v.doubleValue() );
+	}
+
+	private static Maybe.MaybeInt trackFeatureAsInt( final Integer trackID, final String feature, final FeatureModel fm )
+	{
+		final Double v = fm.getTrackFeature( trackID, feature );
+		return ( v == null ) ? new Maybe.MaybeInt() : new Maybe.MaybeInt( v.intValue() );
+	}
+
+	private static Maybe.MaybeDouble trackFeatureAsDouble( final Integer trackID, final String feature, final FeatureModel fm )
+	{
+		final Double v = fm.getTrackFeature( trackID, feature );
 		return ( v == null ) ? new Maybe.MaybeDouble() : new Maybe.MaybeDouble( v.doubleValue() );
 	}
 
