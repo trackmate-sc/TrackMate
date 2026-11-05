@@ -7,7 +7,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 
 import org.apache.commons.io.FileUtils;
-import org.mastodon.geff.imglib2.GeffException;
+import org.litt.geff.GeffException;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;

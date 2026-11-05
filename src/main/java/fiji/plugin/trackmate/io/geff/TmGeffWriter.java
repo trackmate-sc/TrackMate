@@ -37,18 +37,19 @@ import org.janelia.saalfeldlab.n5.N5Writer;
 import org.janelia.saalfeldlab.n5.blosc.BloscCompression;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.mastodon.geff.GeffAxis;
-import org.mastodon.geff.GeffMetadata;
-import org.mastodon.geff.GeffMetadata.GeffDisplayHints;
-import org.mastodon.geff.GeffMetadata.RelatedObjects;
-import org.mastodon.geff.PropMetadata;
-import org.mastodon.geff.imglib2.ElementType;
-import org.mastodon.geff.imglib2.FunctionTypes.ToLongArrayFunction;
-import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeDoubleFunction;
-import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeIntFunction;
-import org.mastodon.geff.imglib2.FunctionTypes.ToMaybeStringFunction;
-import org.mastodon.geff.imglib2.GeffPropertyWriter;
-import org.mastodon.geff.imglib2.Maybe;
+import org.litt.geff.GeffAxis;
+import org.litt.geff.GeffDisplayHints;
+import org.litt.geff.GeffMetadata;
+import org.litt.geff.MeshMetadata;
+import org.litt.geff.PropMetadata;
+import org.litt.geff.RelatedObjects;
+import org.litt.geff.io.GeffPropertyWriter;
+import org.litt.geff.props.ElementType;
+import org.litt.geff.props.FunctionTypes.ToLongArrayFunction;
+import org.litt.geff.props.FunctionTypes.ToMaybeDoubleFunction;
+import org.litt.geff.props.FunctionTypes.ToMaybeIntFunction;
+import org.litt.geff.props.FunctionTypes.ToMaybeStringFunction;
+import org.litt.geff.props.Maybe;
 
 import com.google.gson.JsonElement;
 
@@ -708,7 +709,7 @@ public class TmGeffWriter
 		// as mandated by the GEFF specification.
 		metadata.setSphere( RADIUS_PROP_NAME );
 		if ( hasMesh )
-			metadata.setMesh( new GeffMetadata.MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
+			metadata.setMesh( new MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
 	}
 
 	/**

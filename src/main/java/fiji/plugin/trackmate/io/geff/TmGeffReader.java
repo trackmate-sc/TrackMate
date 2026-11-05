@@ -43,20 +43,21 @@ import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-import org.mastodon.geff.GeffMetadata;
-import org.mastodon.geff.GeffMetadata.RelatedObjects;
-import org.mastodon.geff.imglib2.Construction.EdgeConstructor;
-import org.mastodon.geff.imglib2.Construction.FromId;
-import org.mastodon.geff.imglib2.Construction.FromProperty;
-import org.mastodon.geff.imglib2.Construction.NodeConstructor;
-import org.mastodon.geff.imglib2.ElementCreator;
-import org.mastodon.geff.imglib2.ElementType;
-import org.mastodon.geff.imglib2.GeffException;
-import org.mastodon.geff.imglib2.GeffProperties;
-import org.mastodon.geff.imglib2.GeffProperty;
-import org.mastodon.geff.imglib2.IoUtils;
-import org.mastodon.geff.imglib2.Maybe;
-import org.mastodon.geff.imglib2.Suppliers;
+import org.litt.geff.GeffAxis;
+import org.litt.geff.GeffException;
+import org.litt.geff.GeffMetadata;
+import org.litt.geff.RelatedObjects;
+import org.litt.geff.bind.Construction.EdgeConstructor;
+import org.litt.geff.bind.Construction.FromId;
+import org.litt.geff.bind.Construction.FromProperty;
+import org.litt.geff.bind.Construction.NodeConstructor;
+import org.litt.geff.bind.ElementCreator;
+import org.litt.geff.io.IoUtils;
+import org.litt.geff.props.ElementType;
+import org.litt.geff.props.GeffProperties;
+import org.litt.geff.props.GeffProperty;
+import org.litt.geff.props.Maybe;
+import org.litt.geff.props.Suppliers;
 
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
@@ -260,15 +261,15 @@ public class TmGeffReader
 		String spaceUnits = null;
 		String timeUnits = null;
 		int spaceDim = 0;
-		for ( final var axis : metadata.getGeffAxesList() )
+		for ( final GeffAxis axis : metadata.getGeffAxes() )
 		{
-			if ( axis.getType().equals( org.mastodon.geff.GeffAxis.TYPE_SPACE ) )
+			if ( axis.getType().equals( GeffAxis.TYPE_SPACE ) )
 			{
 				spaceDim++;
 				if ( spaceUnits == null )
 					spaceUnits = axis.getUnit();
 			}
-			else if ( axis.getType().equals( org.mastodon.geff.GeffAxis.TYPE_TIME ) )
+			else if ( axis.getType().equals( GeffAxis.TYPE_TIME ) )
 			{
 				if ( timeUnits == null )
 					timeUnits = axis.getUnit();
