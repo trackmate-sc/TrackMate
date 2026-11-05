@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.litt.geff.GeffAxis;
+import org.litt.geff.GeffDisplayHints;
 import org.litt.geff.GeffException;
 import org.litt.geff.GeffMetadata;
 import org.litt.geff.RelatedObjects;
@@ -52,8 +54,10 @@ import org.litt.geff.bind.Construction.FromId;
 import org.litt.geff.bind.Construction.FromProperty;
 import org.litt.geff.bind.Construction.NodeConstructor;
 import org.litt.geff.bind.ElementCreator;
+import org.litt.geff.io.GeffPropertyWriter;
 import org.litt.geff.io.IoUtils;
 import org.litt.geff.props.ElementType;
+import org.litt.geff.props.FunctionTypes;
 import org.litt.geff.props.GeffProperties;
 import org.litt.geff.props.GeffProperty;
 import org.litt.geff.props.Maybe;
@@ -64,6 +68,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.io.geff.heuristics.AxisIdentifierHeuristic;
+import fiji.plugin.trackmate.io.geff.heuristics.RadiusIdentifierHeuristic;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
@@ -104,8 +110,9 @@ public class TmGeffReader
 		if ( null == metadata )
 			metadata = GeffMetadata.readFromZarr( geffPath );
 
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > trackmateMD = trackmateMetadata();
+		if ( trackmateMD == null )
+			return null;
 		final String log = ( String ) trackmateMD.get( LOG_ELEMENT_KEY );
 		return log;
 	}
@@ -115,21 +122,37 @@ public class TmGeffReader
 		if ( null == metadata )
 			metadata = GeffMetadata.readFromZarr( geffPath );
 
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > trackmateMD = trackmateMetadata();
+		if ( trackmateMD == null )
+			return null;
 		final String guiState = ( String ) trackmateMD.get( GUI_STATE_ELEMENT_KEY );
 		return guiState;
 	}
 
-	@SuppressWarnings( "unchecked" )
 	public DisplaySettings getDisplaySettings()
 	{
 		if ( null == metadata )
 			metadata = GeffMetadata.readFromZarr( geffPath );
 
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > trackmateMD = trackmateMetadata();
+		if ( trackmateMD == null )
+			return DisplaySettingsIO.readUserDefault();
 		final Map< String, Object > displaySettingsJson = ( Map< String, Object > ) trackmateMD.get( "displaySettings" );
 		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
+	}
+
+	/**
+	 * Returns the TrackMate-specific extra metadata map of this file, or
+	 * {@code null} if the file does not have one — the case for foreign GEFF
+	 * files not written by TrackMate.
+	 */
+	@SuppressWarnings( "unchecked" )
+	private Map< String, Object > trackmateMetadata()
+	{
+		final Map< String, Object > extra = metadata.getExtra();
+		if ( null == extra )
+			return null;
+		return ( Map< String, Object > ) extra.get( "trackmate" );
 	}
 
 	public synchronized ImagePlus readImage()
@@ -162,10 +185,12 @@ public class TmGeffReader
 		if ( null == metadata )
 			metadata = GeffMetadata.readFromZarr( geffPath );
 
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > trackmateMD = trackmateMetadata();
+		final Settings settings = new Settings( imp );
+		if ( trackmateMD == null )
+			return settings;
 		final Map< String, Object > settingsJson = ( Map< String, Object > ) trackmateMD.get( "settings" );
 
-		final Settings settings = new Settings( imp );
 		SettingsIO.updateFromJsonTree( settingsJson, settings );
 		return settings;
 	}
@@ -247,7 +272,7 @@ public class TmGeffReader
 	@SuppressWarnings( "unchecked" )
 	private void readFeatureDeclarations( final Model model )
 	{
-		final Map< String, Object > trackmateMD = ( Map< String, Object > ) metadata.getExtra().get( "trackmate" );
+		final Map< String, Object > trackmateMD = trackmateMetadata();
 		if ( trackmateMD == null )
 			return;
 
@@ -293,6 +318,225 @@ public class TmGeffReader
 			POLYGON_PROP,
 			MESH_V_PROP, MESH_VN_PROP, MESH_F_PROP );
 
+	/**
+	 * The radius given to spots of foreign GEFF files that do not have any
+	 * radius-like property we can identify.
+	 */
+	private static final double DEFAULT_SPOT_RADIUS = 5.0;
+
+	/**
+	 * Map the node properties of the loaded file to the TrackMate-canonical
+	 * names the spot builders expect ( {@code "x"}, {@code "y"}, {@code "z"},
+	 * {@code "t"}, {@link #RADIUS_PROP_NAME}, {@link #TRACKMATE_SPOT_ID_PROP}
+	 * and {@link #NAME_PROP} ), so that the builders can remain written
+	 * against the canonical names.
+	 * <p>
+	 * For the spatial and time axes, we try, in this order:
+	 * <ol>
+	 * <li>the display hints of the metadata, when they are set;</li>
+	 * <li>a heuristic on the axis names declared in the metadata
+	 * ( {@link AxisIdentifierHeuristic} for the space axes; the axis of type
+	 * {@code time} for the time axis );</li>
+	 * <li>the GEFF-conventional literal names, accepted as-is.</li>
+	 * </ol>
+	 * For the radius, we use the {@code sphere} metadata key first, then
+	 * {@link RadiusIdentifierHeuristic}.
+	 * <p>
+	 * TrackMate-specific properties that are missing from foreign files are
+	 * synthesized as follows:
+	 * <ul>
+	 * <li>no time axis: all spots are in frame {@code 0};</li>
+	 * <li>no radius: the TrackMate default spot radius
+	 * ({@value #DEFAULT_SPOT_RADIUS});</li>
+	 * <li>no spot ID: the ID property is synthesized as absent, and the spots
+	 * get fresh IDs from {@link SpotBase#IDcounter};</li>
+	 * <li>no name: the name property is synthesized as absent, and the spots
+	 * keep the TrackMate default name ( {@code ID<id>} ).</li>
+	 * </ul>
+	 * On the other hand, {@code x} and {@code y} (and {@code z} for 3D models)
+	 * cannot be defaulted: if they cannot be identified, this is a hard error.
+	 *
+	 * @param props
+	 *            the properties loaded from the file, modified in place.
+	 * @param is2D
+	 *            whether the model is 2D, as determined from the metadata
+	 *            axes.
+	 * @throws GeffException
+	 *             if a spatial axis cannot be identified.
+	 */
+	private void mapCoreSpotProps( final GeffProperties props, final boolean is2D ) throws GeffException
+	{
+		final GeffDisplayHints hints = metadata.getDisplayHints();
+
+		// --- Time axis. ---
+		if ( !props.properties().containsKey( "t" ) )
+		{
+			String t = ( hints == null ) ? null : hints.getDisplayTime();
+			if ( t == null || !props.properties().containsKey( t ) )
+			{
+				// Fall back on the axis declared with the 'time' type.
+				t = null;
+				if ( metadata.getGeffAxes() != null )
+					for ( final GeffAxis axis : metadata.getGeffAxes() )
+						if ( "time".equals( axis.getType() ) && props.properties().containsKey( axis.getName() ) )
+						{
+							t = axis.getName();
+							break;
+						}
+			}
+			if ( t != null )
+				props.rename( t, "t" );
+			else
+				props.put( constantIntProperty( "t", 0, props.numElements() ) );
+		}
+
+		// --- Spatial axes. ---
+		// Candidate properties: those matching axes declared with the 'space'
+		// type in the metadata.
+		final List< String > spaceAxes = new ArrayList<>();
+		if ( metadata.getGeffAxes() != null )
+			for ( final GeffAxis axis : metadata.getGeffAxes() )
+				if ( "space".equals( axis.getType() ) && props.properties().containsKey( axis.getName() ) )
+					spaceAxes.add( axis.getName() );
+		if ( spaceAxes.size() > 3 )
+			spaceAxes.subList( 3, spaceAxes.size() ).clear(); // The heuristic cannot handle more than 3 axes.
+		final Map< Character, String > identified = ( spaceAxes.isEmpty() )
+				? Collections.emptyMap()
+				: AxisIdentifierHeuristic.identify( spaceAxes );
+
+		if ( hints != null )
+		{
+			mapSpatialAxis( props, 'x', hints.getDisplayHorizontal(), identified );
+			mapSpatialAxis( props, 'y', hints.getDisplayVertical(), identified );
+			if ( !is2D )
+				mapSpatialAxis( props, 'z', hints.getDisplayDepth(), identified );
+		}
+		else
+		{
+			mapSpatialAxis( props, 'x', null, identified );
+			mapSpatialAxis( props, 'y', null, identified );
+			if ( !is2D )
+				mapSpatialAxis( props, 'z', null, identified );
+		}
+
+		for ( final String required : new String[] { "x", "y" } )
+			if ( !props.properties().containsKey( required ) )
+				throw new GeffException( "Cannot determine which node property represents the '" + required
+						+ "' axis of the GEFF file." );
+		if ( !is2D && !props.properties().containsKey( "z" ) )
+			throw new GeffException( "Cannot determine which node property represents the 'z' axis of the 3D GEFF file." );
+
+		// --- Radius. ---
+		if ( !props.properties().containsKey( RADIUS_PROP_NAME ) )
+		{
+			final String sphere = metadata.getSphere();
+			if ( sphere != null && props.properties().containsKey( sphere ) )
+				props.rename( sphere, RADIUS_PROP_NAME );
+			else
+			{
+				final String identifiedRadius = RadiusIdentifierHeuristic.identify( props.properties().keySet() );
+				if ( identifiedRadius != null )
+					props.rename( identifiedRadius, RADIUS_PROP_NAME );
+				else
+					props.put( constantRadiusProperty( props.numElements() ) );
+			}
+		}
+
+		// --- TrackMate spot ID. ---
+		// Synthesized as absent: the spots will get fresh IDs from the
+		// SpotBase.IDcounter.
+		if ( !props.properties().containsKey( TRACKMATE_SPOT_ID_PROP ) )
+			props.put( missingIntProperty( TRACKMATE_SPOT_ID_PROP, props.numElements() ) );
+
+		// --- Name. ---
+		// Synthesized as absent: the spots will keep their default name.
+		if ( !props.properties().containsKey( NAME_PROP ) )
+			props.put( missingStringProperty( NAME_PROP, props.numElements() ) );
+	}
+
+	/**
+	 * Map one spatial axis to its canonical name ( {@code x}, {@code y} or
+	 * {@code z} ). The literal canonical name is accepted if present; then
+	 * the display hint; then the heuristic result. The property is renamed
+	 * in place, so nothing is done if the canonical name is already taken.
+	 */
+	private static void mapSpatialAxis(
+			final GeffProperties props,
+			final char axis,
+			final String hint,
+			final Map< Character, String > identified )
+	{
+		final String canonical = String.valueOf( axis );
+		if ( props.properties().containsKey( canonical ) )
+			return;
+		if ( hint != null && props.properties().containsKey( hint ) )
+		{
+			props.rename( hint, canonical );
+			return;
+		}
+		final String viaHeuristic = identified.get( Character.valueOf( axis ) );
+		if ( viaHeuristic != null && props.properties().containsKey( viaHeuristic ) )
+			props.rename( viaHeuristic, canonical );
+	}
+
+	/**
+	 * Synthesize an int property with a constant value for all elements.
+	 */
+	private static GeffProperty< ? > constantIntProperty( final String identifier, final int value, final long numElements )
+	{
+		final List< Object > dummies = Collections.nCopies( ( int ) numElements, null );
+		final java.util.function.ToIntFunction< Object > accessor = o -> value;
+		return new GeffPropertyWriter<>( dummies, ElementType.NODE )
+				.id( ( java.util.function.ToLongFunction< Object > ) o -> 0L, "<u8" )
+				.add( identifier, accessor )
+				.createGeffProperties()
+				.property( identifier );
+	}
+
+	/**
+	 * Synthesize an optional double property with a constant present value
+	 * ( the TrackMate default spot radius ) for all elements.
+	 */
+	private static GeffProperty< ? > constantRadiusProperty( final long numElements )
+	{
+		final List< Object > dummies = Collections.nCopies( ( int ) numElements, null );
+		final FunctionTypes.ToMaybeDoubleFunction< Object > accessor = o -> new Maybe.MaybeDouble( DEFAULT_SPOT_RADIUS );
+		return new GeffPropertyWriter<>( dummies, ElementType.NODE )
+				.id( ( java.util.function.ToLongFunction< Object > ) o -> 0L, "<u8" )
+				.add( RADIUS_PROP_NAME, accessor )
+				.createGeffProperties()
+				.property( RADIUS_PROP_NAME );
+	}
+
+	/**
+	 * Synthesize an optional int property with all values missing.
+	 */
+	private static GeffProperty< ? > missingIntProperty( final String identifier, final long numElements )
+	{
+		final List< Object > dummies = Collections.nCopies( ( int ) numElements, null );
+		final FunctionTypes.ToMaybeIntFunction< Object > accessor = o -> new Maybe.MaybeInt();
+		return new GeffPropertyWriter<>( dummies, ElementType.NODE )
+				.id( ( java.util.function.ToLongFunction< Object > ) o -> 0L, "<u8" )
+				.add( identifier, accessor )
+				.createGeffProperties()
+				.property( identifier );
+	}
+
+	/**
+	 * Synthesize an optional string property with all values missing.
+	 */
+	private static GeffProperty< ? > missingStringProperty( final String identifier, final long numElements )
+	{
+		final List< Object > dummies = Collections.nCopies( ( int ) numElements, null );
+		final FunctionTypes.ToMaybeStringFunction< Object > accessor = o -> new Maybe.MaybeString();
+		return new GeffPropertyWriter<>( dummies, ElementType.NODE )
+				.id( ( java.util.function.ToLongFunction< Object > ) o -> 0L, "<u8" )
+				.add( identifier, accessor )
+				.createGeffProperties()
+				.property( identifier );
+	}
+
+
 	private void readSpots(
 			final Model model,
 			final boolean is2D,
@@ -305,15 +549,14 @@ public class TmGeffReader
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 
 			/*
-			 * TODO! Right now we are strict and EXPECTS the core properties to
-			 * have certain names. This must be relaxed, by looking at display
-			 * hints to guess what is x, y, ...
+			 * Map the properties of the file to the TrackMate-canonical names
+			 * the builders expect. We try the display hints first, then
+			 * heuristics on the axis names, then accept the GEFF-conventional
+			 * literal names. TrackMate-specific properties that are missing
+			 * are synthesized with sensible defaults. See
+			 * {@link #mapCoreSpotProps(GeffProperties, boolean)}.
 			 */
-			for ( final String required : new String[] { "x", "y", "t", RADIUS_PROP_NAME, TRACKMATE_SPOT_ID_PROP, NAME_PROP } )
-				if ( !props.properties().containsKey( required ) )
-					throw new GeffException( "Missing required node property: '" + required + "'." );
-			if ( !is2D && !props.properties().containsKey( "z" ) )
-				throw new GeffException( "Missing required node property: 'z' (3D model)." );
+			mapCoreSpotProps( props, is2D );
 
 			final boolean hasPolygons = props.properties().containsKey( POLYGON_PROP );
 			final boolean hasMeshes = props.properties().containsKey( MESH_V_PROP )
@@ -571,13 +814,16 @@ public class TmGeffReader
 		{
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 
-			// Same strictness as for the spots: we expect the properties we
-			// wrote to be present.
-			// TODO! Same relaxation needed as in readSpots: use the display
-			// hints to guess what is what.
-			for ( final String required : new String[] { VISIBILITY, NAME_PROP } )
-				if ( !props.properties().containsKey( required ) )
-					throw new GeffException( "Missing required node property: '" + required + "' in the tracks sub-file." );
+			/*
+			 * The tracks sub-file is normally written by TrackMate, but be
+			 * tolerant with foreign or incomplete ones: the visibility
+			 * defaults to true, and the names to the TrackMate default
+			 * naming.
+			 */
+			if ( !props.properties().containsKey( VISIBILITY ) )
+				props.put( missingIntProperty( VISIBILITY, props.numElements() ) );
+			if ( !props.properties().containsKey( NAME_PROP ) )
+				props.put( missingStringProperty( NAME_PROP, props.numElements() ) );
 
 			// Build the track nodes with the annotation framework.
 			final TrackBuilder builder = new TrackBuilder( visibility, savedTrackNames );
@@ -678,11 +924,14 @@ public class TmGeffReader
 		@NodeConstructor
 		public void addNode(
 				@FromId final long id,
-				@FromProperty( VISIBILITY ) final int visibilityFlag,
+				@FromProperty( VISIBILITY ) final OptionalInt visibilityFlag,
 				@FromProperty( NAME_PROP ) final Optional< String > name )
 		{
 			final int trackID = ( int ) id;
-			visibility.put( Integer.valueOf( trackID ), Boolean.valueOf( visibilityFlag > 0 ) );
+			// Tracks of foreign files without a visibility property are
+			// visible by default.
+			final boolean visible = !visibilityFlag.isPresent() || visibilityFlag.getAsInt() > 0;
+			visibility.put( Integer.valueOf( trackID ), Boolean.valueOf( visible ) );
 			if ( name.isPresent() )
 				savedTrackNames.put( Integer.valueOf( trackID ), name.get() );
 		}
@@ -713,6 +962,18 @@ public class TmGeffReader
 		List< Spot > spots()
 		{
 			return spotList;
+		}
+
+		/**
+		 * Returns the TrackMate spot ID to use: the one from the file when it
+		 * is present, or a fresh one from the {@link SpotBase#IDcounter}
+		 * otherwise (for foreign GEFF files without a spot-ID property).
+		 */
+		protected static int spotId( final OptionalInt trackmateId )
+		{
+			return trackmateId.isPresent()
+					? trackmateId.getAsInt()
+					: SpotBase.IDcounter.incrementAndGet();
 		}
 
 		protected void setUp(
@@ -754,10 +1015,10 @@ public class TmGeffReader
 				@FromProperty( "y" ) final double y,
 				@FromProperty( "t" ) final int t,
 				@FromProperty( RADIUS_PROP_NAME ) final Maybe.MaybeDouble r,
-				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final int trackmateId,
+				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final OptionalInt trackmateId,
 				@FromProperty( NAME_PROP ) final Optional< String > name )
 		{
-			final SpotBase spot = new SpotBase( trackmateId );
+			final SpotBase spot = new SpotBase( spotId( trackmateId ) );
 			setUp( spot, x, y, 0., t, r, name );
 		}
 	}
@@ -777,10 +1038,10 @@ public class TmGeffReader
 				@FromProperty( "z" ) final double z,
 				@FromProperty( "t" ) final int t,
 				@FromProperty( RADIUS_PROP_NAME ) final Maybe.MaybeDouble r,
-				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final int trackmateId,
+				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final OptionalInt trackmateId,
 				@FromProperty( NAME_PROP ) final Optional< String > name )
 		{
-			final SpotBase spot = new SpotBase( trackmateId );
+			final SpotBase spot = new SpotBase( spotId( trackmateId ) );
 			setUp( spot, x, y, z, t, r, name );
 		}
 	}
@@ -799,14 +1060,14 @@ public class TmGeffReader
 				@FromProperty( "y" ) final double y,
 				@FromProperty( "t" ) final int t,
 				@FromProperty( RADIUS_PROP_NAME ) final Maybe.MaybeDouble r,
-				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final int trackmateId,
+				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final OptionalInt trackmateId,
 				@FromProperty( POLYGON_PROP ) final Optional< double[] > polygon,
 				@FromProperty( NAME_PROP ) final Optional< String > name )
 		{
 			final Spot spot;
 			if ( !polygon.isPresent() )
 			{
-				spot = new SpotBase( trackmateId );
+				spot = new SpotBase( spotId( trackmateId ) );
 			}
 			else
 			{
@@ -821,7 +1082,7 @@ public class TmGeffReader
 					xp[ i ] = p[ 2 * i ];
 					yp[ i ] = p[ 2 * i + 1 ];
 				}
-				spot = new SpotRoi( trackmateId, xp, yp );
+				spot = new SpotRoi( spotId( trackmateId ), xp, yp );
 			}
 			setUp( spot, x, y, 0., t, r, name );
 		}
@@ -842,7 +1103,7 @@ public class TmGeffReader
 				@FromProperty( "z" ) final double z,
 				@FromProperty( "t" ) final int t,
 				@FromProperty( RADIUS_PROP_NAME ) final Maybe.MaybeDouble r,
-				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final int trackmateId,
+				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final OptionalInt trackmateId,
 				@FromProperty( MESH_V_PROP ) final Optional< float[] > meshVertices,
 				@FromProperty( MESH_VN_PROP ) final Optional< float[] > meshNormals,
 				@FromProperty( MESH_F_PROP ) final Optional< long[] > meshTriangles,
@@ -851,11 +1112,11 @@ public class TmGeffReader
 			final Spot spot;
 			if ( !meshVertices.isPresent() || !meshNormals.isPresent() || !meshTriangles.isPresent() )
 			{
-				spot = new SpotBase( trackmateId );
+				spot = new SpotBase( spotId( trackmateId ) );
 			}
 			else
 			{
-				spot = new SpotMesh( trackmateId, buildMesh( meshVertices.get(), meshNormals.get(), meshTriangles.get() ) );
+				spot = new SpotMesh( spotId( trackmateId ), buildMesh( meshVertices.get(), meshNormals.get(), meshTriangles.get() ) );
 				// NB: The SpotMesh constructor re-centers the mesh and sets
 				// the spot position and radius from it. The mesh vertices are
 				// already relative to the spot center, so its center is (0, 0,
