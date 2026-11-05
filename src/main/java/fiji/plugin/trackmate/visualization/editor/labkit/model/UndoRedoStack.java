@@ -65,7 +65,7 @@ public class UndoRedoStack
 	 * <p>
 	 * This method <b>must</b> be called before any edit operation is performed,
 	 * to capture the state of the labeling before the edit. After the edit is
-	 * performed, call {@link #setUndoPoint(int, Interval)} to record the
+	 * performed, call {@link #setUndoPoint(Interval)} to record the
 	 * edit operation.
 	 *
 	 * @param frame
@@ -86,9 +86,6 @@ public class UndoRedoStack
 	 * to record the state of the labeling after the edit. The region parameter
 	 * specifies the region of the labeling that was affected by the edit.
 	 *
-	 * @param frame
-	 *            the time point of the labeling on which the edit operation was
-	 *            performed.
 	 * @param region
 	 *            the region of the labeling that was affected by the edit.
 	 */

@@ -421,6 +421,11 @@ public class FeatureUtils
 
 	public static final double[] autoMinMax( final Model model, final TrackMateObject type, final String feature )
 	{
+		return autoMinMax( model, type, feature, true );
+	}
+
+	public static final double[] autoMinMax( final Model model, final TrackMateObject type, final String feature, final boolean visibileOnly )
+	{
 		switch ( type )
 		{
 		case DEFAULT:
@@ -430,7 +435,7 @@ public class FeatureUtils
 		case SPOTS:
 		case TRACKS:
 		{
-			final double[] values = collectFeatureValues( feature, type, model, true );
+			final double[] values = collectFeatureValues( feature, type, model, visibileOnly );
 			double min = Double.POSITIVE_INFINITY;
 			double max = Double.NEGATIVE_INFINITY;
 			for ( final double val : values )

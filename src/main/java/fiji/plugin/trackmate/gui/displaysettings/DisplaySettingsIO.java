@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jdom2.Element;
@@ -61,12 +62,13 @@ public class DisplaySettingsIO
 		return getGson().toJson( ds );
 	}
 
-	public static DisplaySettings fromJson( final String str )
+	public static JsonElement toJsonTree( final DisplaySettings ds )
 	{
-		final DisplaySettings ds = ( str == null || str.isEmpty() )
-				? DisplaySettings.defaultStyle().copy()
-				: getGson().fromJson( str, DisplaySettings.class );
+		return getGson().toJsonTree( ds );
+	}
 
+	private static void sanitize( final DisplaySettings ds )
+	{
 		// Sanitize min and max.
 		final double spotMin = ds.getSpotMin();
 		final double spotMax = ds.getSpotMax();
@@ -74,7 +76,20 @@ public class DisplaySettingsIO
 		final double trackMin = ds.getTrackMin();
 		final double trackMax = ds.getTrackMax();
 		ds.setTrackMinMax( Math.min( trackMin, trackMax ), Math.max( trackMin, trackMax ) );
+	}
 
+	public static DisplaySettings fromJson( final String str )
+	{
+		final DisplaySettings ds = ( str == null || str.isEmpty() ) ? readUserDefault() : getGson().fromJson( str, DisplaySettings.class );
+		sanitize( ds );
+		return ds;
+	}
+
+	public static DisplaySettings fromJsonTree( final Map< String, Object > displaySettingsJson )
+	{
+		final Gson gson = getGson();
+		final DisplaySettings ds = gson.fromJson( gson.toJsonTree( displaySettingsJson ), DisplaySettings.class );
+		sanitize( ds );
 		return ds;
 	}
 

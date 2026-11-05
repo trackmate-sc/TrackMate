@@ -102,14 +102,7 @@ public class SpotBase extends AbstractEuclideanSpace implements Spot
 		putFeature( POSITION_Z, Double.valueOf( z ) );
 		putFeature( RADIUS, Double.valueOf( radius ) );
 		putFeature( QUALITY, Double.valueOf( quality ) );
-		if ( null == name )
-		{
-			this.name = "ID" + ID;
-		}
-		else
-		{
-			this.name = name;
-		}
+		this.name = name;
 	}
 
 	/**
@@ -249,7 +242,15 @@ public class SpotBase extends AbstractEuclideanSpace implements Spot
 	@Override
 	public String getName()
 	{
+		if ( null == this.name )
+			return "ID" + ID;
 		return this.name;
+	}
+
+	@Override
+	public boolean hasName()
+	{
+		return null != this.name;
 	}
 
 	@Override

@@ -523,8 +523,8 @@ public class TrackModel
 	 * will return the track IDs in the order of their names. It is possible to
 	 * add it to a {@link java.util.List} to facilitate navigating the ids:
 	 * <pre>
-	 * List< String > trackIDList = new ArrayList<>( trackIDs );
-	 * ListIterator< String > iterator = trackIDList.listIterator();
+	 * List&lt; String &gt; trackIDList = new ArrayList&lt;&gt;( trackIDs );
+	 * ListIterator&lt; String &gt; iterator = trackIDList.listIterator();
 	 * </pre>
 	 *
 	 * @param visibleOnly

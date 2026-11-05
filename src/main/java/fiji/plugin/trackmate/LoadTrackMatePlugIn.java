@@ -263,11 +263,11 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 
 	/**
 	 * Hook for subclassers:<br>
-	 * The {@link guiModel} object is loaded and properly configured. This
+	 * The {@link GuiModel} object is loaded and properly configured. This
 	 * method is called just before the controller and GUI are launched.
 	 *
-	 * @param trackmate
-	 *            the {@link guiModel} instance that was fledged after loading.
+	 * @param guiModel
+	 *            the {@link GuiModel} instance that was fledged after loading.
 	 */
 	protected void postRead( final GuiModel guiModel )
 	{}
