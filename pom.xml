@@ -187,10 +187,22 @@
 		<scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
 		<scijava.javadoc.url.java>
 			https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
-		<!-- If we don't do this, mvn javadoc:javadoc fails because of 
-   	    Anisotropic_Diffusion_2D (bad naming, does not like the '2D' at the end), 
+		<!-- If we don't do this, mvn javadoc:javadoc fails because of
+   	    Anisotropic_Diffusion_2D (bad naming, does not like the '2D' at the end),
    	    which is a depdency of Labkit.' -->
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+
+		<!-- Path to the native Blosc library used by the GEFF I/O tests,
+		as required by JNA. The default is the Homebrew location on macOS.
+		It can be overridden on the command line with -Djna.library.path=... .
+		Tests also extend GeffTestBase, which appends further common
+		install locations to this, so both mechanisms cooperate. -->
+		<jna.library.path>/opt/homebrew/opt/c-blosc/lib</jna.library.path>
+
+		<!-- NB: Surefire (configured in pom-scijava) builds its command line
+		from @{argLine}; defining the argLine property appends our JVM flag to
+		the parent flags (Xmx, add-opens, ...) instead of replacing them. -->
+		<argLine>-Djna.library.path=${jna.library.path}</argLine>
 	</properties>
 
 	<dependencies>
