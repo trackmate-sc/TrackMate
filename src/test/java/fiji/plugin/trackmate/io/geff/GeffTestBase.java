@@ -9,6 +9,11 @@ import java.util.List;
  * Base class for GEFF tests. Sets up the native library path for blosc before
  * any test code runs, covering all platforms and environments (Eclipse, Maven,
  * CI) without requiring manual run configuration.
+ * <p>
+ * NB: JNA resolves (and caches the failure of) a native library at its first
+ * use in the JVM, so this base class only guarantees correct setup for tests
+ * running after its static initializer. Should another test class use blosc
+ * before any GEFF test is loaded, the path fix would come too late.
  */
 public abstract class GeffTestBase
 {
@@ -18,7 +23,7 @@ public abstract class GeffTestBase
 	}
 
 	/**
-	 * Prepends common blosc installation directories to
+	 * Appends common blosc installation directories to
 	 * {@code jna.library.path} so JNA can find {@code libblosc} regardless of
 	 * the execution environment.
 	 * <p>
@@ -48,8 +53,6 @@ public abstract class GeffTestBase
 				paths.add( candidate );
 		}
 
-		final String joined = String.join( File.pathSeparator, paths );
-		System.setProperty( "jna.library.path", joined );
-		System.out.println( "[GeffTestBase] jna.library.path = " + joined );
+		System.setProperty( "jna.library.path", String.join( File.pathSeparator, paths ) );
 	}
 }
