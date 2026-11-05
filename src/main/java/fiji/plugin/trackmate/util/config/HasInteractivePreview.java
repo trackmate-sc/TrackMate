@@ -22,8 +22,8 @@
 package fiji.plugin.trackmate.util.config;
 
 /**
- * Interface for {@link Configurator}s which settings can be previewed with
- * {@link fiji.plugin.trackmate.util.DetectionPreview}.
+ * Interface for {@link org.scijava.ui.config.Configurator}s which settings can
+ * be previewed with {@link fiji.plugin.trackmate.util.DetectionPreview}.
  */
 public interface HasInteractivePreview
 {
@@ -31,9 +31,9 @@ public interface HasInteractivePreview
 	/**
 	 * Declares the argument key and axis label to be used in the
 	 * {@link fiji.plugin.trackmate.util.DetectionPreview} GUI.
-	 * 
-	 * @return argumentKey the argument key. This is the key used in the
-	 *         {@link fiji.plugin.trackmate.util.cli.Configurator.Argument#getKey()}.
+	 *
+	 * @return argumentKey the argument key. This is the key used by the
+	 *         arguments of the {@link org.scijava.ui.config.Configurator}.
 	 */
 	public default String getPreviewArgumentKey()
 	{

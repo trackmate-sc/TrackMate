@@ -50,8 +50,8 @@ import org.scijava.plugin.SciJavaPlugin;
  * detectors for the detection step of TrackMate.
  * <li>{@link fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory}:
  * generates analyzers that grant spots with scalar numerical features.
- * <li>{@link fiji.plugin.trackmate.visualization.ViewFactory}: generates views
- * that can display the detection and tracking results.
+ * <li>{@link fiji.plugin.trackmate.visualization.TrackMateModelView}: generates
+ * views that can display the detection and tracking results.
  * <li>{@link fiji.plugin.trackmate.tracking.SpotTrackerFactory}: generates
  * particle linkers for the tracking step of TrackMate.
  * <li>{@link fiji.plugin.trackmate.features.track.TrackAnalyzer}: compute
