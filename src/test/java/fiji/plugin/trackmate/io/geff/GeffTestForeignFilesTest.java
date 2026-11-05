@@ -34,7 +34,7 @@ import fiji.plugin.trackmate.SpotCollection;
  * TrackMate-canonical ones using the display hints and heuristics, and by
  * synthesizing the TrackMate-specific properties that are missing.
  */
-public class GeffTestForeignFilesTest
+public class GeffTestForeignFilesTest extends GeffTestBase
 {
 
 	/**
