@@ -21,36 +21,36 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
-import static fiji.plugin.trackmate.gui.Icons.SPOT_TABLE_ICON;
-import static fiji.plugin.trackmate.gui.Icons.TRACK_SCHEME_ICON_16x16;
-import static fiji.plugin.trackmate.gui.Icons.TRACK_TABLES_ICON;
-
-import java.awt.event.ActionEvent;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
-import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.action.AbstractTMAction;
-import fiji.plugin.trackmate.action.ExportAllSpotsStatsAction;
-import fiji.plugin.trackmate.action.ExportStatsTablesAction;
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.ModelFeatureUpdater;
+import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.FeatureDisplaySelector;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.editor.LabkitLauncher;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ActionChooserDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseDetectorDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ChooseTrackerDescriptor;
@@ -72,18 +72,12 @@ import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotImageTrackerFactory;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
-import fiji.plugin.trackmate.util.Threads;
-import fiji.plugin.trackmate.visualization.trackscheme.SpotImageUpdater;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
+import fiji.plugin.trackmate.util.ImpCloseWindowListener;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
+import ij.gui.ImageWindow;
 
-public class TrackMateWizardSequence implements WizardSequence
+public class TrackMateWizardSequence extends AbstractTrackMateModelJFrameView implements WizardSequence
 {
-
-	private final TrackMate trackmate;
-
-	private final SelectionModel selectionModel;
-
-	private final DisplaySettings displaySettings;
 
 	private WizardPanelDescriptor current;
 
@@ -117,13 +111,15 @@ public class TrackMateWizardSequence implements WizardSequence
 
 	private final SaveDescriptor saveDescriptor;
 
-	public TrackMateWizardSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	private JFrame frame;
+
+	public TrackMateWizardSequence( final GuiModel guiModel )
 	{
-		this.trackmate = trackmate;
-		this.selectionModel = selectionModel;
-		this.displaySettings = displaySettings;
-		final Settings settings = trackmate.getSettings();
-		final Model model = trackmate.getModel();
+		super( guiModel );
+		final Settings settings = guiModel.getSettings();
+		final Model model = guiModel.getModel();
+		final TrackMate trackmate = guiModel.getTrackMate();
+		final DisplaySettings displaySettings = guiModel.getDisplaySettings();
 
 		// Listen to changes in the model and update features accordingly.
 		final ModelFeatureUpdater modelFeatureUpdater = new ModelFeatureUpdater( model, settings );
@@ -140,34 +136,21 @@ public class TrackMateWizardSequence implements WizardSequence
 
 		logDescriptor = new LogPanelDescriptor2( logPanel );
 		startDialogDescriptor = new StartDialogDescriptor( settings, logger );
-		chooseDetectorDescriptor = new ChooseDetectorDescriptor( new DetectorProvider(), trackmate );
-		executeDetectionDescriptor = new ExecuteDetectionDescriptor( trackmate, logPanel );
-		initFilterDescriptor = new InitFilterDescriptor( trackmate, initialFilter );
-		spotFilterDescriptor = new SpotFilterDescriptor( trackmate, spotFilters, featureSelector );
-		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), trackmate );
-		executeTrackingDescriptor = new ExecuteTrackingDescriptor( trackmate, logPanel );
-		trackFilterDescriptor = new TrackFilterDescriptor( trackmate, trackFilters, featureSelector, displaySettings );
-		configureViewsDescriptor = new ConfigureViewsDescriptor(
-				displaySettings,
-				featureSelector,
-				new LaunchTrackSchemeAction(),
-				new ShowTrackTablesAction(),
-				new ShowSpotTableAction(),
-				LabkitLauncher.getLaunchAction( trackmate, displaySettings ),
-				model.getSpaceUnits() );
-		grapherDescriptor = new GrapherDescriptor( trackmate, selectionModel, displaySettings );
-		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), trackmate, selectionModel, displaySettings );
-		saveDescriptor = new SaveDescriptor( trackmate, displaySettings, this );
+		chooseDetectorDescriptor = new ChooseDetectorDescriptor( new DetectorProvider(), guiModel );
+		executeDetectionDescriptor = new ExecuteDetectionDescriptor( guiModel, logPanel );
+		initFilterDescriptor = new InitFilterDescriptor( guiModel, initialFilter );
+		spotFilterDescriptor = new SpotFilterDescriptor( guiModel, spotFilters, featureSelector );
+		chooseTrackerDescriptor = new ChooseTrackerDescriptor( new TrackerProvider(), guiModel );
+		executeTrackingDescriptor = new ExecuteTrackingDescriptor( guiModel, logPanel );
+		trackFilterDescriptor = new TrackFilterDescriptor( guiModel, trackFilters, featureSelector );
+		configureViewsDescriptor = new ConfigureViewsDescriptor( guiModel, featureSelector );
+		grapherDescriptor = new GrapherDescriptor( guiModel );
+		actionChooserDescriptor = new ActionChooserDescriptor( new ActionProvider(), guiModel );
+		saveDescriptor = new SaveDescriptor( guiModel, this );
 
 		this.next = getForwardSequence();
 		this.previous = getBackwardSequence();
 		current = startDialogDescriptor;
-	}
-
-	@Override
-	public void onClose()
-	{
-		trackmate.getModel().setLogger( Logger.IJ_LOGGER );
 	}
 
 	@Override
@@ -312,8 +295,10 @@ public class TrackMateWizardSequence implements WizardSequence
 	 */
 	private SpotDetectorDescriptor getDetectorConfigDescriptor()
 	{
-		final SpotDetectorFactoryBase< ? > detectorFactory = trackmate.getSettings().detectorFactory;
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
 
+		final SpotDetectorFactoryBase< ? > detectorFactory = settings.detectorFactory;
 		/*
 		 * Special case: are we dealing with the manual detector? If yes, no
 		 * config, no detection.
@@ -333,7 +318,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		 * descriptor.
 		 */
 		// From settings.
-		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().detectorSettings );
+		final Map< String, Object > oldSettings1 = new HashMap<>( settings.detectorSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
 		final WizardPanelDescriptor previousDescriptor = next.get( chooseDetectorDescriptor );
@@ -354,10 +339,10 @@ public class TrackMateWizardSequence implements WizardSequence
 			defaultSettings.put( skey, previousValue );
 		}
 
-		final ConfigurationPanel detectorConfigurationPanel = detectorFactory.getDetectorConfigurationPanel( trackmate.getSettings(), trackmate.getModel() );
+		final ConfigurationPanel detectorConfigurationPanel = detectorFactory.getDetectorConfigurationPanel( settings, model );
 		detectorConfigurationPanel.setSettings( defaultSettings );
-		trackmate.getSettings().detectorSettings = defaultSettings;
-		final SpotDetectorDescriptor configDescriptor = new SpotDetectorDescriptor( trackmate.getSettings(), detectorConfigurationPanel, trackmate.getModel().getLogger() );
+		settings.detectorSettings = defaultSettings;
+		final SpotDetectorDescriptor configDescriptor = new SpotDetectorDescriptor( settings, detectorConfigurationPanel, model.getLogger() );
 
 		// Position sequence next and previous.
 		next.put( chooseDetectorDescriptor, configDescriptor );
@@ -378,13 +363,15 @@ public class TrackMateWizardSequence implements WizardSequence
 	 */
 	private SpotTrackerDescriptor getTrackerConfigDescriptor()
 	{
-		final SpotTrackerFactory trackerFactory = trackmate.getSettings().trackerFactory;
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
+		final SpotTrackerFactory trackerFactory = settings.trackerFactory;
 
 		/*
 		 * Special case: are we dealing with the manual tracker? If yes, no
 		 * config, no detection.
 		 */
-		if ( trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
+		if ( trackerFactory == null || trackerFactory.getKey().equals( ManualTrackerFactory.TRACKER_KEY ) )
 		{
 			// Position sequence next and previous.
 			next.put( chooseTrackerDescriptor, trackFilterDescriptor );
@@ -397,7 +384,7 @@ public class TrackMateWizardSequence implements WizardSequence
 		 * descriptor.
 		 */
 		// From settings.
-		final Map< String, Object > oldSettings1 = new HashMap<>( trackmate.getSettings().trackerSettings );
+		final Map< String, Object > oldSettings1 = new HashMap<>( settings.trackerSettings );
 		// From previous panel.
 		final Map< String, Object > oldSettings2 = new HashMap<>();
 		final WizardPanelDescriptor previousDescriptor = next.get( chooseTrackerDescriptor );
@@ -419,19 +406,17 @@ public class TrackMateWizardSequence implements WizardSequence
 		}
 
 		final ConfigurationPanel trackerConfigurationPanel;
-		if (trackerFactory instanceof SpotImageTrackerFactory)
+		if ( trackerFactory instanceof SpotImageTrackerFactory )
 		{
-			trackerConfigurationPanel = ((SpotImageTrackerFactory)trackerFactory).getTrackerConfigurationPanel(
-					trackmate.getModel(),  trackmate.getSettings().imp );
+			trackerConfigurationPanel = ( ( SpotImageTrackerFactory ) trackerFactory ).getTrackerConfigurationPanel( model, settings.imp );
 		}
 		else
 		{
-			trackerConfigurationPanel= trackerFactory.getTrackerConfigurationPanel(
-					trackmate.getModel() );
+			trackerConfigurationPanel = trackerFactory.getTrackerConfigurationPanel( model );
 		}
 		trackerConfigurationPanel.setSettings( defaultSettings );
-		trackmate.getSettings().trackerSettings = defaultSettings;
-		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( trackmate.getSettings(), trackerConfigurationPanel, trackmate.getModel().getLogger() );
+		settings.trackerSettings = defaultSettings;
+		final SpotTrackerDescriptor configDescriptor = new SpotTrackerDescriptor( settings, trackerConfigurationPanel, model.getLogger() );
 
 		// Position sequence next and previous.
 		next.put( chooseTrackerDescriptor, configDescriptor );
@@ -443,83 +428,84 @@ public class TrackMateWizardSequence implements WizardSequence
 		return configDescriptor;
 	}
 
-	private static final String TRACK_TABLES_BUTTON_TOOLTIP = "<html>"
-			+ "Export the features of all tracks, edges and all <br>"
-			+ "spots belonging to a track to ImageJ tables."
-			+ "</html>";
-
-	private static final String SPOT_TABLE_BUTTON_TOOLTIP = "Export the features of all spots to ImageJ tables.";
-
-	private static final String TRACKSCHEME_BUTTON_TOOLTIP = "<html>Launch a new instance of TrackScheme.</html>";
-
-	private class LaunchTrackSchemeAction extends AbstractAction
+	@Override
+	public JFrame run( final String title )
 	{
-		private static final long serialVersionUID = 1L;
+		this.frame = WizardSequence.super.run( title );
+		final ImageWindow window = guiModel.getSettings().imp.getWindow();
 
-		private LaunchTrackSchemeAction()
-		{
-			super( "TrackScheme", TRACK_SCHEME_ICON_16x16 );
-			putValue( SHORT_DESCRIPTION, TRACKSCHEME_BUTTON_TOOLTIP );
-		}
+		// Build a confirmation dialog, add it to the wizard window and the
+		// image window.
+		final BooleanSupplier confirmClose = () -> {
+			final int choice = JOptionPane.showOptionDialog( window, ""
+					+ "This will close the image and\n"
+					+ "terminate this TrackMate session. \n"
+					+ "Close window?",
+					"End TrackMate session?",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					Icons.TRACKMATE_ICON_64x64,
+					null,
+					JOptionPane.NO_OPTION );
+			return ( choice == JOptionPane.YES_OPTION );
+		};
+		final Runnable onClosed = () -> {
+			guiModel.getWindowManager().closeAll();
+			frame.dispose();
+		};
 
-		@Override
-		public void actionPerformed( final ActionEvent e )
+		// Intercept closing the image -> ask for confirmation.
+		ImpCloseWindowListener.wrap( window, confirmClose, onClosed );
+
+		// Intercept closing the main window.
+		frame.setDefaultCloseOperation( WindowConstants.DO_NOTHING_ON_CLOSE );
+		final WindowListener closeConfirm = new WindowAdapter()
 		{
-			Threads.run( "Launching TrackScheme thread", () ->
+
+			@Override
+			public void windowClosing( final WindowEvent e )
 			{
-				final TrackScheme trackscheme = new TrackScheme( trackmate.getModel(), selectionModel, displaySettings );
-				final SpotImageUpdater thumbnailUpdater = new SpotImageUpdater( trackmate.getSettings() );
-				trackscheme.setSpotImageUpdater( thumbnailUpdater );
-				trackscheme.render();
-			} );
-		}
+				if ( confirmClose.getAsBoolean() )
+				{
+					onClosed.run();
+					window.dispose();
+				}
+			};
+		};
+		frame.addWindowListener( closeConfirm );
+		setWindow( frame );
+		return frame;
 	}
 
-	private class ShowTrackTablesAction extends AbstractAction
+	@Override
+	public void render()
+	{}
+
+	@Override
+	public void refresh()
+	{}
+
+	@Override
+	public void clear()
+	{}
+
+	@Override
+	public void centerViewOn( final Spot spot )
+	{}
+
+	@Override
+	public String getKey()
 	{
-		private static final long serialVersionUID = 1L;
-
-		private ShowTrackTablesAction()
-		{
-			super( "Tracks", TRACK_TABLES_ICON );
-			putValue( SHORT_DESCRIPTION, TRACK_TABLES_BUTTON_TOOLTIP );
-		}
-
-		@Override
-		public void actionPerformed( final ActionEvent e )
-		{
-			showTables( false );
-		}
+		return "TRACKMATE_WIZARD";
 	}
 
-	private class ShowSpotTableAction extends AbstractAction
+	@Override
+	public Window getWindow()
 	{
-		private static final long serialVersionUID = 1L;
-
-		private ShowSpotTableAction()
-		{
-			super( "Spots", SPOT_TABLE_ICON );
-			putValue( SHORT_DESCRIPTION, SPOT_TABLE_BUTTON_TOOLTIP );
-		}
-
-		@Override
-		public void actionPerformed( final ActionEvent e )
-		{
-			showTables( true );
-		}
+		return frame;
 	}
 
-	private void showTables( final boolean showSpotTable )
-	{
-		Threads.run( "TrackMate table thread.", () ->
-		{
-			AbstractTMAction action;
-			if ( showSpotTable )
-				action = new ExportAllSpotsStatsAction();
-			else
-				action = new ExportStatsTablesAction();
-
-			action.execute( trackmate, selectionModel, displaySettings, null );
-		} );
-	}
+	@Override
+	public void modelChanged( final ModelChangeEvent event )
+	{}
 }

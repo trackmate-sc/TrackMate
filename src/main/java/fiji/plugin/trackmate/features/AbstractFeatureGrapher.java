@@ -49,7 +49,6 @@ import org.jfree.chart.ui.RectangleInsets;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.util.ExportableChartPanel;
-import fiji.plugin.trackmate.util.TMUtils;
 
 public abstract class AbstractFeatureGrapher
 {
@@ -96,7 +95,7 @@ public abstract class AbstractFeatureGrapher
 	public JFrame render()
 	{
 		// X label
-		final String xAxisLabel = featureNames.get( xFeature ) + " (" + TMUtils.getUnitsFor( xDimension, spaceUnits, timeUnits ) + ")";
+		final String xAxisLabel = featureNames.get( xFeature ) + " (" + xDimension.units( spaceUnits, timeUnits ) + ")";
 
 		// Find how many different dimensions
 		final Set< Dimension > dimensions = getUniqueValues( yFeatures, yDimensions );
@@ -107,7 +106,7 @@ public abstract class AbstractFeatureGrapher
 		{
 
 			// Y label
-			final String yAxisLabel = TMUtils.getUnitsFor( dimension, spaceUnits, timeUnits );
+			final String yAxisLabel = dimension.units( spaceUnits, timeUnits );
 
 			// Collect suitable feature for this dimension
 			final List< String > featuresThisDimension = getCommonKeys( dimension, yFeatures, yDimensions );

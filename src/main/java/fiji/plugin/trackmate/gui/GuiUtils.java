@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -117,7 +117,7 @@ public class GuiUtils
 	}
 
 	/**
-	 * Distance between two colors in CIELab space.
+	 * Distance between two colors.
 	 * <p>
 	 * Adapted from
 	 * https://stackoverflow.com/questions/9018016/how-to-compare-two-colors-for-similarity-difference
@@ -178,12 +178,12 @@ public class GuiUtils
 	}
 
 	/**
-	 * Positions a JFrame more or less cleverly next a {@link Component}.
-	 *
+	 * Positions a window more or less cleverly next a {@link Component}.
+	 * 
 	 * @param gui
 	 *            the window to position.
 	 * @param component
-	 *            the component to position next to.
+	 *            the component to position the window with respect to.
 	 */
 	public static void positionWindow( final Window gui, final Component component )
 	{

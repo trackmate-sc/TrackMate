@@ -39,11 +39,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.scijava.ui.config.visitors.gui.elements.SliderPanelDouble;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements;
+import org.scijava.ui.config.visitors.gui.elements.StyleElements.BoundedDoubleElement;
+
 import fiji.plugin.trackmate.action.closegaps.GapClosingMethod.GapClosingParameter;
 import fiji.plugin.trackmate.gui.Fonts;
-import fiji.plugin.trackmate.gui.displaysettings.SliderPanelDouble;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements;
-import fiji.plugin.trackmate.gui.displaysettings.StyleElements.BoundedDoubleElement;
 
 /**
  * A basic UI to let a TrackMate user choose between several techniques for gap

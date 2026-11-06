@@ -23,50 +23,40 @@ package fiji.plugin.trackmate.features;
 
 import java.util.List;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class TrackFeatureGrapher extends AbstractFeatureGrapher
 {
 
 	private final List< Integer > trackIDs;
 
-	private final Model model;
-
-	private final SelectionModel selectionModel;
-
-	private final DisplaySettings ds;
+	private final GuiModel guiModel;
 
 	public TrackFeatureGrapher(
+			final GuiModel guiModel,
 			final List< Integer > trackIDs,
 			final String xFeature,
-			final List< String > yFeatures,
-			final Model model,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings )
+			final List< String > yFeatures )
 	{
 		super(
 				xFeature,
 				yFeatures,
-				model.getFeatureModel().getTrackFeatureDimensions().get( xFeature ),
-				model.getFeatureModel().getTrackFeatureDimensions(),
-				model.getFeatureModel().getTrackFeatureNames(),
-				model.getSpaceUnits(),
-				model.getTimeUnits() );
+				guiModel.getModel().getFeatureModel().getTrackFeatureDimensions().get( xFeature ),
+				guiModel.getModel().getFeatureModel().getTrackFeatureDimensions(),
+				guiModel.getModel().getFeatureModel().getTrackFeatureNames(),
+				guiModel.getModel().getSpaceUnits(),
+				guiModel.getModel().getTimeUnits() );
+		this.guiModel = guiModel;
 		this.trackIDs = trackIDs;
-		this.model = model;
-		this.selectionModel = selectionModel;
-		this.ds = displaySettings;
 	}
 
 	@Override
 	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
 		return new TrackCollectionDataset(
-				model,
-				selectionModel,
-				ds,
+				guiModel.getModel(),
+				guiModel.getSelectionModel(),
+				guiModel.getDisplaySettings(),
 				xFeature,
 				targetYFeatures,
 				trackIDs );

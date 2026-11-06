@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -30,7 +30,7 @@ import net.imglib2.type.numeric.RealType;
  * Top-level interface for spot analyzer factories, both classical and
  * morphological. They are separated so that clients can deal separately with
  * classical spots (spheres) and spots with ROIs.
- *
+ * 
  * @author Jean-Yves Tinevez - 2020
  */
 public interface SpotAnalyzerFactoryBase< T extends RealType< T > & NativeType< T > > extends FeatureAnalyzer
@@ -53,9 +53,7 @@ public interface SpotAnalyzerFactoryBase< T extends RealType< T > & NativeType< 
 	 *            the target frame to operate on.
 	 * @param channel
 	 *            the target channel to operate on.
-	 *
-	 * @return a {@link SpotAnalyzer} ready to operate on the given frame and
-	 *         channel.
+	 * @return a new spot analyzer.
 	 */
 	public SpotAnalyzer< T > getAnalyzer( ImgPlus< T > img, int frame, int channel );
 

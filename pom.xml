@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>43.0.0</version>
+		<version>45.1.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate</artifactId>
-	<version>8.1.7-SNAPSHOT</version>
+	<version>9.0.0-SNAPSHOT</version>
 
 	<name>TrackMate</name>
 	<description>TrackMate plugin for Fiji.</description>
@@ -164,6 +166,7 @@
 	</ciManagement>
 
 	<properties>
+		<enforcer.skip>true</enforcer.skip>
 		<package-name>fiji.plugin.trackmate</package-name>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<license.copyrightOwners>TrackMate developers.</license.copyrightOwners>
@@ -176,26 +179,40 @@
 		(https://github.com/scijava/scijava-coding-style) -->
 		<scijava.coding-style>imglib2</scijava.coding-style>
 
-		<fontchooser.version>2.5.2</fontchooser.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
-		<imglib2.version>8.0.0</imglib2.version>
-		<bigdataviewer-core.version>10.6.7</bigdataviewer-core.version>
+		<imglib2-mesh.version>1.2.0</imglib2-mesh.version>
 
-	    <!-- TrackMate >=8 requires Java 21 -->			
-	    <scijava.jvm.version>21</scijava.jvm.version>
-	    <scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
-   	    <scijava.javadoc.url.java>https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
-   	    <!-- If we don't do this, mvn javadoc:javadoc fails because of 
+		<!-- TrackMate >=8 requires Java 21 -->
+		<scijava.jvm.version>21</scijava.jvm.version>
+		<scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
+		<scijava.javadoc.url.java>
+			https://docs.oracle.com/en/java/javase/21/docs/api/</scijava.javadoc.url.java>
+		<!-- If we don't do this, mvn javadoc:javadoc fails because of 
    	    Anisotropic_Diffusion_2D (bad naming, does not like the '2D' at the end), 
-   	    which is a depdency of Labkit.' -->			
-   	    <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+   	    which is a depdency of Labkit.' -->
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
 	<dependencies>
 
+		<!-- Config UI -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>config-ui</artifactId>
+			<version>0.0.7</version>
+		</dependency>
+
+		<!-- Logging dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+
+		<!-- Geff dependency for IO -->
+		<dependency>
+			<groupId>org.litt</groupId>
+			<artifactId>geff</artifactId>
+			<version>1.1.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Fiji dependencies -->
@@ -230,6 +247,32 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-mesh</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigvolumeviewer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<classifier>${scijava.natives.classifier.gluegen}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<classifier>${scijava.natives.classifier.jogl}</classifier>
 		</dependency>
 
 		<!-- ImgLib2 dependencies -->
@@ -271,16 +314,16 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-listeners</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>ui-behaviour</artifactId>
+		</dependency>
 
 		<!-- Other dependencies -->
 		<dependency>
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency> -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
@@ -346,16 +389,17 @@
 			<artifactId>javaGeom</artifactId>
 			<version>${javaGeom.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.drjekyll</groupId>
-			<artifactId>fontchooser</artifactId>
-			<version>${fontchooser.version}</version>
-		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.27.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

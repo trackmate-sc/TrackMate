@@ -23,45 +23,35 @@ package fiji.plugin.trackmate.features;
 
 import java.util.List;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class SpotFeatureGrapher extends AbstractFeatureGrapher
 {
 
 	private final List< Spot > spots;
 
-	private final SelectionModel selectionModel;
-
-	private final Model model;
-
-	private final DisplaySettings ds;
-
 	private final boolean addLines;
 
+	private final GuiModel guiModel;
+
 	public SpotFeatureGrapher(
+			final GuiModel guiModel,
 			final List< Spot > spots,
 			final String xFeature,
 			final List< String > yFeatures,
-			final Model model,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings,
 			final boolean addLines )
 	{
 		super(
 				xFeature,
 				yFeatures,
-				model.getFeatureModel().getSpotFeatureDimensions().get( xFeature ),
-				model.getFeatureModel().getSpotFeatureDimensions(),
-				model.getFeatureModel().getSpotFeatureNames(),
-				model.getSpaceUnits(),
-				model.getTimeUnits() );
+				guiModel.getModel().getFeatureModel().getSpotFeatureDimensions().get( xFeature ),
+				guiModel.getModel().getFeatureModel().getSpotFeatureDimensions(),
+				guiModel.getModel().getFeatureModel().getSpotFeatureNames(),
+				guiModel.getModel().getSpaceUnits(),
+				guiModel.getModel().getTimeUnits() );
+		this.guiModel = guiModel;
 		this.spots = spots;
-		this.model = model;
-		this.selectionModel = selectionModel;
-		this.ds = displaySettings;
 		this.addLines = addLines;
 	}
 
@@ -69,9 +59,9 @@ public class SpotFeatureGrapher extends AbstractFeatureGrapher
 	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
 		return new SpotCollectionDataset(
-				model,
-				selectionModel,
-				ds,
+				guiModel.getModel(),
+				guiModel.getSelectionModel(),
+				guiModel.getDisplaySettings(),
 				xFeature,
 				targetYFeatures,
 				spots,

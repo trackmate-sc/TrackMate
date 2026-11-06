@@ -24,16 +24,16 @@ package fiji.plugin.trackmate.detection;
 import java.util.List;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -55,7 +55,6 @@ public class HessianDetectorTestDrive1
 		final ImagePlus imp = IJ.openImage( "samples/TSabateCell.tif" );
 		imp.show();
 
-		@SuppressWarnings( "unchecked" )
 		final ImgPlus< T > input = TMUtils.rawWraps( imp );
 		final double[] calibration = TMUtils.getSpatialCalibration( imp );
 		final double radiusXY = 0.6 / 2.; // um;
@@ -91,14 +90,13 @@ public class HessianDetectorTestDrive1
 		final Model model = new Model();
 		model.setPhysicalUnits( imp.getCalibration().getUnit(), imp.getCalibration().getTimeUnit() );
 		model.setSpots( sc, false );
-		final SelectionModel selectionModel = new SelectionModel( model );
 		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
 		final String feature = Spot.QUALITY;
 		ds.setSpotColorBy( TrackMateObject.SPOTS, feature );
 		final double[] mm = FeatureUtils.autoMinMax( model, TrackMateObject.SPOTS, feature );
 		ds.setSpotMinMax( mm[ 0 ], mm[ 1 ] );
-		final HyperStackDisplayer displayer = new HyperStackDisplayer( model, selectionModel, imp, ds );
-		displayer.render();
-		displayer.refresh();
+		final Settings settings = new Settings( imp );
+		final GuiModel guiModel = new GuiModel( model, settings, ds );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 }

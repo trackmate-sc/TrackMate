@@ -28,13 +28,11 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 
 public class KalmanTrackerInteractiveTest2
@@ -79,12 +77,9 @@ public class KalmanTrackerInteractiveTest2
 		}
 
 		ij.ImageJ.main( args );
-		final SelectionModel selectionModel = new SelectionModel( model );
 
-		final DisplaySettings ds = DisplaySettings.defaultStyle().copy();
-		ds.setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
-
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, ds );
-		view.render();
+		final GuiModel guiModel = new GuiModel( model, imp );
+		guiModel.getDisplaySettings().setSpotColorBy( TrackMateObject.SPOTS, Spot.QUALITY );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 }

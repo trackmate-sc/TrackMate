@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.GraphIterator;
@@ -314,67 +313,26 @@ public class SelectionModel
 		final HashSet< Spot > lSpotSelection = new HashSet<>();
 		final HashSet< DefaultWeightedEdge > lEdgeSelection = new HashSet<>();
 
-		if ( direction == 0 )
-		{ // Unconditionally
-			for ( final Spot spot : inspectionSpots )
+		for ( final Spot spot : inspectionSpots )
+		{
+			lSpotSelection.add( spot );
+
+			final GraphIterator< Spot, DefaultWeightedEdge > walker;
+			if ( direction == 0 )
+				walker = model.getTrackModel().getDepthFirstIterator( spot );
+			else if ( direction > 0 )
+				walker = model.getTrackModel().getDirectedDepthFirstIterator( spot, true );
+			else
+				walker = model.getTrackModel().getDirectedDepthFirstIterator( spot, false );
+
+			while ( walker.hasNext() )
 			{
-				lSpotSelection.add( spot );
-				final GraphIterator< Spot, DefaultWeightedEdge > walker = model.getTrackModel().getDepthFirstIterator( spot, false );
-				while ( walker.hasNext() )
-				{
-					final Spot target = walker.next();
-					lSpotSelection.add( target );
-					// Deal with edges
-					final Set< DefaultWeightedEdge > targetEdges = model.getTrackModel().edgesOf( target );
-					for ( final DefaultWeightedEdge targetEdge : targetEdges )
-					{
-						lEdgeSelection.add( targetEdge );
-					}
-				}
-			}
-
-		}
-		else
-		{ // Only upward or backward in time
-			for ( final Spot spot : inspectionSpots )
-			{
-				lSpotSelection.add( spot );
-
-				/*
-				 * A bit more complicated: we want to walk in only one
-				 * direction, when branching is occurring, we do not want to get
-				 * back in time.
-				 */
-				final Stack< Spot > stack = new Stack<>();
-				stack.add( spot );
-				while ( !stack.isEmpty() )
-				{
-					final Spot inspected = stack.pop();
-					final Set< DefaultWeightedEdge > targetEdges = model.getTrackModel().edgesOf( inspected );
-					for ( final DefaultWeightedEdge targetEdge : targetEdges )
-					{
-						Spot other;
-						if ( direction > 0 )
-						{
-							/*
-							 * Upward in time: we just have to search through
-							 * edges using their source spots.
-							 */
-							other = model.getTrackModel().getEdgeSource( targetEdge );
-						}
-						else
-						{
-							other = model.getTrackModel().getEdgeTarget( targetEdge );
-						}
-
-						if ( other != inspected )
-						{
-							lSpotSelection.add( other );
-							lEdgeSelection.add( targetEdge );
-							stack.add( other );
-						}
-					}
-				}
+				final Spot target = walker.next();
+				lSpotSelection.add( target );
+				// Deal with edges
+				final Set< DefaultWeightedEdge > targetEdges = model.getTrackModel().edgesOf( target );
+				for ( final DefaultWeightedEdge targetEdge : targetEdges )
+					lEdgeSelection.add( targetEdge );
 			}
 		}
 
@@ -388,9 +346,7 @@ public class SelectionModel
 			final Spot source = model.getTrackModel().getEdgeSource( edge );
 			final Spot target = model.getTrackModel().getEdgeTarget( edge );
 			if ( !( lSpotSelection.contains( source ) && lSpotSelection.contains( target ) ) )
-			{
 				edgesToRemove.add( edge );
-			}
 		}
 		lEdgeSelection.removeAll( edgesToRemove );
 
@@ -398,5 +354,4 @@ public class SelectionModel
 		addSpotToSelection( lSpotSelection );
 		addEdgeToSelection( lEdgeSelection );
 	}
-
 }

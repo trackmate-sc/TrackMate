@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -38,6 +38,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.util.MedianFilter2D;
@@ -294,11 +295,11 @@ public class DetectionUtils
 	 *            the interval in the source image to copy.
 	 * @param factory
 	 *            a factory used to build the float image.
-	 * @param <T>
-	 *            the pixel type of the source image.
 	 * @return a new float Img. Careful: even if the specified interval does not
 	 *         start at (0, 0), the new image will have its first pixel at
 	 *         coordinates (0, 0).
+	 * @param <T>
+	 *            the pixel type of the input image.
 	 */
 	public static final < T extends RealType< T > > Img< FloatType > copyToFloatImg( final RandomAccessible< T > img, final Interval interval, final ImgFactory< FloatType > factory )
 	{
@@ -353,17 +354,18 @@ public class DetectionUtils
 	/**
 	 * Applies a simple 3x3 median filter to the target image.
 	 *
-	 * @param image
-	 *            the input image.
 	 * @param <R>
-	 *            the pixel type of the input and output images.
-	 * @return a new image, or <code>null</code> if the filtering failed.
+	 *            the pixel type in the image.
+	 * @param image
+	 *            the image to filter.
+	 * @return the filtered image, as a new image, or <code>null</code> if there
+	 *         was a problem during processing.
 	 */
 	public static final < R extends RealType< R > & NativeType< R > > Img< R > applyMedianFilter( final RandomAccessibleInterval< R > image )
 	{
 		final MedianFilter2D< R > medFilt = new MedianFilter2D<>( image, 1 );
 		if ( !medFilt.checkInput() || !medFilt.process() )
-			return null;
+		{ return null; }
 		return medFilt.getResult();
 	}
 
@@ -443,7 +445,7 @@ public class DetectionUtils
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = refinedPeak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -456,7 +458,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = refinedPeak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -469,7 +471,7 @@ public class DetectionUtils
 					ra.setPosition( refinedPeak.getOriginalPeak() );
 					final double quality = ra.get().getRealDouble();
 					final double x = refinedPeak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 
@@ -488,7 +490,7 @@ public class DetectionUtils
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
 					final double z = peak.getDoublePosition( 2 ) * calibration[ 2 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -501,7 +503,7 @@ public class DetectionUtils
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
 					final double y = peak.getDoublePosition( 1 ) * calibration[ 1 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
 			}
@@ -514,10 +516,9 @@ public class DetectionUtils
 					ra.setPosition( peak );
 					final double quality = ra.get().getRealDouble();
 					final double x = peak.getDoublePosition( 0 ) * calibration[ 0 ];
-					final Spot spot = new Spot( x, y, z, radius, quality );
+					final Spot spot = new SpotBase( x, y, z, radius, quality );
 					spots.add( spot );
 				}
-
 			}
 		}
 
@@ -593,9 +594,10 @@ public class DetectionUtils
 	 *
 	 * @param img
 	 *            the image to wrap.
-	 * @param <T>
-	 *            the type of pixel in the input image.
 	 * @return a new ImagePlus.
+	 * @param <T>
+	 *            the type of pixels in the image. Must extend {@link RealType}
+	 *            and {@link NativeType}.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImagePlus wrap( final ImgPlus< T > img )
 	{

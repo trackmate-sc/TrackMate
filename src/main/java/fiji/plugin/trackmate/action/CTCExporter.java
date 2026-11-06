@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -50,9 +50,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.action.LabelImgExporter.SpotRoiWriter;
+import fiji.plugin.trackmate.action.LabelImgExporter.SpotShapeWriter;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
@@ -77,7 +78,7 @@ import net.imglib2.util.Util;
  * Cell-Tracking-Challenge convention.
  * <p>
  * See http://celltrackingchallenge.net/
- *
+ * 
  * @author Jean-Yves Tinevez
  *
  */
@@ -173,7 +174,7 @@ public class CTCExporter
 
 	/**
 	 * Saves the settings part as XML for reference.
-	 *
+	 * 
 	 * @param exportRootFolder
 	 *            the root folder for exporting.
 	 * @param saveId
@@ -184,7 +185,7 @@ public class CTCExporter
 	 * @param logger
 	 *            a logger to report progress.
 	 * @throws IOException
-	 *             if a problem happens during writing.
+	 *             if there's any problem writing.
 	 */
 	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
@@ -204,7 +205,7 @@ public class CTCExporter
 	 * For instance the first id return will be '1', which means that the
 	 * original image data will be saved under the folder '01'. If '01' already
 	 * exists, then this method will return 2, etc.
-	 *
+	 * 
 	 * @param exportRootFolder
 	 *            the root folder in which to export the data.
 	 * @return an integer id that can be passed in the other method of this
@@ -271,7 +272,7 @@ public class CTCExporter
 	 * <p>
 	 * Only exports the spots that have a ROI, and write only the frames that
 	 * have at least one spot with a ROI.
-	 *
+	 * 
 	 * @param exportRootFolder
 	 *            the root of the export folder.
 	 * @param saveId
@@ -316,15 +317,16 @@ public class CTCExporter
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-			final SpotRoiWriter< UnsignedShortType > spotWriter = new SpotRoiWriter<>( imgCT );
+			final SpotShapeWriter< UnsignedShortType > spotWriter = new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
-				if ( spot.getRoi() == null )
-					continue;
-				final int id = idGen.getAndIncrement();
-				spotWriter.write( spot, id );
-				framesToWrite.add( Integer.valueOf( frame ) );
+				if ( spot instanceof SpotRoi )
+				{
+					final int id = idGen.getAndIncrement();
+					spotWriter.write( spot, id );
+					framesToWrite.add( Integer.valueOf( frame ) );
+				}
 			}
 		}
 
@@ -340,7 +342,7 @@ public class CTCExporter
 		final Function< Long, String > tifNameGen = nFrames > 999
 				? i -> String.format( "man_seg%04d.tif", i )
 				: i -> String.format( "man_seg%03d.tif", i );
-
+				
 		// Only save frames with spots in.
 		for ( final int frame : framesToWrite )
 		{
@@ -411,8 +413,8 @@ public class CTCExporter
 		Files.createDirectories( path.getParent() );
 		logger.log( "Exporting tracking text file to " + path.toString() );
 
-		try (FileOutputStream fos = new FileOutputStream( path.toFile() );
-				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
+		try (final FileOutputStream fos = new FileOutputStream( path.toFile() );
+				final BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
 		{
 
 			for ( final Integer trackID : trackModel.trackIDs( true ) )
@@ -448,7 +450,7 @@ public class CTCExporter
 					{
 						final long frame = spot.getFeature( Spot.FRAME ).longValue();
 						final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-						final SpotRoiWriter< UnsignedShortType > spotRoiWriter = new SpotRoiWriter<>( imgCT );
+						final SpotShapeWriter< UnsignedShortType > spotRoiWriter = new SpotShapeWriter<>( imgCT );
 						spotRoiWriter.write( spot, currentID );
 					}
 
@@ -510,7 +512,7 @@ public class CTCExporter
 
 	/**
 	 * Returns the folder in which the tracking data will be exported.
-	 *
+	 * 
 	 * @param exportRootFolder
 	 *            the root folder to export in.
 	 * @param saveId
@@ -561,7 +563,7 @@ public class CTCExporter
 					final Spot s2 = spots.get( j );
 					final double r2 = s2.getFeature( Spot.RADIUS ).doubleValue();
 					final double d = Math.sqrt( s1.squareDistanceTo( s2 ) );
-
+					
 					if ( fudgeFactor * r1 > ( d + r2 ) || fudgeFactor * r2 > ( d + r1 ) )
 					{
 						// They overlap too much. We must fix this.
@@ -611,7 +613,7 @@ public class CTCExporter
 							else
 								sources.add( trackModel.getEdgeSource( edge ) );
 						}
-
+						
 						model.beginUpdate();
 						try
 						{

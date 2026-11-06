@@ -61,7 +61,7 @@ public class SpotRoiIterableTest
 				84, 85 };
 
 		final TIntArrayList vals = new TIntArrayList();
-		final IterableInterval< UnsignedByteType > iterable = SpotUtil.iterable( spot, new ImgPlus<>( img ) );
+		final IterableInterval< UnsignedByteType > iterable = spot.iterable( new ImgPlus<>( img ) );
 		final Cursor< UnsignedByteType > cursor = iterable.cursor();
 		while ( cursor.hasNext() )
 		{
@@ -85,7 +85,7 @@ public class SpotRoiIterableTest
 		final double[] yp = new double[] { 1.5, 5, 8.8, 5 };
 		final Spot spot = SpotRoi.createSpot( xp, yp, 1. );
 
-		final IterableInterval< UnsignedByteType > iterable = SpotUtil.iterable( spot, new ImgPlus<>( img ) );
+		final IterableInterval< UnsignedByteType > iterable = spot.iterable( new ImgPlus<>( img ) );
 		final Cursor< UnsignedByteType > cursor = iterable.cursor();
 		while ( cursor.hasNext() )
 		{

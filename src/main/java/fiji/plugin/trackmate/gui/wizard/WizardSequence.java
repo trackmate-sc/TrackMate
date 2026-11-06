@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -21,9 +21,6 @@
  */
 package fiji.plugin.trackmate.gui.wizard;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import javax.swing.JFrame;
 
 /**
@@ -39,7 +36,7 @@ public interface WizardSequence
 	 * Launches the wizard to play this sequence.
 	 *
 	 * @param title
-	 *            the title to show in the wizard window.
+	 *            the title of the frame in which the wizard is displayed.
 	 * @return the {@link JFrame} in which the wizard is displayed.
 	 */
 	public default JFrame run( final String title )
@@ -51,22 +48,8 @@ public interface WizardSequence
 		frame.setSize( 350, 560 );
 		frame.setTitle( title );
 		controller.init();
-		frame.addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final WindowEvent e )
-			{
-				onClose();
-			};
-		} );
 		return frame;
 	}
-
-	/**
-	 * Method called when the wizard is closed.
-	 */
-	public default void onClose()
-	{}
 
 	/**
 	 * Returns the descriptor currently displayed.
@@ -94,7 +77,7 @@ public interface WizardSequence
 	/**
 	 * Returns the descriptor in charge of logging events. It can be accessed
 	 * out of the normal sequence by a special button in the wizard.
-	 *
+	 * 
 	 * @return the descriptor in charge of logging events.
 	 */
 	public WizardPanelDescriptor logDescriptor();
@@ -102,7 +85,7 @@ public interface WizardSequence
 	/**
 	 * Returns the descriptor in charge of configure the views. It can be
 	 * accessed out of the normal sequence by a special button in the wizard.
-	 *
+	 * 
 	 * @return the descriptor in charge of configuring the views.
 	 */
 	public WizardPanelDescriptor configDescriptor();
@@ -127,7 +110,7 @@ public interface WizardSequence
 
 	/**
 	 * Returns the panel in charge of saving the data.
-	 *
+	 * 
 	 * @return the panel in charge of saving the data.
 	 */
 	public WizardPanelDescriptor save();
@@ -136,7 +119,7 @@ public interface WizardSequence
 	 * Position the sequence so that its current descriptor is the one with the
 	 * specified identifier. If the identifier is unknown to the sequence, do
 	 * nothing.
-	 *
+	 * 
 	 * @param panelIdentifier
 	 *            the descriptor identifier.
 	 */

@@ -37,14 +37,12 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.FeatureModel;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
@@ -76,11 +74,7 @@ public class ComputeDistanceToRoiAction extends AbstractTMAction
 	private static final String KEY = "COMPUTE_DIST_TO_ROI";
 
 	@Override
-	public void execute(
-			final TrackMate trackmate,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings,
-			final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log( "Computing distance from visible spots to closest ROI.\n" );
 		// Get Roi Manager.
@@ -92,9 +86,9 @@ public class ComputeDistanceToRoiAction extends AbstractTMAction
 		}
 		// Get spatial calibration.
 		final double[] calibration;
-		if ( trackmate.getSettings() != null )
+		if ( guiModel.getSettings() != null )
 		{
-			final Settings settings = trackmate.getSettings();
+			final Settings settings = guiModel.getSettings();
 			if ( settings.imp != null )
 			{
 				calibration = TMUtils.getSpatialCalibration( settings.imp );
@@ -113,7 +107,7 @@ public class ComputeDistanceToRoiAction extends AbstractTMAction
 		}
 
 		// Compute
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		computeDistance( model, rm, calibration );
 		logger.log( "Done.\n" );
 	}

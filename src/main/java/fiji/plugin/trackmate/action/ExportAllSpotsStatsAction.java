@@ -29,10 +29,7 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.AllSpotsTableView;
 
@@ -50,14 +47,14 @@ public class ExportAllSpotsStatsAction extends AbstractTMAction
 			+ "</html>";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		createSpotsTable( trackmate.getModel(), selectionModel, displaySettings, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
+		createSpotsTable( guiModel, TMUtils.getImagePathWithoutExtension( guiModel.getSettings() ) ).render();
 	}
 
-	public static final AllSpotsTableView createSpotsTable( final Model model, final SelectionModel selectionModel, final DisplaySettings displaySettings, final String imageFileName )
+	public static final AllSpotsTableView createSpotsTable( final GuiModel guiModel, final String imageFileName )
 	{
-		return new AllSpotsTableView( model, selectionModel, displaySettings, imageFileName );
+		return new AllSpotsTableView( guiModel, imageFileName );
 	}
 
 	// Invisible because called on the view config panel.

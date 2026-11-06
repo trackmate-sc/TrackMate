@@ -29,10 +29,7 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.table.BranchTableView;
 
@@ -56,14 +53,14 @@ public class TrackBranchAnalysis extends AbstractTMAction
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/actions/branch-hierarchy-analysis";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		createBranchTable( trackmate.getModel(), selectionModel, TMUtils.getImagePathWithoutExtension( trackmate.getSettings() ) ).render();
+		createBranchTable( guiModel, TMUtils.getImagePathWithoutExtension( guiModel.getSettings() ) ).render();
 	}
 
-	public static final BranchTableView createBranchTable( final Model model, final SelectionModel selectionModel, final String imageFileName )
+	public static final BranchTableView createBranchTable( final GuiModel guiModel, final String imageFileName )
 	{
-		return new BranchTableView( model, selectionModel, imageFileName );
+		return new BranchTableView( guiModel, imageFileName );
 	}
 
 	@Plugin( type = TrackMateActionFactory.class, enabled = true )

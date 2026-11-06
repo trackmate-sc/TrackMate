@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -79,15 +79,15 @@ public class SaveAction extends AbstractAction
 
 	/**
 	 * Saves XML+PNG format.
-	 *
+	 * 
 	 * @param frame
-	 *            the TrackScheme frame to capture from.
+	 *            the TrackScheme frame to capture.
 	 * @param filename
 	 *            the file to save to.
 	 * @param bg
-	 *            the background color, or null for transparent.
+	 *            the color of the background in the exported image.
 	 * @throws IOException
-	 *             if something goes wrong when writing the file.
+	 *             if an error happens while writing.
 	 */
 	protected void saveXmlPng( final TrackSchemeFrame frame, final String filename, final Color bg ) throws IOException
 	{

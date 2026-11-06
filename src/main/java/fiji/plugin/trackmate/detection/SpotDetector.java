@@ -30,15 +30,13 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 /**
- * Interface for Spot detector classes, that are able to segment spots of a
- * given estimated radius within a 2D or 3D image.
+ * Interface for Spot detector classes, that are able to detect or segment spots
+ * in a single time-point 2D or 3D image.
  * <p>
- * Normally, concrete implementation are not expected to be multi-threaded.
- * Indeed, the {@link fiji.plugin.trackmate.TrackMate} trackmate generates one
- * instance of the concrete implementation per thread, to process multiple
- * frames simultaneously.
+ * Concrete implementation can be multithreaded. In that case TrackMate will
+ * possible allocate some threads to each instance of this class.
  * 
- * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt; 2010 - 2012
+ * @author Jean-Yves Tinevez, 2010 - 2012
  * 
  */
 public interface SpotDetector< T extends RealType< T > & NativeType< T > > extends OutputAlgorithm< List< Spot > >, Benchmark

@@ -25,9 +25,9 @@ import java.util.function.Function;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.InitFilterPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
@@ -38,14 +38,14 @@ public class InitFilterDescriptor extends WizardPanelDescriptor
 
 	public static final String KEY = "InitialFiltering";
 
-	private final TrackMate trackmate;
+	private final GuiModel guiModel;
 
-	public InitFilterDescriptor( final TrackMate trackmate, final FeatureFilter filter )
+	public InitFilterDescriptor( final GuiModel guiModel, final FeatureFilter filter )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
+		this.guiModel = guiModel;
 		final Function< String, double[] > valuesCollector = key -> FeatureUtils.collectFeatureValues(
-				Spot.QUALITY, TrackMateObject.SPOTS, trackmate.getModel(), false );
+				Spot.QUALITY, TrackMateObject.SPOTS, guiModel.getModel(), false );
 		this.targetPanel = new InitFilterPanel( filter, valuesCollector );
 	}
 
@@ -58,7 +58,7 @@ public class InitFilterDescriptor extends WizardPanelDescriptor
 			@Override
 			public void run()
 			{
-				trackmate.getModel().getLogger().log( "\nComputing spot quality histogram...\n", Logger.BLUE_COLOR );
+				guiModel.getModel().getLogger().log( "\nComputing spot quality histogram...\n", Logger.BLUE_COLOR );
 				final InitFilterPanel component = ( InitFilterPanel ) targetPanel;
 				component.refresh();
 			}
@@ -69,9 +69,9 @@ public class InitFilterDescriptor extends WizardPanelDescriptor
 	public void aboutToHidePanel()
 	{
 		final InitFilterPanel component = ( InitFilterPanel ) targetPanel;
-		trackmate.getSettings().initialSpotFilterValue = component.getFeatureThreshold().value;
+		guiModel.getSettings().initialSpotFilterValue = component.getFeatureThreshold().value;
 
 		// Settings persistence.
-		SettingsPersistence.saveLastUsedSettings( trackmate.getSettings(), trackmate.getModel().getLogger() );
+		SettingsPersistence.saveLastUsedSettings( guiModel.getSettings(), guiModel.getModel().getLogger() );
 	}
 }

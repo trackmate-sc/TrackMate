@@ -22,7 +22,7 @@
 package fiji.plugin.trackmate;
 
 import fiji.plugin.trackmate.detection.ManualDetectorFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
@@ -33,9 +33,17 @@ public class ManualTrackingPlugIn extends TrackMatePlugIn
 {
 
 	@Override
-	protected WizardSequence createSequence( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	protected WizardSequence createSequence( final GuiModel guiModel )
 	{
-		final WizardSequence sequence = super.createSequence( trackmate, selectionModel, displaySettings );
+		// Trigger computation of features so that they analyzers are declared
+		// in the model.
+		final TrackMate trackmate = guiModel.getTrackMate();
+		trackmate.computeSpotFeatures( false );
+		trackmate.computeEdgeFeatures( false );
+		trackmate.computeTrackFeatures( false );
+
+		// Create sequence and position it on the ConfigureViewsDescriptor.
+		final WizardSequence sequence = super.createSequence( guiModel );
 		sequence.setCurrent( ConfigureViewsDescriptor.KEY );
 		return sequence;
 	}
@@ -52,18 +60,6 @@ public class ManualTrackingPlugIn extends TrackMatePlugIn
 		lSettings.trackerFactory = new ManualTrackerFactory();
 		lSettings.trackerSettings = lSettings.trackerFactory.getDefaultSettings();
 		return lSettings;
-	}
-
-	@Override
-	protected TrackMate createTrackMate( final Model model, final Settings settings )
-	{
-		final TrackMate trackmate = super.createTrackMate( model, settings );
-		// Trigger computation of features so that they analyzers are declared
-		// in the model.
-		trackmate.computeSpotFeatures( false );
-		trackmate.computeEdgeFeatures( false );
-		trackmate.computeTrackFeatures( false );
-		return trackmate;
 	}
 
 	public static void main( final String[] args )

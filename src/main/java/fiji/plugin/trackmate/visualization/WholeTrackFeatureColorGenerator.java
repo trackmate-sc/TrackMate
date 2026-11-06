@@ -23,8 +23,9 @@ package fiji.plugin.trackmate.visualization;
 
 import java.awt.Color;
 
+import org.scijava.ui.config.visitors.gui.elements.colormap.Colormap;
+
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.gui.displaysettings.Colormap;
 
 public class WholeTrackFeatureColorGenerator implements FeatureColorGenerator< Integer >
 {

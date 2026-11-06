@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -58,7 +58,7 @@ public class SpotImageUpdater
 	 * group calls to this method for spots that belong to the same frame.
 	 *
 	 * @param spot
-	 *            the spot for which we want the image string.
+	 *            the spot.
 	 * @param radiusFactor
 	 *            a factor that determines the size of the thumbnail. The
 	 *            thumbnail will have a size equal to the spot diameter times

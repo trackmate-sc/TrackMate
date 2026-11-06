@@ -41,11 +41,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -95,10 +94,10 @@ public class ExportTracksToXML extends AbstractTMAction
 	}
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log( "Exporting tracks to simple XML format.\n" );
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		final int ntracks = model.getTrackModel().nTracks( true );
 		if ( ntracks == 0 )
 		{
@@ -107,12 +106,12 @@ public class ExportTracksToXML extends AbstractTMAction
 		}
 
 		logger.log( "  Preparing XML data.\n" );
-		final Element root = marshall( model, trackmate.getSettings(), logger );
+		final Element root = marshall( model, guiModel.getSettings(), logger );
 
 		File folder;
 		try
 		{
-			folder = new File( trackmate.getSettings().imp.getOriginalFileInfo().directory );
+			folder = new File( guiModel.getSettings().imp.getOriginalFileInfo().directory );
 		}
 		catch ( final NullPointerException npe )
 		{
@@ -122,7 +121,7 @@ public class ExportTracksToXML extends AbstractTMAction
 		File file;
 		try
 		{
-			String filename = trackmate.getSettings().imageFileName;
+			String filename = guiModel.getSettings().imageFileName;
 			final int dot = filename.indexOf( "." );
 			filename = dot < 0 ? filename : filename.substring( 0, dot );
 			file = new File( folder.getPath() + File.separator + filename + "_Tracks.xml" );

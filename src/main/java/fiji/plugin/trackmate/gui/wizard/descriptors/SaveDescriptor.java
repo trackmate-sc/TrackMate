@@ -31,8 +31,8 @@ import javax.swing.SwingUtilities;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackMatePlugIn;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.LogPanel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.IOUtils;
@@ -44,18 +44,15 @@ public class SaveDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "Saving";
 
-	private final TrackMate trackmate;
-
-	private final DisplaySettings displaySettings;
-
 	private final WizardSequence sequence;
 
-	public SaveDescriptor( final TrackMate trackmate, final DisplaySettings displaySettings, final WizardSequence sequence )
+	private final GuiModel guiModel;
+
+	public SaveDescriptor( final GuiModel guiModel, final WizardSequence sequence )
 	{
 		super( KEY );
+		this.guiModel = guiModel;
 		this.targetPanel = sequence.logDescriptor().getPanelComponent();
-		this.trackmate = trackmate;
-		this.displaySettings = displaySettings;
 		this.sequence = sequence;
 	}
 
@@ -70,14 +67,15 @@ public class SaveDescriptor extends WizardPanelDescriptor
 		if ( TrackMatePlugIn.lastLoadedFile != null && TrackMatePlugIn.lastLoadedFile.exists() )
 			file = TrackMatePlugIn.lastLoadedFile;
 		else
-			file = TMUtils.proposeTrackMateSaveFile( trackmate.getSettings(), logger );
+			file = TMUtils.proposeTrackMateSaveFile( guiModel.getSettings(), logger );
 
 		/*
 		 * If we are to save tracks, we better ensures that track and edge
 		 * features are there, even if we have to enforce it.
 		 */
-		if ( trackmate.getModel().getTrackModel().nTracks( false ) > 0 )
+		if ( guiModel.getModel().getTrackModel().nTracks( false ) > 0 )
 		{
+			final TrackMate trackmate = guiModel.getTrackMate();
 			trackmate.computeEdgeFeatures( true );
 			trackmate.computeTrackFeatures( true );
 		}
@@ -97,10 +95,10 @@ public class SaveDescriptor extends WizardPanelDescriptor
 		final TmXmlWriter writer = new TmXmlWriter( file, logger );
 
 		writer.appendLog( logPanel.getTextContent() );
-		writer.appendModel( trackmate.getModel() );
-		writer.appendSettings( trackmate.getSettings() );
+		writer.appendModel( guiModel.getModel() );
+		writer.appendSettings( guiModel.getSettings() );
 		writer.appendGUIState( sequence.current().getPanelDescriptorIdentifier() );
-		writer.appendDisplaySettings( displaySettings );
+		writer.appendDisplaySettings( guiModel.getDisplaySettings() );
 
 		try
 		{

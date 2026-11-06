@@ -69,7 +69,15 @@ public class TrackCollectionDataset extends ModelDataset
 	@Override
 	public void setItemLabel( final int item, final String label )
 	{
-		model.getTrackModel().setName( trackIDs.get( item ), label );
+		model.beginUpdate();
+		try
+		{
+			model.setTrackName( trackIDs.get( item ), label );
+		}
+		finally
+		{
+			model.endUpdate();
+		}
 	}
 
 	@Override

@@ -312,7 +312,7 @@ public class TrackModel
 		edgesModified.add( edge );
 	}
 
-	Boolean setVisibility( final Integer trackID, final boolean visible )
+	public boolean setVisibility( final Integer trackID, final boolean visible )
 	{
 		return visibility.put( trackID, Boolean.valueOf( visible ) );
 	}
@@ -518,6 +518,14 @@ public class TrackModel
 	/**
 	 * Returns the set of track IDs managed by this model, ordered by track
 	 * names (alpha-numerically sorted).
+	 * <p>
+	 * The set maintains the order of the track IDs, so that iterating over it
+	 * will return the track IDs in the order of their names. It is possible to
+	 * add it to a {@link java.util.List} to facilitate navigating the ids:
+	 * <pre>
+	 * List< String > trackIDList = new ArrayList<>( trackIDs );
+	 * ListIterator< String > iterator = trackIDList.listIterator();
+	 * </pre>
 	 *
 	 * @param visibleOnly
 	 *            if <code>true</code>, only visible track IDs will be returned.
@@ -733,25 +741,41 @@ public class TrackModel
 	 */
 
 	/**
-	 * Returns a new depth first iterator over the spots connected by links in
-	 * this model. A boolean flag allow to set whether the returned iterator
-	 * does take into account the edge direction. If true, the iterator will not
-	 * be able to iterate backward in time.
+	 * Returns a new, undirected depth first iterator over the spots connected
+	 * by links in this model. The iterator will iterate backward and forward in
+	 * time.
 	 *
 	 * @param start
 	 *            the spot to start iteration with. Can be <code>null</code>,
 	 *            then the start will be taken randomly and will traverse all
 	 *            the links.
-	 * @param directed
-	 *            if true returns a directed iterator, undirected if false.
 	 * @return a new depth-first iterator.
 	 */
-	public GraphIterator< Spot, DefaultWeightedEdge > getDepthFirstIterator( final Spot start, final boolean directed )
+	public GraphIterator< Spot, DefaultWeightedEdge > getDepthFirstIterator( final Spot start )
 	{
-		if ( directed )
-			return new TimeDirectedDepthFirstIterator( graph, start );
-
 		return new DepthFirstIterator<>( graph, start );
+	}
+
+	/**
+	 * Returns a new, directed depth first iterator over the spots connected by
+	 * links in this model.
+	 * <p>
+	 * The iterator will iterate forward in time only. If the boolean flag
+	 * <code>reversed</code> is set to <code>true</code>, the iterator will
+	 * iterate backward in time only.
+	 * 
+	 * @param start
+	 *            the spot to start iteration with. Can be <code>null</code>,
+	 *            then the start will be taken randomly and will traverse all
+	 *            the links.
+	 * @param reversed
+	 *            if <code>true</code>, the iterator will iterate backward in
+	 *            time only, otherwise it will iterate forward in time only.
+	 * @return a new depth-first iterator.
+	 */
+	public GraphIterator< Spot, DefaultWeightedEdge > getDirectedDepthFirstIterator( final Spot start, final boolean reversed )
+	{
+		return new TimeDirectedDepthFirstIterator( graph, start, reversed );
 	}
 
 	/**
@@ -1288,7 +1312,7 @@ public class TrackModel
 							for ( final Spot v : targetVCS )
 								vertexToID.put( v, newid );
 
-							final Boolean targetVisibility = visibility.get( id );
+							final boolean targetVisibility = visibility.get( id );
 							visibility.put( newid, targetVisibility );
 							names.put( newid, nameGenerator.next() );
 							// Transaction: both children tracks are marked for

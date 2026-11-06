@@ -27,13 +27,11 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.AbstractTMAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 
 public class CloseGapsAction extends AbstractTMAction
 {
@@ -61,9 +59,9 @@ public class CloseGapsAction extends AbstractTMAction
 	public static final String DOC_URL = "https://imagej.net/plugins/trackmate/actions/close-gaps-action";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		final CloseGapsController controller = new CloseGapsController( trackmate, logger );
+		final CloseGapsController controller = new CloseGapsController( guiModel.getTrackMate(), logger );
 		controller.show();
 	}
 

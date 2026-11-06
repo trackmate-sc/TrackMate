@@ -24,12 +24,10 @@ package fiji.plugin.trackmate.gui.wizard.descriptors;
 import java.util.Map;
 import java.util.Set;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.FeatureUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.components.FeaturePlotSelectionPanel;
 import fiji.plugin.trackmate.gui.components.GrapherPanel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 
@@ -38,13 +36,13 @@ public class GrapherDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "GraphFeatures";
 
-	private final TrackMate trackmate;
+	private final GuiModel guiModel;
 
-	public GrapherDescriptor( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public GrapherDescriptor( final GuiModel guiModel )
 	{
 		super( KEY );
-		this.trackmate = trackmate;
-		this.targetPanel = new GrapherPanel( trackmate, selectionModel, displaySettings );
+		this.guiModel = guiModel;
+		this.targetPanel = new GrapherPanel( guiModel );
 	}
 
 	@Override
@@ -53,17 +51,17 @@ public class GrapherDescriptor extends WizardPanelDescriptor
 		// Regen features.
 		final GrapherPanel panel = ( GrapherPanel ) targetPanel;
 
-		final Map< String, String > spotFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.SPOTS, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > spotFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.SPOTS, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > spotFeatures = spotFeatureNames.keySet();
 		final FeaturePlotSelectionPanel spotFeatureSelectionPanel = panel.getSpotFeatureSelectionPanel();
 		spotFeatureSelectionPanel.setFeatures( spotFeatures, spotFeatureNames );
 
-		final Map< String, String > edgeFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.EDGES, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > edgeFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.EDGES, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > edgeFeatures = edgeFeatureNames.keySet();
 		final FeaturePlotSelectionPanel edgeFeatureSelectionPanel = panel.getEdgeFeatureSelectionPanel();
 		edgeFeatureSelectionPanel.setFeatures( edgeFeatures, edgeFeatureNames );
 
-		final Map< String, String > trackFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.TRACKS, trackmate.getModel(), trackmate.getSettings() );
+		final Map< String, String > trackFeatureNames = FeatureUtils.collectFeatureKeys( TrackMateObject.TRACKS, guiModel.getModel(), guiModel.getSettings() );
 		final Set< String > trackFeatures = trackFeatureNames.keySet();
 		final FeaturePlotSelectionPanel trackFeatureSelectionPanel = panel.getTrackFeatureSelectionPanel();
 		trackFeatureSelectionPanel.setFeatures( trackFeatures, trackFeatureNames );

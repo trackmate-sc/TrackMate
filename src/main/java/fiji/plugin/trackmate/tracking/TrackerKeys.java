@@ -251,13 +251,4 @@ public class TrackerKeys
 	/** A default value for the {@value #KEY_CUTOFF_PERCENTILE} parameter. */
 	public static final double DEFAULT_CUTOFF_PERCENTILE = 0.9d;
 
-	/**
-	 * Key for the parameter that stores the blocking value: cost for
-	 * non-physical, forbidden links. Expected values are {@link Double}s, and
-	 * are typically very large.
-	 */
-	public static final String KEY_BLOCKING_VALUE = "BLOCKING_VALUE";
-
-	/** A default value for the {@value #KEY_BLOCKING_VALUE} parameter. */
-	public static final double DEFAULT_BLOCKING_VALUE = Double.POSITIVE_INFINITY;
 }

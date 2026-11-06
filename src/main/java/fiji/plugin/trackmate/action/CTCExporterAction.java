@@ -32,10 +32,8 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.CTCExporter.ExportType;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 
@@ -53,11 +51,11 @@ public class CTCExporterAction extends AbstractTMAction
 			"</html>";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		final GenericDialog dialog = new GenericDialog( "CTC exporter", parent );
 
-		final ImagePlus imp = trackmate.getSettings().imp;
+		final ImagePlus imp = guiModel.getSettings().imp;
 		String defaultPath;
 		if ( imp == null || imp.getOriginalFileInfo() == null )
 			defaultPath = System.getProperty( "user.home" );
@@ -80,7 +78,7 @@ public class CTCExporterAction extends AbstractTMAction
 
 		try
 		{
-			CTCExporter.exportAll( exportRootFolder, trackmate, ExportType.values()[ choiceIndex ], logger );
+			CTCExporter.exportAll( exportRootFolder, guiModel.getTrackMate(), ExportType.values()[ choiceIndex ], logger );
 		}
 		catch ( final IOException e )
 		{

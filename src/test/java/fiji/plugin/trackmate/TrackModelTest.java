@@ -49,7 +49,7 @@ public class TrackModelTest
 			Spot previous = null;
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				if ( null != previous )
 				{
@@ -83,7 +83,7 @@ public class TrackModelTest
 			Spot spot = null;
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				if ( null != previous )
 				{
@@ -125,7 +125,7 @@ public class TrackModelTest
 		{
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				if ( null != previous )
 				{
@@ -158,14 +158,14 @@ public class TrackModelTest
 		// Build 1 long track
 		final TrackModel model = new TrackModel();
 		final List< DefaultWeightedEdge > trackBreaks = new ArrayList<>();
-		Spot previous = new Spot( 0d, 0d, 0d, 1d, -1d );
+		Spot previous = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 		model.addSpot( previous );
 		for ( int i = 0; i < N_TRACKS; i++ )
 		{
 			DefaultWeightedEdge edge = null;
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				edge = model.addEdge( previous, spot, 1 );
 				previous = spot;
@@ -198,7 +198,7 @@ public class TrackModelTest
 			Spot previous = null;
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				if ( null != previous )
 				{
@@ -245,7 +245,7 @@ public class TrackModelTest
 			Spot previous = null;
 			for ( int j = 0; j < DEPTH; j++ )
 			{
-				final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+				final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 				model.addSpot( spot );
 				if ( null != previous )
 				{

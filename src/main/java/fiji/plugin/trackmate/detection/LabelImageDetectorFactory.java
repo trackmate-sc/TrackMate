@@ -24,6 +24,7 @@ package fiji.plugin.trackmate.detection;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,8 +67,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 			+ "that is unique to the object."
 			+ "<p>"
 			+ "This detector reads such an image and create spots from each object. "
-			+ "In 2D the contour of a label is imported. In 3D, spherical spots "
-			+ "of the same volume that the label are created."
+			+ "In 2D the contour of a label is imported. In 3D, a mesh around the "
+			+ "label is imported."
 			+ "<p>"
 			+ "The spot quality stores the object area or volume in pixels."
 			+ "</html>";
@@ -82,6 +83,7 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	public SpotDetector< T > getDetector( final ImgPlus< T > img, final Map< String, Object > settings, final Interval interval, final int frame )
 	{
 		final boolean simplifyContours = ( Boolean ) settings.get( KEY_SIMPLIFY_CONTOURS );
+		final double smoothingScale = ( Double ) settings.get( KEY_SMOOTHING_SCALE );
 		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 		final RandomAccessible< T > imFrame = DetectionUtils.prepareFrameImg( img, channel, frame );
@@ -90,7 +92,8 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 				imFrame,
 				interval,
 				calibration,
-				simplifyContours );
+				simplifyContours,
+				smoothingScale );
 		return detector;
 	}
 
@@ -111,6 +114,12 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 
 	@Override
 	public boolean has2Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean has3Dsegmentation()
 	{
 		return true;
 	}
@@ -144,5 +153,4 @@ public class LabelImageDetectorFactory< T extends RealType< T > & NativeType< T 
 	{
 		return ThresholdDetectorFactory.ICON;
 	}
-
 }

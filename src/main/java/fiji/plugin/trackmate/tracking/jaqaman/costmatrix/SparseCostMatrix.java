@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -47,7 +47,7 @@ import java.util.List;
  * Volgenant paper: <code>Volgenant. Linear and semi-assignment problems: A core
  * oriented approach. Computers &amp; Operations Research (1996) vol. 23 (10) pp.
  * 917-932</code>
- *
+ * 
  * @author Jean-Yves Tinevez - 2014
  */
 public class SparseCostMatrix
@@ -101,12 +101,12 @@ public class SparseCostMatrix
 	 * These two arrays must be arranged row by row, starting with the first
 	 * one. And in each row, the columns must be sorted in increasing order (to
 	 * facilitate index search). Also, each row must have at least one
-	 * non-infinte cost. If not, an {@link IllegalArgumentException} is thrown.
+	 * non-infinite cost. If not, an {@link IllegalArgumentException} is thrown.
 	 * <ol start="3">
 	 * <li><code>number</code> an <code>int[]</code> array, with one element per
 	 * row, that contains the number of non infinite cost for a row.
 	 * </ol>
-	 *
+	 * 
 	 * @param cc
 	 *            the cost array.
 	 * @param kk
@@ -114,7 +114,7 @@ public class SparseCostMatrix
 	 * @param number
 	 *            the number of element for each row.
 	 * @param nCols
-	 *            the number of columns in the matrix.
+	 *            the number of columns in the cost matrix.
 	 * @throws IllegalArgumentException
 	 *             if the cost and column arrays are not of the same size, if
 	 *             the column array is not sorted row by row, of if one row has
@@ -306,7 +306,7 @@ public class SparseCostMatrix
 	 * Computes the total cost for an assignment specified by row. It is
 	 * supposed that row <code>i</code> is assigned to column
 	 * <code>rowAssignment[i]</code>.
-	 *
+	 * 
 	 * @param rowAssignment
 	 *            the assignment, specified by row.
 	 * @return the total cost for this assignment.
@@ -327,7 +327,7 @@ public class SparseCostMatrix
 	 * Creates and returns a new <code>double[][]</code> matrix representing a
 	 * non-sparse version of this cost matrix. Missing costs are replace by
 	 * {@link Double#MAX_VALUE}.
-	 *
+	 * 
 	 * @return a new <code>double[][]</code>
 	 */
 	public double[][] toFullMatrix()
@@ -355,7 +355,7 @@ public class SparseCostMatrix
 	 * Returns the value stored by this matrix at the specified row and column.
 	 * If a value is not present in the sparse matrix, the specified missing
 	 * value is returned.
-	 *
+	 * 
 	 * @param i
 	 *            the row.
 	 * @param j
@@ -376,7 +376,7 @@ public class SparseCostMatrix
 
 	/**
 	 * Exposes the array of all the non-infinite costs.
-	 *
+	 * 
 	 * @return the costs.
 	 */
 	public double[] getCosts()
@@ -397,14 +397,14 @@ public class SparseCostMatrix
 	/**
 	 * Returns the vertical concatenation of this matrix with the specified one.
 	 * So that if this matrix is A and the specified matrix is B, you get
-	 *
+	 * 
 	 * <pre>
 	 * -----
 	 * | A |
 	 * | B |
 	 * -----
 	 * </pre>
-	 *
+	 * 
 	 * @param B
 	 *            the matrix to concatenate this matrix with
 	 * @return a new sparse matrix.
@@ -438,13 +438,13 @@ public class SparseCostMatrix
 	/**
 	 * Returns the horizontal concatenation of this matrix with the specified
 	 * one. So that if this matrix is A and the specified matrix is B, you get
-	 *
+	 * 
 	 * <pre>
 	 * -------
 	 * | A B |
 	 * -------
 	 * </pre>
-	 *
+	 * 
 	 * @param B
 	 *            the matrix to concatenate this matrix with
 	 * @return a new sparse matrix.
@@ -493,7 +493,7 @@ public class SparseCostMatrix
 
 	/**
 	 * Returns the transpose of this matrix.
-	 *
+	 * 
 	 * @return a new sparse matrix.
 	 */
 	public final SparseCostMatrix transpose()
@@ -556,7 +556,7 @@ public class SparseCostMatrix
 	/**
 	 * Replace all the non-infinite values of this matrix by the specified
 	 * value.
-	 *
+	 * 
 	 * @param value
 	 *            the value to write in this matrix.
 	 */

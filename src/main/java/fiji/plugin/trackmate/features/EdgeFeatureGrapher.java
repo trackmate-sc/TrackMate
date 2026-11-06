@@ -25,44 +25,34 @@ import java.util.List;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 {
 
 	private final List< DefaultWeightedEdge > edges;
 
-	private final Model model;
-
-	private final SelectionModel selectionModel;
-
-	private final DisplaySettings ds;
-
 	private final boolean addLines;
 
+	private final GuiModel guiModel;
+
 	public EdgeFeatureGrapher(
+			final GuiModel guiModel,
 			final List< DefaultWeightedEdge > edges,
 			final String xFeature,
 			final List< String > yFeatures,
-			final Model model,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings,
 			final boolean addLines )
 	{
 		super(
 				xFeature,
 				yFeatures,
-				model.getFeatureModel().getEdgeFeatureDimensions().get( xFeature ),
-				model.getFeatureModel().getEdgeFeatureDimensions(),
-				model.getFeatureModel().getEdgeFeatureNames(),
-				model.getSpaceUnits(),
-				model.getTimeUnits() );
+				guiModel.getModel().getFeatureModel().getEdgeFeatureDimensions().get( xFeature ),
+				guiModel.getModel().getFeatureModel().getEdgeFeatureDimensions(),
+				guiModel.getModel().getFeatureModel().getEdgeFeatureNames(),
+				guiModel.getModel().getSpaceUnits(),
+				guiModel.getModel().getTimeUnits() );
+		this.guiModel = guiModel;
 		this.edges = edges;
-		this.model = model;
-		this.selectionModel = selectionModel;
-		this.ds = displaySettings;
 		this.addLines = addLines;
 	}
 
@@ -70,9 +60,9 @@ public class EdgeFeatureGrapher extends AbstractFeatureGrapher
 	protected ModelDataset buildMainDataSet( final List< String > targetYFeatures )
 	{
 		return new EdgeCollectionDataset(
-				model,
-				selectionModel,
-				ds,
+				guiModel.getModel(),
+				guiModel.getSelectionModel(),
+				guiModel.getDisplaySettings(),
 				xFeature,
 				targetYFeatures,
 				edges,

@@ -28,6 +28,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.io.TmXmlReader;
 import ij.ImageJ;
@@ -47,6 +48,7 @@ public class TrackMateTableExample
 		model.getSpots().iterable( 1, true ).forEach( selectionModel::addSpotToSelection );
 		final String exportFile = System.getProperty( "user.home" ) + File.separator + "test";
 
-		new TrackTableView( model, selectionModel, ds, exportFile ).render();
+		final GuiModel guiModel = new GuiModel( model, ds );
+		new TrackTableView( guiModel, exportFile ).render();
 	}
 }
