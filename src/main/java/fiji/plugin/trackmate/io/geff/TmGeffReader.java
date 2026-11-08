@@ -68,14 +68,15 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
-import fiji.plugin.trackmate.io.geff.heuristics.AxisIdentifierHeuristic;
-import fiji.plugin.trackmate.io.geff.heuristics.RadiusIdentifierHeuristic;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.io.geff.heuristics.AxisIdentifierHeuristic;
+import fiji.plugin.trackmate.io.geff.heuristics.RadiusIdentifierHeuristic;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
@@ -124,7 +125,7 @@ public class TmGeffReader
 
 		final Map< String, Object > trackmateMD = trackmateMetadata();
 		if ( trackmateMD == null )
-			return null;
+			return ConfigureViewsDescriptor.KEY;
 		final String guiState = ( String ) trackmateMD.get( GUI_STATE_ELEMENT_KEY );
 		return guiState;
 	}
@@ -137,6 +138,7 @@ public class TmGeffReader
 		final Map< String, Object > trackmateMD = trackmateMetadata();
 		if ( trackmateMD == null )
 			return DisplaySettingsIO.readUserDefault();
+		@SuppressWarnings( "unchecked" )
 		final Map< String, Object > displaySettingsJson = ( Map< String, Object > ) trackmateMD.get( "displaySettings" );
 		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
 	}
