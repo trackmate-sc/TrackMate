@@ -384,7 +384,7 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.detectorFactory )
 		{
-			final String errorMessage = settings.detectorFactory.marshal( settings.detectorSettings, el );
+			final String errorMessage = marshal( settings.detectorSettings, el );
 			if ( errorMessage != null )
 				logger.error( errorMessage );
 			else
@@ -407,7 +407,7 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.trackerFactory )
 		{
-			final String error = settings.trackerFactory.marshal( settings.trackerSettings, el );
+			final String error = marshal( settings.trackerSettings, el );
 			if ( error != null )
 				logger.error( error );
 			else
@@ -844,5 +844,19 @@ public class TmXmlWriter
 			logger.error( "Problem writing the mesh file:\n" + e.getMessage() );
 			e.printStackTrace();
 		}
+	}
+
+	private static String marshal( final Map< String, Object > settings, final Element element )
+	{
+		for ( final Map.Entry< String, Object > entry : settings.entrySet() )
+		{
+			final String key = entry.getKey();
+			final Object value = entry.getValue();
+			if ( null == value )
+				return "No value set for parameter " + key;
+
+			element.setAttribute( key, value.toString() );
+		}
+		return null;
 	}
 }

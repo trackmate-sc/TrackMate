@@ -22,9 +22,6 @@
 package fiji.plugin.trackmate.io.xml;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
-import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.readIntAttribute;
 import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
 import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
@@ -90,6 +87,9 @@ import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_FILTER_COLLECTION_ELE
 import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.xml.TmXmlWriter.MESH_FILE_EXTENSION;
+import static fiji.plugin.trackmate.io.xml.XmlUtils.readBooleanAttribute;
+import static fiji.plugin.trackmate.io.xml.XmlUtils.readDoubleAttribute;
+import static fiji.plugin.trackmate.io.xml.XmlUtils.readIntAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
@@ -128,6 +128,8 @@ import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.TrackMateFactoryBase;
+import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -148,6 +150,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.TrackerKeys;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.mesh.Mesh;
@@ -792,7 +795,7 @@ public class TmXmlReader implements TrackMateFileReader
 		settings.detectorFactory = factory;
 
 		final Map< String, Object > ds = new HashMap<>();
-		final String errorMessage = factory.unmarshal( element, ds );
+		final String errorMessage = unmarshal( element, ds, factory );
 		ok = ( errorMessage == null );
 
 		settings.detectorSettings = ds;
@@ -854,7 +857,7 @@ public class TmXmlReader implements TrackMateFileReader
 		settings.trackerFactory = factory;
 
 		// All the hard work is delegated to the factory.
-		final String error = factory.unmarshal( element, ds );
+		final String error = unmarshal( element, ds, factory );
 		if ( error == null )
 		{
 			settings.trackerSettings = ds;
@@ -1577,5 +1580,98 @@ public class TmXmlReader implements TrackMateFileReader
 		featureShortNames.put( feature, featureShortName );
 		featureDimensions.put( feature, featureDimension );
 		isIntFeature.put( feature, Boolean.valueOf( isInt ) );
+	}
+
+	/**
+	 * Un-marshals a JDom element to update a settings map.
+	 *
+	 * @param element
+	 *            the JDom element to read from.
+	 * @param settings
+	 *            the map to update. Is cleared prior to updating, so that it
+	 *            contains only the parameters specific to the target detector
+	 *            factory.
+	 * @return an error message if un-marshaling was unsuccessful. If
+	 *         successful, returns <code>null</code>.
+	 */
+	private static final String unmarshal( final Element element, final Map< String, Object > settings, final TrackMateFactoryBase< ? > factory )
+	{
+		// We get the class of the attribute to unmarshal from the default map.
+		final Map< String, Object > defaultSettings = factory.getDefaultSettings();
+
+		settings.clear();
+		for ( final Object key : element.getAttributes() )
+		{
+			final String keyString = ( ( org.jdom2.Attribute ) key ).getName();
+			if ( DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME.equals( keyString ) || TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME.equals( keyString ) )
+			{
+				// This is the name of the detector or tracker, we skip it.
+				continue;
+			}
+
+			if ( !defaultSettings.containsKey( keyString ) )
+				return "When unmarshaling: Unknown parameter " + keyString + " in factory " + factory.getName() + ".\n";
+
+			final Attribute att = element.getAttribute( keyString );
+			if ( null == att )
+				return "When unmarshaling: No value set for parameter " + keyString + " in factory " + factory.getName() + ".\n";
+
+			// Expected class
+			final Class< ? > klass = defaultSettings.get( keyString ).getClass();
+			try
+			{
+				final Object value;
+				if ( klass == String.class )
+				{
+					value = att.getValue();
+				}
+				else if ( klass == Integer.class )
+				{
+					value = att.getIntValue();
+				}
+				else if ( klass == Double.class )
+				{
+					value = att.getDoubleValue();
+				}
+				else if ( klass == Float.class )
+				{
+					value = att.getFloatValue();
+				}
+				else if ( klass == Long.class )
+				{
+					value = att.getLongValue();
+				}
+				else if ( klass == Boolean.class )
+				{
+					value = att.getBooleanValue();
+				}
+				else if ( klass.isEnum() )
+				{
+					@SuppressWarnings( "unchecked" )
+					final Class< Enum< ? > > enumClass = ( Class< Enum< ? > > ) klass;
+					final Enum< ? >[] enums = enumClass.getEnumConstants();
+					Enum< ? > tmp = null;
+					for ( final Enum< ? > e : enums )
+					{
+						if ( e.toString().equals( att.getValue() ) )
+						{
+							tmp = e;
+							break;
+						}
+					}
+					value = tmp;
+				}
+				else
+				{
+					return "When unmarshalling: Unsupported type " + klass.getSimpleName() + " for parameter " + keyString + " in factory " + factory.getName();
+				}
+				settings.put( keyString, value );
+			}
+			catch ( final DataConversionException e )
+			{
+				return "When unmarshalling: Cannot parse value '" + att.getValue() + "' for parameter " + keyString + " in factory " + factory.getName() + ".";
+			}
+		}
+		return null;
 	}
 }
