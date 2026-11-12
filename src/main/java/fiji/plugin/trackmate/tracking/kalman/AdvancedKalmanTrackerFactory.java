@@ -21,18 +21,12 @@
  */
 package fiji.plugin.trackmate.tracking.kalman;
 
-import static fiji.plugin.trackmate.io.IOUtils.marshallMap;
-import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
-import static fiji.plugin.trackmate.io.IOUtils.unmarshallMap;
-import static fiji.plugin.trackmate.io.IOUtils.writeAttribute;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.DEFAULT_LINKING_MAX_DISTANCE;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_KALMAN_SEARCH_RADIUS;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_FEATURE_PENALTIES;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.KEY_LINKING_MAX_DISTANCE;
-import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_FEATURE_PENALTIES;
-import static fiji.plugin.trackmate.tracking.jaqaman.LAPUtils.XML_ELEMENT_NAME_LINKING;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +34,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.jdom2.Element;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -126,78 +119,6 @@ public class AdvancedKalmanTrackerFactory extends SegmentTrackerFactory
 		settings.put( KEY_KALMAN_SEARCH_RADIUS, DEFAULT_KALMAN_SEARCH_RADIUS );
 		settings.put( KEY_LINKING_FEATURE_PENALTIES, new HashMap<>( DEFAULT_LINKING_FEATURE_PENALTIES ) );
 		return settings;
-	}
-
-	/**
-	 * Marshall into the {@link Element} the settings in the {@link Map} that
-	 * relate to segment linking: gap-closing, merging segments, splitting
-	 * segments.
-	 */
-	@Override
-	public String marshal( final Map< String, Object > settings, final Element element )
-	{
-		boolean ok = true;
-		final StringBuilder str = new StringBuilder();
-
-		ok = ok & writeAttribute( settings, element, KEY_KALMAN_SEARCH_RADIUS, Double.class, str );
-		// Linking
-		final Element linkingElement = new Element( XML_ELEMENT_NAME_LINKING );
-		ok = ok & writeAttribute( settings, linkingElement, KEY_LINKING_MAX_DISTANCE, Double.class, str );
-		// feature penalties
-		@SuppressWarnings( "unchecked" )
-		final Map< String, Double > lfpm = ( Map< String, Double > ) settings.get( KEY_LINKING_FEATURE_PENALTIES );
-		final Element lfpElement = new Element( XML_ELEMENT_NAME_FEATURE_PENALTIES );
-		marshallMap( lfpm, lfpElement );
-		linkingElement.addContent( lfpElement );
-		element.addContent( linkingElement );
-
-		if ( !ok )
-			return str.toString();
-
-		return super.marshal( settings, element );
-	}
-
-	@Override
-	public String unmarshal( final Element element, final Map< String, Object > settings )
-	{
-		final StringBuilder errorHolder = new StringBuilder();
-		// common parameters
-		boolean ok = unmarshallSegment( element, settings, errorHolder );
-
-		ok = ok & readDoubleAttribute( element, settings, KEY_KALMAN_SEARCH_RADIUS, errorHolder );
-
-		// Linking
-		final Element linkingElement = element.getChild( XML_ELEMENT_NAME_LINKING );
-		if ( null == linkingElement )
-		{
-			errorHolder.append( "Could not found the " + XML_ELEMENT_NAME_LINKING + " element in XML.\n" );
-			ok = false;
-		}
-		else
-		{
-			ok = ok & readDoubleAttribute( linkingElement, settings, KEY_LINKING_MAX_DISTANCE, errorHolder );
-			// feature penalties
-			final Map< String, Double > lfpMap = new HashMap<>();
-			final Element lfpElement = linkingElement.getChild( XML_ELEMENT_NAME_FEATURE_PENALTIES );
-			if ( null != lfpElement )
-			{
-				ok = ok & unmarshallMap( lfpElement, lfpMap, errorHolder );
-			}
-			settings.put( KEY_LINKING_FEATURE_PENALTIES, lfpMap );
-		}
-
-		final String error = checkSettings( settings );
-		if ( null != error )
-		{
-			ok = false;
-			errorHolder.append( error ); // append validity check message
-		}
-
-		if ( !ok )
-			return errorHolder.toString();
-
-		return null;
-
 	}
 
 	@Override
