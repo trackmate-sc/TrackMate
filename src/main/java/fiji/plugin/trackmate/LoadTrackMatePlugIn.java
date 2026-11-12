@@ -26,11 +26,9 @@ import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JFrame;
 
-import org.litt.geff.GeffException;
 import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -46,8 +44,8 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.SettingsPersistence;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.io.geff.TmGeffReader;
+import fiji.plugin.trackmate.io.TrackMateFileReader;
+import fiji.plugin.trackmate.io.TrackMateFileReaders;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import ij.IJ;
@@ -60,9 +58,9 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 	 * Loads a TrackMate file in the GUI.
 	 *
 	 * @param filePath
-	 *            the path to a TrackMate XML file, to load. If
-	 *            <code>null</code> or 0-length, the user will be asked to
-	 *            browse to a TrackMate file.
+	 *            the path to a TrackMate file to load. If <code>null</code>
+	 *            or 0-length, the user will be asked to browse to a TrackMate
+	 *            file.
 	 */
 	@Override
 	public void run( final String filePath )
@@ -94,189 +92,58 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 			}
 		}
 
-		// Do we have an old XM file?
-		if ( filePath.toLowerCase().endsWith( ".xml" ) )
-		{
-			readOldXmlFile( filePath, logger );
-			return;
-		}
-
-		// Read the file content
-		final TmGeffReader reader = new TmGeffReader( filePath );
+		// Open with the reader matching the file format.
+		final TrackMateFileReader reader = TrackMateFileReaders.open( file.getPath(), logger );
 
 		final String version = reader.getVersion();
-		logger.log( "TrackMate file version: " + version + '\n' );
+		logger.log( "TrackMate file version: " + ( null == version ? "unknown" : version ) + '\n' );
 
-		// We could open the file. Let's remember it.
-		lastLoadedFile = file;
-
-		// Log
-		final String logText = reader.getLog() + '\n';
-
-		// Model
-		Model model;
-		try
-		{
-			model = reader.getModel();
-		}
-		catch ( IOException | GeffException e )
-		{
-			logger.error( "Problem reading the model:\n" + e.getMessage() + '\n'
-					+ "Aborting.\n" );
-			e.printStackTrace();
-			return;
-		}
-
-		/*
-		 * Read image.
-		 */
-
-		ImagePlus imp = reader.readImage();
-		if ( null == imp )
-			imp = ViewUtils.makeEmptyImagePlus( model );
-
-		/*
-		 * Read settings.
-		 */
-
-		Settings settings = reader.readSettings( imp );
-		if ( settings == null )
-		{
-			logger.error( "Problem reading the settings:\n"
-					+ "The file did not contain a settings element. Using default values." );
-			settings = new Settings( imp );
-		}
-
-		/*
-		 * Declare the analyzers that are in the settings to the model. This is
-		 * required when we are loading a file that does not have the analyzer
-		 * presents at runtime declared in the settings section of the file.
-		 */
-		for ( final SpotAnalyzerFactoryBase< ? > analyzer : settings.getSpotAnalyzerFactories() )
-			model.getFeatureModel().declareSpotFeatures(
-					analyzer.getFeatures(),
-					analyzer.getFeatureNames(),
-					analyzer.getFeatureShortNames(),
-					analyzer.getFeatureDimensions(),
-					analyzer.getIsIntFeature() );
-
-		for ( final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers() )
-			model.getFeatureModel().declareEdgeFeatures(
-					analyzer.getFeatures(),
-					analyzer.getFeatureNames(),
-					analyzer.getFeatureShortNames(),
-					analyzer.getFeatureDimensions(),
-					analyzer.getIsIntFeature() );
-		for ( final TrackAnalyzer analyzer : settings.getTrackAnalyzers() )
-			model.getFeatureModel().declareTrackFeatures(
-					analyzer.getFeatures(),
-					analyzer.getFeatureNames(),
-					analyzer.getFeatureShortNames(),
-					analyzer.getFeatureDimensions(),
-					analyzer.getIsIntFeature() );
-
-		// Display settings.
-		final DisplaySettings displaySettings = reader.getDisplaySettings();
-
-		/*
-		 * Create GuiModel.
-		 */
-
-		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
-
-		// Main view.
-		guiModel.getWindowManager().createHyperStackDisplayer();
-
-		// GUI state
-		String panelIdentifier = reader.getGUIState();
-
-		if ( null == panelIdentifier )
-			panelIdentifier = ConfigureViewsDescriptor.KEY;
-
-		// Wizard.
-		final WizardSequence sequence = createSequence( guiModel );
-		sequence.setCurrent( panelIdentifier );
-		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
-		frame.setIconImage( TRACKMATE_ICON.getImage() );
-		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
-		frame.setVisible( true );
-		final Dimension size = frame.getSize();
-		frame.setSize( size.width, size.height + 1 );
-
-		// Text
-		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
-		final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
-		final Logger logger2 = logPanel.getLogger();
-
-		logger2.log( "Session log saved in the file:\n"
-				+ "--------------------\n"
-				+ logText
-				+ "--------------------\n",
-				Color.GRAY );
-
-		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
-		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + '\n';
-		// Log GUI processing start
-		logger2.log( welcomeMessage, Logger.BLUE_COLOR );
-		logger2.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
-				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
-		logger2.log( StartDialogDescriptor.PUB1_TXT + "\n", Logger.GREEN_COLOR );
-		logger2.log( StartDialogDescriptor.PUB1_URL + "\n", Logger.BLUE_COLOR );
-		logger2.log( "and / or:\n" );
-		logger2.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
-				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
-		logger2.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
-	}
-
-	/**
-	 * This method reproduces the way to load an old TrackMate XML file. It is
-	 * here for backward compatibility, to allow importing XML files. The logic
-	 * is the same that in TrackMate v<9
-	 *
-	 * @param filePath
-	 *            the path to the XML file to load.
-	 * @param logger
-	 *            the logger to use for messaging.
-	 */
-	@SuppressWarnings( "deprecation" )
-	private void readOldXmlFile( final String filePath, final Logger logger )
-	{
-		// Warn the user that we are loading an old file.
-		logger.log( "Loading an TrackMate XML file. Starting from v9, TrackMate "
-				+ "file format is GEFF. The XML format is still supported for "
-				+ "backward compatibility, but resaving will use the GEFF writer.\n",
-				Color.ORANGE.darker() );
-
-		// Read the file content
-		final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
-
-		final String version = reader.getVersion();
-		if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
-		{
-			// Since v7.0.0 we do not support TrackMate file version < 2.1.0.
-			logger.error( "Cannot read TrackMate file version lower than 2.1.0.\nAborting.\n" );
-			return;
-		}
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( reader.getErrorMessage() );
 			logger.error( "Aborting.\n" );
-			/*
-			 * If I cannot even open the xml file, it is not worth going on.
-			 */
+			return;
+		}
+
+		// Since v7.0.0 we do not support TrackMate file version < 2.1.0.
+		if ( null != version && VersionUtils.compare( version, "2.1.0" ) < 0 )
+		{
+			logger.error( "Cannot read TrackMate file version lower than 2.1.0.\nAborting.\n" );
 			return;
 		}
 
 		// We could open the file. Let's remember it.
-		lastLoadedFile = new File( filePath.replace( ".xml", ".geff" ) );
+		lastLoadedFile = new File( reader.getSuggestedSaveFile() );
 
+		openWith( reader, logger );
+	}
+
+	/**
+	 * Loads the model, the settings and the GUI from the specified reader, and
+	 * opens the TrackMate wizard on it. This is the assembly logic, written
+	 * against the {@link TrackMateFileReader} interface so that it is
+	 * independent of the file format.
+	 *
+	 * @param reader
+	 *            the reader to load from.
+	 * @param logger
+	 *            the logger to use for messaging.
+	 */
+	private void openWith( final TrackMateFileReader reader, final Logger logger )
+	{
 		// Log
 		final String logText = reader.getLog() + '\n';
 
 		// Model
 		final Model model = reader.getModel();
+		if ( null == model )
+		{
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage()
+					+ "\nAborting.\n" );
+			return;
+		}
 		if ( !reader.isReadingOk() )
-			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() );
+			logger.error( "Problem reading the model:\n" + reader.getErrorMessage() + '\n' );
 
 		/*
 		 * Read image.
@@ -291,13 +158,10 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		 */
 
 		Settings settings = reader.readSettings( imp );
-		if ( !reader.isReadingOk() )
-			logger.error( "Problem reading the settings:\n" + reader.getErrorMessage() );
-
-		if ( settings == null )
+		if ( null == settings )
 		{
 			logger.error( "Problem reading the settings:\n"
-					+ "The file did not contain a settings element. Using default values." );
+					+ "The file did not contain a settings element. Using default values.\n" );
 			settings = new Settings( imp );
 		}
 
@@ -337,11 +201,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		 */
 
 		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
-		if ( !reader.isReadingOk() )
-		{
-			logger.error( "Some errors occurred while reading file:\n" );
-			logger.error( reader.getErrorMessage() );
-		}
 
 		// Main view.
 		guiModel.getWindowManager().createHyperStackDisplayer();

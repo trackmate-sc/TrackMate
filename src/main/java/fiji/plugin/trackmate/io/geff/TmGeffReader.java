@@ -11,9 +11,6 @@ import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
 import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.X_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.Y_LOCATION;
 import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_F_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_VN_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_V_PROP;
@@ -22,6 +19,9 @@ import static fiji.plugin.trackmate.io.geff.TmGeffWriter.POLYGON_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.RADIUS_PROP_NAME;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_SPOT_ID_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACK_GEFF_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +62,7 @@ import org.litt.geff.props.Maybe;
 import org.litt.geff.props.Suppliers;
 
 import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.Logger.StringBuilderLogger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
@@ -73,6 +74,7 @@ import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.io.TrackMateFileReader;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import gnu.trove.map.TIntObjectMap;
@@ -89,23 +91,64 @@ import net.imglib2.type.numeric.real.DoubleType;
 /**
  * Reads a GEFF file into a TrackMate with Tobias' new GEFF property binding
  * framework.
+ * <p>
+ * This reader follows the <em>accumulate and degrade</em> error model of
+ * {@link TrackMateFileReader}: recoverable problems are logged internally and
+ * reported via {@link #isReadingOk()} and {@link #getErrorMessage()}, instead
+ * of being thrown.
  */
-public class TmGeffReader
+public class TmGeffReader implements TrackMateFileReader
 {
 
 	private final String geffPath;
 
 	private GeffMetadata metadata;
 
+	/**
+	 * The logger the reading errors are accumulated into, exposed via
+	 * {@link #getErrorMessage()}.
+	 */
+	private final StringBuilderLogger logger = new StringBuilderLogger();
+
+	/**
+	 * If <code>false</code>, an error occurred during reading.
+	 *
+	 * @see #getErrorMessage()
+	 */
+	private boolean ok = true;
+
 	public TmGeffReader( final String geffPath )
 	{
 		this.geffPath = geffPath;
 	}
 
+	/**
+	 * Loads the metadata of the file if not done yet. On failure, records the
+	 * error and leaves the {@link #metadata} field to <code>null</code>; all
+	 * the public methods must then return their sensible fallback.
+	 */
+	private void ensureMetadata()
+	{
+		if ( null != metadata )
+			return;
+		try
+		{
+			metadata = GeffMetadata.readFromZarr( geffPath );
+		}
+		catch ( final RuntimeException e )
+		{
+			ok = false;
+			logger.error( "Problem reading the GEFF file " + geffPath
+					+ ".\nError message is:\n" + e + '\n' );
+		}
+	}
+
+	@Override
 	public String getVersion()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		if ( metadata == null )
+			return null;
 
 		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
 		if ( trackmateMD == null )
@@ -116,10 +159,12 @@ public class TmGeffReader
 
 	}
 
+	@Override
 	public String getLog()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		if ( metadata == null )
+			return null;
 
 		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
 		if ( trackmateMD == null )
@@ -128,10 +173,12 @@ public class TmGeffReader
 		return log;
 	}
 
+	@Override
 	public String getGUIState()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		if ( metadata == null )
+			return ConfigureViewsDescriptor.KEY;
 
 		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
 		if ( trackmateMD == null )
@@ -140,10 +187,12 @@ public class TmGeffReader
 		return guiState;
 	}
 
+	@Override
 	public DisplaySettings getDisplaySettings()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		if ( metadata == null )
+			return DisplaySettingsIO.readUserDefault();
 
 		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
 		if ( trackmateMD == null )
@@ -153,10 +202,12 @@ public class TmGeffReader
 		return DisplaySettingsIO.fromJsonTree( displaySettingsJson );
 	}
 
+	@Override
 	public synchronized ImagePlus readImage()
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		if ( metadata == null )
+			return null;
 
 		final RelatedObjects relatedObjects = metadata.getRelatedObjects();
 		if ( null == relatedObjects )
@@ -177,14 +228,16 @@ public class TmGeffReader
 		return null;
 	}
 
+	@Override
 	@SuppressWarnings( "unchecked" )
 	public synchronized Settings readSettings( final ImagePlus imp )
 	{
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
+		ensureMetadata();
+		final Settings settings = new Settings( imp );
+		if ( metadata == null )
+			return settings;
 
 		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
-		final Settings settings = new Settings( imp );
 		if ( trackmateMD == null )
 			return settings;
 		final Map< String, Object > settingsJson = ( Map< String, Object > ) trackmateMD.get( "settings" );
@@ -197,71 +250,97 @@ public class TmGeffReader
 	 * Reads the model from the GEFF file.
 	 *
 	 * @return a new {@link Model} with the spots (and later: edges, tracks,
-	 *         features) read from the file.
-	 * @throws IOException
-	 *             if an I/O error occurs.
-	 * @throws GeffException
-	 *             if the file is not a valid GEFF file, or if a required
-	 *             property is missing from it.
+	 *         features) read from the file, or <code>null</code> if it cannot
+	 *         be read at all, in which case the cause is available via
+	 *         {@link #getErrorMessage()}.
 	 */
-	public synchronized Model getModel() throws IOException, GeffException
+	@Override
+	public synchronized Model getModel()
 	{
 		final Model model = new Model();
-
-		if ( null == metadata )
-			metadata = GeffMetadata.readFromZarr( geffPath );
-
-		// Units
-		final boolean is2D = readUnits( model );
-
-		// Spots
-		final TIntObjectMap< Spot > spotIdMap = new TIntObjectHashMap<>();
-		final TObjectIntMap< Spot > spotTrackIDMap = new TObjectIntHashMap<>();
-		readSpots( model, is2D, spotIdMap, spotTrackIDMap );
-
-		// Edges: build the graph and, when the spot lineage is known, the
-		// track membership maps. The graph is not wired into the model yet:
-		// TrackModel.from() also needs the track visibility and names, which
-		// are read from the tracks sub-file afterwards.
-		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
-		final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap<>();
-		final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>();
-		readEdges( model, is2D, spotIdMap, spotTrackIDMap, graph, connectedVertexSet, connectedEdgeSet );
-
-		// Tracks sub-file: track visibility, names and feature values. It is
-		// absent when the model has no tracks.
-		final Map< Integer, Boolean > visibility = new HashMap<>();
-		final Map< Integer, String > savedTrackNames = new HashMap<>();
-		final boolean hasTracks = readTracks( model, visibility, savedTrackNames );
-
-		if ( hasTracks )
+		try
 		{
-			// Single-spot tracks: their spots are not referenced by any edge,
-			// so they are not in the connected vertex sets yet. Add them from
-			// the spot lineage (a set, so already-present spots are not added
-			// twice).
-			for ( final Spot spot : spotTrackIDMap.keySet() )
+			ensureMetadata();
+			if ( metadata == null )
+				return null;
+
+			// Units
+			final boolean is2D = readUnits( model );
+
+			// Spots
+			final TIntObjectMap< Spot > spotIdMap = new TIntObjectHashMap<>();
+			final TObjectIntMap< Spot > spotTrackIDMap = new TObjectIntHashMap<>();
+			readSpots( model, is2D, spotIdMap, spotTrackIDMap );
+
+			// Edges: build the graph and, when the spot lineage is known, the
+			// track membership maps. The graph is not wired into the model yet:
+			// TrackModel.from() also needs the track visibility and names, which
+			// are read from the tracks sub-file afterwards.
+			final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+			final Map< Integer, Set< Spot > > connectedVertexSet = new HashMap<>();
+			final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>();
+			readEdges( model, is2D, spotIdMap, spotTrackIDMap, graph, connectedVertexSet, connectedEdgeSet );
+
+			// Tracks sub-file: track visibility, names and feature values. It is
+			// absent when the model has no tracks.
+			final Map< Integer, Boolean > visibility = new HashMap<>();
+			final Map< Integer, String > savedTrackNames = new HashMap<>();
+			final boolean hasTracks = readTracks( model, visibility, savedTrackNames );
+
+			if ( hasTracks )
 			{
-				final int trackID = spotTrackIDMap.get( spot );
-				connectedVertexSet
-						.computeIfAbsent( Integer.valueOf( trackID ), k -> new HashSet<>() )
-						.add( spot );
+				// Single-spot tracks: their spots are not referenced by any edge,
+				// so they are not in the connected vertex sets yet. Add them from
+				// the spot lineage (a set, so already-present spots are not added
+				// twice).
+				for ( final Spot spot : spotTrackIDMap.keySet() )
+				{
+					final int trackID = spotTrackIDMap.get( spot );
+					connectedVertexSet
+							.computeIfAbsent( Integer.valueOf( trackID ), k -> new HashSet<>() )
+							.add( spot );
+				}
 			}
+			else
+			{
+				// Foreign GEFF files: no tracks sub-file. Reconstruct the tracks
+				// from the graph connectivity instead.
+				synthesizeTracksFromGraph( model, graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
+			}
+
+			// Wire the graph into the model.
+			model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
+
+			// Feature declarations, from the TrackMate extra metadata.
+			readFeatureDeclarations( model );
+
+			return model;
 		}
-		else
+		catch ( final GeffException | IOException | RuntimeException e )
 		{
-			// Foreign GEFF files: no tracks sub-file. Reconstruct the tracks
-			// from the graph connectivity instead.
-			synthesizeTracksFromGraph( model, graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
+			ok = false;
+			logger.error( "Problem reading the model:\n" + e + '\n' );
+			e.printStackTrace();
+			return null;
 		}
+	}
 
-		// Wire the graph into the model.
-		model.getTrackModel().from( graph, connectedVertexSet, connectedEdgeSet, visibility, savedTrackNames );
+	@Override
+	public boolean isReadingOk()
+	{
+		return ok;
+	}
 
-		// Feature declarations, from the TrackMate extra metadata.
-		readFeatureDeclarations( model );
+	@Override
+	public String getErrorMessage()
+	{
+		return logger.toString();
+	}
 
-		return model;
+	@Override
+	public String getSuggestedSaveFile()
+	{
+		return geffPath;
 	}
 
 	/**

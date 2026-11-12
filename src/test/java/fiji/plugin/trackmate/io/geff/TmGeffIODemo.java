@@ -25,7 +25,7 @@ import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
@@ -66,7 +66,7 @@ public class TmGeffIODemo extends GeffTestBase
 
 	public static GuiModel loadFromXML( final String path ) throws IOException
 	{
-		final TmXmlReader reader = new TmXmlReader( new File( path ) );
+		final TmXmlReader reader = new TmXmlReader( path );
 		if ( !reader.isReadingOk() )
 		{
 			System.err.println( reader.getErrorMessage() );

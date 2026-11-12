@@ -6,7 +6,7 @@ import static fiji.plugin.trackmate.Spot.POSITION_Y;
 import static fiji.plugin.trackmate.Spot.POSITION_Z;
 import static fiji.plugin.trackmate.Spot.RADIUS;
 import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
-import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;

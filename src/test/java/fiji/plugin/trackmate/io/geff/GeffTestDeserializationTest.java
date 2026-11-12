@@ -24,7 +24,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 
 /**
  * Tests that check that a TrackMate model, settings etc, can be written and
@@ -84,7 +84,7 @@ public class GeffTestDeserializationTest extends GeffTestBase
 
 	protected void testModelSerialization( final String path ) throws Exception
 	{
-		final TmXmlReader reader = new TmXmlReader( new File( path ) );
+		final TmXmlReader reader = new TmXmlReader( path );
 		if ( !reader.isReadingOk() )
 			throw new Exception( reader.getErrorMessage() );
 

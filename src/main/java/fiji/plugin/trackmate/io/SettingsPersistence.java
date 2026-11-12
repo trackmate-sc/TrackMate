@@ -31,6 +31,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.io.geff.TmGeffReader;
 import fiji.plugin.trackmate.io.geff.TmGeffWriter;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.tracking.jaqaman.SimpleSparseLAPTrackerFactory;
 import ij.ImagePlus;
 
@@ -45,13 +46,12 @@ public class SettingsPersistence
 	private static String lastSettingsFile = new File( new File( System.getProperty( "user.home" ), ".trackmate" ),
 			"lastusedsettings.geff" ).getAbsolutePath();
 
-	@SuppressWarnings( "deprecation" )
 	public static final Settings readLastUsedSettings( final ImagePlus imp, final Logger logger )
 	{
 		if ( !Files.exists( Paths.get( lastSettingsFile ) ) )
 		{
 			// Try to read the old XML file, if it exists.
-			final TmXmlReader reader = new TmXmlReader( lastSettingsXMLFile );
+			final TmXmlReader reader = new TmXmlReader( lastSettingsXMLFile.getPath() );
 			if ( !reader.isReadingOk() )
 			{
 				logger.log( "No last-used settings found in '" + lastSettingsFile + "'.\n" );

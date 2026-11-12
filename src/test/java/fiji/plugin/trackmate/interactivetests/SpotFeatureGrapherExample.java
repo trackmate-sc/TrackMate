@@ -40,7 +40,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.features.SpotFeatureGrapher;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class SpotFeatureGrapherExample
@@ -50,7 +50,7 @@ public class SpotFeatureGrapherExample
 	{
 		// Load objects
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 		final GuiModel guiModel = new GuiModel( model );
 

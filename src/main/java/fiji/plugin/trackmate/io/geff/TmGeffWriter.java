@@ -12,9 +12,9 @@ import static fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer.Z_LO
 import static fiji.plugin.trackmate.features.track.TrackDurationAnalyzer.TRACK_START;
 import static fiji.plugin.trackmate.features.track.TrackIndexAnalyzer.TRACK_ID;
 import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;

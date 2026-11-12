@@ -8,20 +8,18 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 package fiji.plugin.trackmate.visualization.editor;
-
-import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -35,7 +33,7 @@ import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import fiji.plugin.trackmate.visualization.bvv.BVVKeymapManager;
 import fiji.plugin.trackmate.visualization.editor.labkit.component.EditorKeymapManager;
@@ -147,7 +145,7 @@ public class LabkitLauncher
 //		final String filename = "samples/MAX_Merged.xml";
 		final String filename = "samples/CElegans3D-smoothed-mask-orig-02.xml";
 //		final String filename = "samples/221031_Stat_Stage55_561nm_part1Conf_crop_f4.xml";
-		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
+		final TmXmlReader reader = new TmXmlReader( filename );
 		if ( !reader.isReadingOk() )
 		{
 			System.out.println( reader.getErrorMessage() );

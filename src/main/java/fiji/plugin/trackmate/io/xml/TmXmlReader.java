@@ -19,77 +19,77 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.xml;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
 import static fiji.plugin.trackmate.io.IOUtils.readBooleanAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntAttribute;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_ABOVE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_FEATURE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_HEIGHT_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_NFRAMES_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_NSLICES_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_WIDTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.MODEL_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FILTER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FRAME_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ID_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_NAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TIME_UNITS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACKER_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_EDGE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlWriter.MESH_FILE_EXTENSION;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_TEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_TSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_ABOVE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_FEATURE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_HEIGHT_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_NFRAMES_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_NSLICES_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_WIDTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.MODEL_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FRAME_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ID_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TIME_UNITS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACKER_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_EDGE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlWriter.MESH_FILE_EXTENSION;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
@@ -138,6 +138,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.io.TrackMateFileReader;
 import fiji.plugin.trackmate.io.geff.TmGeffReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
@@ -159,18 +160,17 @@ import net.imglib2.mesh.io.ply.PLYMeshIO;
  * <p>
  * We now use the GEFF file format. See {@link TmGeffReader}.
  */
-@Deprecated
-public class TmXmlReader
+public class TmXmlReader implements TrackMateFileReader
 {
 
-	@Deprecated
 	protected static final boolean DEBUG = true;
 
-	@Deprecated
 	protected Document document = null;
 
-	@Deprecated
-	protected final File file;
+	/**
+	 * The path to the file this reader reads from.
+	 */
+	protected final String path;
 
 	/**
 	 * A map of all spots loaded. We need this for performance, since we need to
@@ -181,21 +181,18 @@ public class TmXmlReader
 	 * {@link ConcurrentHashMap} because we hope to load large data in a
 	 * multi-threaded way.
 	 */
-	@Deprecated
 	protected ConcurrentHashMap< Integer, Spot > cache;
 
-	@Deprecated
 	protected StringBuilderLogger logger = new StringBuilderLogger();
 
-	@Deprecated
-	protected final Element root;
+	public final Element root;
 
 	/**
 	 * If <code>false</code>, an error occurred during reading.
 	 *
 	 * @see #getErrorMessage()
 	 */
-	@Deprecated
+
 	protected boolean ok = true;
 
 	/*
@@ -205,29 +202,28 @@ public class TmXmlReader
 	/**
 	 * Initializes this reader to read the file given in argument.
 	 *
-	 * @param file
-	 *            the file to read.
+	 * @param path
+	 *            the path to the file to read.
 	 */
-	@Deprecated
-	public TmXmlReader( final File file )
+	public TmXmlReader( final String path )
 	{
-		this.file = file;
+		this.path = path;
 		final SAXBuilder sb = new SAXBuilder();
 		Element r = null;
 		try
 		{
-			document = sb.build( file );
+			document = sb.build( new File( path ) );
 			r = document.getRootElement();
 		}
 		catch ( final JDOMException e )
 		{
 			ok = false;
-			logger.error( "Problem parsing " + file.getName() + ", it is not a valid TrackMate XML file.\nError message is:\n"
+			logger.error( "Problem parsing " + path + ", it is not a valid TrackMate XML file.\nError message is:\n"
 					+ e.getLocalizedMessage() + '\n' );
 		}
 		catch ( final IOException e )
 		{
-			logger.error( "Problem reading " + file.getName()
+			logger.error( "Problem reading " + path
 					+ ".\nError message is:\n" + e.getLocalizedMessage() + '\n' );
 			ok = false;
 		}
@@ -244,7 +240,8 @@ public class TmXmlReader
 	 *
 	 * @return the log.
 	 */
-	@Deprecated
+	@Override
+
 	public String getLog()
 	{
 		final Element logElement = root.getChild( LOG_ELEMENT_KEY );
@@ -259,7 +256,8 @@ public class TmXmlReader
 	 *
 	 * @return the saved GUI state, as a string.
 	 */
-	@Deprecated
+	@Override
+
 	public String getGUIState()
 	{
 		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
@@ -280,7 +278,8 @@ public class TmXmlReader
 		return ConfigureViewsDescriptor.KEY;
 	}
 
-	@Deprecated
+	@Override
+
 	public DisplaySettings getDisplaySettings()
 	{
 		final Element dsel = root.getChild( DISPLAY_SETTINGS_ELEMENT_KEY );
@@ -299,7 +298,8 @@ public class TmXmlReader
 	 *
 	 * @return a new {@link Model}.
 	 */
-	@Deprecated
+	@Override
+
 	public Model getModel()
 	{
 		final Element modelElement = root.getChild( MODEL_ELEMENT_KEY );
@@ -356,13 +356,14 @@ public class TmXmlReader
 	 *
 	 * @return a new {@link Model} instance.
 	 */
-	@Deprecated
+
 	protected Model createModel()
 	{
 		return new Model();
 	}
 
-	@Deprecated
+	@Override
+
 	public ImagePlus readImage()
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
@@ -372,7 +373,8 @@ public class TmXmlReader
 		return getImage( settingsElement );
 	}
 
-	@Deprecated
+	@Override
+
 	public Settings readSettings( final ImagePlus imp )
 	{
 		return readSettings( imp,
@@ -419,7 +421,7 @@ public class TmXmlReader
 	 *            the spot 3D morphology provider.
 	 * @return a new Settings object.
 	 */
-	@Deprecated
+
 	public Settings readSettings(
 			final ImagePlus imp,
 			final DetectorProvider detectorProvider,
@@ -486,9 +488,12 @@ public class TmXmlReader
 	 *
 	 * @return the version string stored in the file.
 	 */
-	@Deprecated
+
+	@Override
 	public String getVersion()
 	{
+		if ( null == root )
+			return null;
 		return root.getAttribute( PLUGIN_VERSION_ATTRIBUTE_NAME ).getValue();
 	}
 
@@ -498,7 +503,8 @@ public class TmXmlReader
 	 * @return an error message.
 	 * @see #isReadingOk()
 	 */
-	@Deprecated
+	@Override
+
 	public String getErrorMessage()
 	{
 		return logger.toString();
@@ -511,10 +517,23 @@ public class TmXmlReader
 	 * @return <code>true</code> if reading was ok.
 	 * @see #getErrorMessage()
 	 */
-	@Deprecated
+	@Override
+
 	public boolean isReadingOk()
 	{
 		return ok;
+	}
+
+	/**
+	 * Returns the path of the GEFF file a subsequent save operation should
+	 * propose by default: the twin of the XML file, with the <code>.xml</code>
+	 * extension replaced by <code>.geff</code>.
+	 */
+
+	@Override
+	public String getSuggestedSaveFile()
+	{
+		return path.replace( ".xml", ".geff" );
 	}
 
 	/*
@@ -533,14 +552,15 @@ public class TmXmlReader
 			return null;
 		}
 		if ( null == folder || folder.isEmpty() )
-			folder = file.getParent(); // it is a relative path, then
+			folder = new File( path ).getParent(); // it is a relative path,
+													// then
 
 		File imageFile = new File( folder, filename );
 		if ( !imageFile.exists() || !imageFile.canRead() )
 		{
 			// Could not find it to the absolute path. Then we look for the same
 			// path of the xml file
-			folder = file.getParent();
+			folder = new File( path ).getParent();
 			imageFile = new File( folder, filename );
 			if ( !imageFile.exists() || !imageFile.canRead() )
 			{
@@ -627,7 +647,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return the initial filter, as a {@link FeatureFilter}.
 	 */
-	@Deprecated
+
 	protected FeatureFilter getInitialFilter( final Element settingsElement )
 	{
 		final Element itEl = settingsElement.getChild( INITIAL_SPOT_FILTER_ELEMENT_KEY );
@@ -645,7 +665,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
-	@Deprecated
+
 	protected List< FeatureFilter > getSpotFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
@@ -669,7 +689,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
-	@Deprecated
+
 	protected List< FeatureFilter > getTrackFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
@@ -738,7 +758,7 @@ public class TmXmlReader
 	 *            a {@link DetectorProvider}, required to read detector
 	 *            parameters.
 	 */
-	@Deprecated
+
 	protected void getDetectorSettings(
 			final Element settingsElement,
 			final Settings settings,
@@ -799,7 +819,7 @@ public class TmXmlReader
 	 *            the {@link TrackerProvider}, required to read the tracker
 	 *            parameters.
 	 */
-	@Deprecated
+
 	protected void getTrackerSettings(
 			final Element settingsElement,
 			final Settings settings,
@@ -903,7 +923,7 @@ public class TmXmlReader
 		}
 
 		// Do we have a mesh file?
-		final File meshFile = new File( file.getAbsolutePath() + MESH_FILE_EXTENSION );
+		final File meshFile = new File( path + MESH_FILE_EXTENSION );
 		if ( meshFile.exists() )
 		{
 			// Matcher for zipped file name.
@@ -980,7 +1000,7 @@ public class TmXmlReader
 	 * @return <code>true</code> if reading tracks was successful,
 	 *         <code>false</code> otherwise.
 	 */
-	@Deprecated
+
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{
 		boolean ok = true;
@@ -1232,7 +1252,6 @@ public class TmXmlReader
 		return spot;
 	}
 
-	@Deprecated
 	protected static final void removeAttributeFromName( final List< Attribute > attributes, final String attributeNameToRemove )
 	{
 		final List< Attribute > toRemove = new ArrayList<>();
