@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -131,15 +131,23 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.view.TranslateMesh;
 
+/**
+ * Deprecated in TrackMate v9.
+ * <p>
+ * We now use the GEFF file format. Check {@link TmGeffWriter}.
+ */
+@Deprecated
 public class TmXmlWriter
 {
 
+	@Deprecated
 	static final String MESH_FILE_EXTENSION = ".meshes";
 
 	/** Zip compression level (0-9) */
@@ -149,8 +157,10 @@ public class TmXmlWriter
 	 * FIELD
 	 */
 
+	@Deprecated
 	protected final Element root;
 
+	@Deprecated
 	protected final Logger logger;
 
 	private final File file;
@@ -165,6 +175,7 @@ public class TmXmlWriter
 	 * @param file
 	 *            the xml file to write to, will be overwritten.
 	 */
+	@Deprecated
 	public TmXmlWriter( final File file )
 	{
 		this( file, new Logger.StringBuilderLogger() );
@@ -178,6 +189,7 @@ public class TmXmlWriter
 	 * @param logger
 	 *            a logger instance to log writing progress and errors.
 	 */
+	@Deprecated
 	public TmXmlWriter( final File file, final Logger logger )
 	{
 		this.root = new Element( ROOT_ELEMENT_KEY );
@@ -203,6 +215,7 @@ public class TmXmlWriter
 	 * @see #appendModel(Model)
 	 * @see #appendSettings(Settings)
 	 */
+	@Deprecated
 	public void writeToFile() throws FileNotFoundException, IOException
 	{
 		try (FileOutputStream fos = new FileOutputStream( file ))
@@ -214,6 +227,7 @@ public class TmXmlWriter
 		}
 	}
 
+	@Deprecated
 	@Override
 	public String toString()
 	{
@@ -238,6 +252,7 @@ public class TmXmlWriter
 	 * @param model
 	 *            the {@link Model} to write.
 	 */
+	@Deprecated
 	public void appendModel( final Model model )
 	{
 		final Element modelElement = new Element( MODEL_ELEMENT_KEY );
@@ -267,6 +282,7 @@ public class TmXmlWriter
 	 * @param settings
 	 *            the {@link Settings} to write.
 	 */
+	@Deprecated
 	public void appendSettings( final Settings settings )
 	{
 		final Element settingsElement = new Element( SETTINGS_ELEMENT_KEY );
@@ -304,6 +320,7 @@ public class TmXmlWriter
 	 * @param log
 	 *            the log content, as a String.
 	 */
+	@Deprecated
 	public void appendLog( final String log )
 	{
 		if ( null != log )
@@ -321,6 +338,7 @@ public class TmXmlWriter
 	 * @param currentPanelIdentifier
 	 *            the key to the panel currently displaying.
 	 */
+	@Deprecated
 	public void appendGUIState( final String currentPanelIdentifier )
 	{
 		final Element guiel = new Element( GUI_STATE_ELEMENT_KEY );
@@ -329,6 +347,7 @@ public class TmXmlWriter
 		logger.log( "  Added GUI current state.\n" );
 	}
 
+	@Deprecated
 	public void appendDisplaySettings( final DisplaySettings ds )
 	{
 		final Element dsel = new Element( DISPLAY_SETTINGS_ELEMENT_KEY );
@@ -356,6 +375,7 @@ public class TmXmlWriter
 		return settingsElement;
 	}
 
+	@Deprecated
 	protected Element echoDetectorSettings( final Settings settings )
 	{
 		final Element el = new Element( DETECTOR_SETTINGS_ELEMENT_KEY );
@@ -379,6 +399,7 @@ public class TmXmlWriter
 		return el;
 	}
 
+	@Deprecated
 	protected Element echoTrackerSettings( final Settings settings )
 	{
 		final Element el = new Element( TRACKER_SETTINGS_ELEMENT_KEY );
@@ -524,6 +545,7 @@ public class TmXmlWriter
 		return filteredTracksElement;
 	}
 
+	@Deprecated
 	protected Element echoImageInfo( final Settings settings )
 	{
 		final Element imEl = new Element( IMAGE_ELEMENT_KEY );
@@ -636,6 +658,7 @@ public class TmXmlWriter
 		return featuresElement;
 	}
 
+	@Deprecated
 	protected Element echoInitialSpotFilter( final Settings settings )
 	{
 		final Element itElement = new Element( INITIAL_SPOT_FILTER_ELEMENT_KEY );
@@ -646,6 +669,7 @@ public class TmXmlWriter
 		return itElement;
 	}
 
+	@Deprecated
 	protected Element echoSpotFilters( final Settings settings )
 	{
 		final List< FeatureFilter > featureThresholds = settings.getSpotFilters();
@@ -663,6 +687,7 @@ public class TmXmlWriter
 		return filtersElement;
 	}
 
+	@Deprecated
 	protected Element echoTrackFilters( final Settings settings )
 	{
 		final List< FeatureFilter > filters = settings.getTrackFilters();
@@ -680,6 +705,7 @@ public class TmXmlWriter
 		return trackFiltersElement;
 	}
 
+	@Deprecated
 	protected Element echoAnalyzers( final Settings settings )
 	{
 		final Element analyzersElement = new Element( ANALYZER_COLLECTION_ELEMENT_KEY );
@@ -761,6 +787,7 @@ public class TmXmlWriter
 		return spotElement;
 	}
 
+	@Deprecated
 	protected void writeSpotMeshes( final Iterable< Spot > spots )
 	{
 		// Only create the meshes file if at least one spot has a mesh.

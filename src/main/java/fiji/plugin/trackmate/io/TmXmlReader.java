@@ -138,6 +138,7 @@ import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
+import fiji.plugin.trackmate.io.geff.TmGeffReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
@@ -153,13 +154,22 @@ import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 
+/**
+ * Deprecated in TrackMate v9.
+ * <p>
+ * We now use the GEFF file format. See {@link TmGeffReader}.
+ */
+@Deprecated
 public class TmXmlReader
 {
 
+	@Deprecated
 	protected static final boolean DEBUG = true;
 
+	@Deprecated
 	protected Document document = null;
 
+	@Deprecated
 	protected final File file;
 
 	/**
@@ -171,10 +181,13 @@ public class TmXmlReader
 	 * {@link ConcurrentHashMap} because we hope to load large data in a
 	 * multi-threaded way.
 	 */
+	@Deprecated
 	protected ConcurrentHashMap< Integer, Spot > cache;
 
+	@Deprecated
 	protected StringBuilderLogger logger = new StringBuilderLogger();
 
+	@Deprecated
 	protected final Element root;
 
 	/**
@@ -182,6 +195,7 @@ public class TmXmlReader
 	 *
 	 * @see #getErrorMessage()
 	 */
+	@Deprecated
 	protected boolean ok = true;
 
 	/*
@@ -194,6 +208,7 @@ public class TmXmlReader
 	 * @param file
 	 *            the file to read.
 	 */
+	@Deprecated
 	public TmXmlReader( final File file )
 	{
 		this.file = file;
@@ -229,6 +244,7 @@ public class TmXmlReader
 	 *
 	 * @return the log.
 	 */
+	@Deprecated
 	public String getLog()
 	{
 		final Element logElement = root.getChild( LOG_ELEMENT_KEY );
@@ -243,6 +259,7 @@ public class TmXmlReader
 	 *
 	 * @return the saved GUI state, as a string.
 	 */
+	@Deprecated
 	public String getGUIState()
 	{
 		final Element guiel = root.getChild( GUI_STATE_ELEMENT_KEY );
@@ -263,6 +280,7 @@ public class TmXmlReader
 		return ConfigureViewsDescriptor.KEY;
 	}
 
+	@Deprecated
 	public DisplaySettings getDisplaySettings()
 	{
 		final Element dsel = root.getChild( DISPLAY_SETTINGS_ELEMENT_KEY );
@@ -281,6 +299,7 @@ public class TmXmlReader
 	 *
 	 * @return a new {@link Model}.
 	 */
+	@Deprecated
 	public Model getModel()
 	{
 		final Element modelElement = root.getChild( MODEL_ELEMENT_KEY );
@@ -337,11 +356,13 @@ public class TmXmlReader
 	 *
 	 * @return a new {@link Model} instance.
 	 */
+	@Deprecated
 	protected Model createModel()
 	{
 		return new Model();
 	}
 
+	@Deprecated
 	public ImagePlus readImage()
 	{
 		final Element settingsElement = root.getChild( SETTINGS_ELEMENT_KEY );
@@ -351,6 +372,7 @@ public class TmXmlReader
 		return getImage( settingsElement );
 	}
 
+	@Deprecated
 	public Settings readSettings( final ImagePlus imp )
 	{
 		return readSettings( imp,
@@ -397,6 +419,7 @@ public class TmXmlReader
 	 *            the spot 3D morphology provider.
 	 * @return a new Settings object.
 	 */
+	@Deprecated
 	public Settings readSettings(
 			final ImagePlus imp,
 			final DetectorProvider detectorProvider,
@@ -463,6 +486,7 @@ public class TmXmlReader
 	 *
 	 * @return the version string stored in the file.
 	 */
+	@Deprecated
 	public String getVersion()
 	{
 		return root.getAttribute( PLUGIN_VERSION_ATTRIBUTE_NAME ).getValue();
@@ -474,6 +498,7 @@ public class TmXmlReader
 	 * @return an error message.
 	 * @see #isReadingOk()
 	 */
+	@Deprecated
 	public String getErrorMessage()
 	{
 		return logger.toString();
@@ -486,6 +511,7 @@ public class TmXmlReader
 	 * @return <code>true</code> if reading was ok.
 	 * @see #getErrorMessage()
 	 */
+	@Deprecated
 	public boolean isReadingOk()
 	{
 		return ok;
@@ -601,6 +627,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return the initial filter, as a {@link FeatureFilter}.
 	 */
+	@Deprecated
 	protected FeatureFilter getInitialFilter( final Element settingsElement )
 	{
 		final Element itEl = settingsElement.getChild( INITIAL_SPOT_FILTER_ELEMENT_KEY );
@@ -618,6 +645,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
+	@Deprecated
 	protected List< FeatureFilter > getSpotFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
@@ -641,6 +669,7 @@ public class TmXmlReader
 	 *            the settings {@link Element} to read from.
 	 * @return a list of {@link FeatureFilter}s.
 	 */
+	@Deprecated
 	protected List< FeatureFilter > getTrackFeatureFilters( final Element settingsElement )
 	{
 		final List< FeatureFilter > featureThresholds = new ArrayList<>();
@@ -709,6 +738,7 @@ public class TmXmlReader
 	 *            a {@link DetectorProvider}, required to read detector
 	 *            parameters.
 	 */
+	@Deprecated
 	protected void getDetectorSettings(
 			final Element settingsElement,
 			final Settings settings,
@@ -769,6 +799,7 @@ public class TmXmlReader
 	 *            the {@link TrackerProvider}, required to read the tracker
 	 *            parameters.
 	 */
+	@Deprecated
 	protected void getTrackerSettings(
 			final Element settingsElement,
 			final Settings settings,
@@ -949,6 +980,7 @@ public class TmXmlReader
 	 * @return <code>true</code> if reading tracks was successful,
 	 *         <code>false</code> otherwise.
 	 */
+	@Deprecated
 	protected boolean readTracks( final Element modelElement, final Model model )
 	{
 		boolean ok = true;
@@ -1200,6 +1232,7 @@ public class TmXmlReader
 		return spot;
 	}
 
+	@Deprecated
 	protected static final void removeAttributeFromName( final List< Attribute > attributes, final String attributeNameToRemove )
 	{
 		final List< Attribute > toRemove = new ArrayList<>();

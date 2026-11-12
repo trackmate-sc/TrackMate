@@ -118,18 +118,18 @@ public class IOUtils
 		if ( IJ.isMacintosh() && parent != null )
 		{
 			// use the native file dialog on the mac
-			final FileDialog dialog = new FileDialog( parent, "Save to a XML file", FileDialog.SAVE );
+			final FileDialog dialog = new FileDialog( parent, "Save to a GEFF file", FileDialog.SAVE );
 			dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			dialog.setDirectory( file.getParent() );
 			dialog.setFile( file.getName() );
-			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".xml" );
+			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".geff" );
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
 			String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
 				return null;
-			if ( !selectedFile.endsWith( ".xml" ) )
-				selectedFile += ".xml";
+			if ( !selectedFile.endsWith( ".geff" ) )
+				selectedFile += ".geff";
 			return new File( dialog.getDirectory(), selectedFile );
 		}
 		else
@@ -147,7 +147,7 @@ public class IOUtils
 				}
 			};
 			fileChooser.setSelectedFile( file );
-			final FileNameExtensionFilter filter = new FileNameExtensionFilter( "XML files", "xml" );
+			final FileNameExtensionFilter filter = new FileNameExtensionFilter( "GEFF files", "geff" );
 			fileChooser.setFileFilter( filter );
 
 			final int returnVal = fileChooser.showSaveDialog( parent );
@@ -159,7 +159,7 @@ public class IOUtils
 	}
 
 	/**
-	 * Prompts the user for a xml file to load from.
+	 * Prompts the user for a GEFF file to load from.
 	 *
 	 * @param file
 	 *            a default file, will be used to display a default choice in
@@ -188,19 +188,17 @@ public class IOUtils
 				@Override
 				public boolean accept( final File dir, final String name )
 				{
-					return name.endsWith( ".xml" );
+					return name.endsWith( ".geff" ) || name.endsWith( ".xml" );
 				}
 			};
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
-			String selectedFile = dialog.getFile();
+			final String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
 			{
 				logger.log( "Load data aborted.\n" );
 				return null;
 			}
-			if ( !selectedFile.endsWith( ".xml" ) )
-				selectedFile += ".xml";
 			file = new File( dialog.getDirectory(), selectedFile );
 		}
 		else
@@ -219,7 +217,7 @@ public class IOUtils
 			};
 			fileChooser.setName( title );
 			fileChooser.setSelectedFile( file );
-			final FileNameExtensionFilter filter = new FileNameExtensionFilter( "XML files", "xml" );
+			final FileNameExtensionFilter filter = new FileNameExtensionFilter( "TrackMate GEFF or XML files", "geff", "xml" );
 			fileChooser.setFileFilter( filter );
 
 			final int returnVal = fileChooser.showOpenDialog( parent );
@@ -309,7 +307,7 @@ public class IOUtils
 	 * Read and return an integer attribute from a JDom {@link Element}, and
 	 * substitute a default value of 0 if the attribute is not found or of the
 	 * wrong type.
-	 * 
+	 *
 	 * @param element
 	 *            the element to read from.
 	 * @param name
@@ -603,7 +601,7 @@ public class IOUtils
 	/**
 	 * Stores the given mapping in a given JDom element, using attributes in a
 	 * KEY="VALUE" fashion.
-	 * 
+	 *
 	 * @param map
 	 *            the map.
 	 * @param element
@@ -618,7 +616,7 @@ public class IOUtils
 	/**
 	 * Possibly creates the whole directories needed to save a file with the
 	 * specified path.
-	 * 
+	 *
 	 * @param path
 	 *            the path.
 	 * @return <code>true</code> if folders have actually been created.

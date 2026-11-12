@@ -880,28 +880,28 @@ public class TMUtils
 			 * Warn the user that the file cannot be reloaded properly because
 			 * the source image does not match a file.
 			 */
-			logger.error( "Warning: The source image does not match a file on the system." + "TrackMate won't be able to reload it when opening this XML file.\n" + "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
+			logger.error( "Warning: The source image does not match a file on the system." + "TrackMate won't be able to reload it when opening this GEFF file.\n" + "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
 			settings.imageFolder = "";
 		}
 
 		File file;
 		try
 		{
-			file = new File( folder.getPath(), settings.imp.getShortTitle() + ".xml" );
+			file = new File( folder.getPath(), settings.imp.getShortTitle() + ".geff" );
 		}
 		catch ( final NullPointerException npe )
 		{
 			if ( settings.imageFileName.isEmpty() )
-				file = new File( folder, "TrackMateData.xml" );
+				file = new File( folder, "TrackMateData.geff" );
 			else
 			{
 				final String imName = settings.imageFileName;
 				final int i = imName.lastIndexOf( '.' );
 				String xmlName;
 				if ( i < 0 )
-					xmlName = imName + ".xml";
+					xmlName = imName + ".geff";
 				else
-					xmlName = imName.substring( 0, i ) + ".xml";
+					xmlName = imName.substring( 0, i ) + ".geff";
 				file = new File( folder, xmlName );
 			}
 		}

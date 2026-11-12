@@ -13,6 +13,7 @@ import static fiji.plugin.trackmate.features.track.TrackLocationAnalyzer.Y_LOCAT
 import static fiji.plugin.trackmate.features.track.TrackMotilityAnalyzer.TRACK_MAX_DISTANCE_TRAVELED;
 import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
 import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_F_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_VN_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_V_PROP;
@@ -99,6 +100,20 @@ public class TmGeffReader
 	public TmGeffReader( final String geffPath )
 	{
 		this.geffPath = geffPath;
+	}
+
+	public String getVersion()
+	{
+		if ( null == metadata )
+			metadata = GeffMetadata.readFromZarr( geffPath );
+
+		final Map< String, Object > trackmateMD = ForeignGeffFileMapper.trackmateMetadata( metadata );
+		if ( trackmateMD == null )
+			return null;
+
+		final String version = ( String ) trackmateMD.get( PLUGIN_VERSION_ATTRIBUTE_NAME );
+		return version;
+
 	}
 
 	public String getLog()

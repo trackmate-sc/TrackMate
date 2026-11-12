@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -26,9 +26,11 @@ import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import org.litt.geff.GeffException;
 import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -45,10 +47,10 @@ import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.geff.TmGeffReader;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.ViewUtils;
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 
 public class LoadTrackMatePlugIn extends TrackMatePlugIn
@@ -71,7 +73,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		{
 			final Settings lastUsedSettings = SettingsPersistence.readLastUsedSettings( null, logger );
 			file = TMUtils.proposeTrackMateSaveFile( lastUsedSettings, Logger.VOID_LOGGER );
-			file = IOUtils.askForFileForLoading( file, "Load a TrackMate XML file", null, logger );
+			file = IOUtils.askForFileForLoading( file, "Load a TrackMate GEFF file", null, logger );
 			if ( null == file )
 				return;
 		}
@@ -92,13 +94,161 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 			}
 		}
 
-		// Read the file content
-		final TmXmlReader reader = createReader( file );
-		if ( !reader.isReadingOk() )
+		// Do we have an old XM file?
+		if ( filePath.toLowerCase().endsWith( ".xml" ) )
 		{
-			IJ.error( TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION, reader.getErrorMessage() );
+			readOldXmlFile( filePath, logger );
 			return;
 		}
+
+		// Read the file content
+		final TmGeffReader reader = new TmGeffReader( filePath );
+
+		final String version = reader.getVersion();
+		logger.log( "TrackMate file version: " + version + '\n' );
+
+		// We could open the file. Let's remember it.
+		lastLoadedFile = file;
+
+		// Log
+		final String logText = reader.getLog() + '\n';
+
+		// Model
+		Model model;
+		try
+		{
+			model = reader.getModel();
+		}
+		catch ( IOException | GeffException e )
+		{
+			logger.error( "Problem reading the model:\n" + e.getMessage() + '\n'
+					+ "Aborting.\n" );
+			e.printStackTrace();
+			return;
+		}
+
+		/*
+		 * Read image.
+		 */
+
+		ImagePlus imp = reader.readImage();
+		if ( null == imp )
+			imp = ViewUtils.makeEmptyImagePlus( model );
+
+		/*
+		 * Read settings.
+		 */
+
+		Settings settings = reader.readSettings( imp );
+		if ( settings == null )
+		{
+			logger.error( "Problem reading the settings:\n"
+					+ "The file did not contain a settings element. Using default values." );
+			settings = new Settings( imp );
+		}
+
+		/*
+		 * Declare the analyzers that are in the settings to the model. This is
+		 * required when we are loading a file that does not have the analyzer
+		 * presents at runtime declared in the settings section of the file.
+		 */
+		for ( final SpotAnalyzerFactoryBase< ? > analyzer : settings.getSpotAnalyzerFactories() )
+			model.getFeatureModel().declareSpotFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
+
+		for ( final EdgeAnalyzer analyzer : settings.getEdgeAnalyzers() )
+			model.getFeatureModel().declareEdgeFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
+		for ( final TrackAnalyzer analyzer : settings.getTrackAnalyzers() )
+			model.getFeatureModel().declareTrackFeatures(
+					analyzer.getFeatures(),
+					analyzer.getFeatureNames(),
+					analyzer.getFeatureShortNames(),
+					analyzer.getFeatureDimensions(),
+					analyzer.getIsIntFeature() );
+
+		// Display settings.
+		final DisplaySettings displaySettings = reader.getDisplaySettings();
+
+		/*
+		 * Create GuiModel.
+		 */
+
+		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
+
+		// Main view.
+		guiModel.getWindowManager().createHyperStackDisplayer();
+
+		// GUI state
+		String panelIdentifier = reader.getGUIState();
+
+		if ( null == panelIdentifier )
+			panelIdentifier = ConfigureViewsDescriptor.KEY;
+
+		// Wizard.
+		final WizardSequence sequence = createSequence( guiModel );
+		sequence.setCurrent( panelIdentifier );
+		final JFrame frame = sequence.run( "TrackMate on " + settings.imp.getShortTitle() );
+		frame.setIconImage( TRACKMATE_ICON.getImage() );
+		GuiUtils.positionWindow( frame, settings.imp.getWindow() );
+		frame.setVisible( true );
+		final Dimension size = frame.getSize();
+		frame.setSize( size.width, size.height + 1 );
+
+		// Text
+		final LogPanelDescriptor2 logDescriptor = ( LogPanelDescriptor2 ) sequence.logDescriptor();
+		final LogPanel logPanel = ( LogPanel ) logDescriptor.getPanelComponent();
+		final Logger logger2 = logPanel.getLogger();
+
+		logger2.log( "Session log saved in the file:\n"
+				+ "--------------------\n"
+				+ logText
+				+ "--------------------\n",
+				Color.GRAY );
+
+		logger2.log( "File loaded on " + TMUtils.getCurrentTimeString() + '\n', Logger.BLUE_COLOR );
+		final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + '\n';
+		// Log GUI processing start
+		logger2.log( welcomeMessage, Logger.BLUE_COLOR );
+		logger2.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
+				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		logger2.log( StartDialogDescriptor.PUB1_TXT + "\n", Logger.GREEN_COLOR );
+		logger2.log( StartDialogDescriptor.PUB1_URL + "\n", Logger.BLUE_COLOR );
+		logger2.log( "and / or:\n" );
+		logger2.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
+				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
+		logger2.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
+	}
+
+	/**
+	 * This method reproduces the way to load an old TrackMate XML file. It is
+	 * here for backward compatibility, to allow importing XML files. The logic
+	 * is the same that in TrackMate v<9
+	 *
+	 * @param filePath
+	 *            the path to the XML file to load.
+	 * @param logger
+	 *            the logger to use for messaging.
+	 */
+	@SuppressWarnings( "deprecation" )
+	private void readOldXmlFile( final String filePath, final Logger logger )
+	{
+		// Warn the user that we are loading an old file.
+		logger.log( "Loading an TrackMate XML file. Starting from v9, TrackMate "
+				+ "file format is GEFF. The XML format is still supported for "
+				+ "backward compatibility, but resaving will use the GEFF writer.\n",
+				Color.ORANGE.darker() );
+
+		// Read the file content
+		final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
 
 		final String version = reader.getVersion();
 		if ( VersionUtils.compare( version, "2.1.0" ) < 0 )
@@ -118,7 +268,7 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		}
 
 		// We could open the file. Let's remember it.
-		lastLoadedFile = file;
+		lastLoadedFile = new File( filePath.replace( ".xml", ".geff" ) );
 
 		// Log
 		final String logText = reader.getLog() + '\n';
@@ -187,10 +337,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		 */
 
 		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
-
-		// Hook actions
-		postRead( guiModel );
-
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( "Some errors occurred while reading file:\n" );
@@ -254,58 +400,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		{
 			logger2.error( "Some errors occurred while reading file:\n" );
 			logger2.error( reader.getErrorMessage() );
-		}
-	}
-
-	/*
-	 * HOOKS
-	 */
-
-	/**
-	 * Hook for subclassers:<br>
-	 * The {@link GuiModel} object is loaded and properly configured. This
-	 * method is called just before the controller and GUI are launched.
-	 *
-	 * @param guiModel
-	 *            the {@link GuiModel} instance that was fledged after loading.
-	 */
-	protected void postRead( final GuiModel guiModel )
-	{}
-
-	/**
-	 * Hook for subclassers: <br>
-	 * Creates the {@link TmXmlReader} instance that will be used to load the
-	 * file.
-	 *
-	 * @param lFile
-	 *            the file to read from.
-	 * @return a new {@link TmXmlReader} instance.
-	 */
-	protected TmXmlReader createReader( final File lFile )
-	{
-		return new TmXmlReader( lFile );
-	}
-
-	/*
-	 * MAIN METHOD
-	 */
-
-	public static void main( final String[] args )
-	{
-		try
-		{
-			GuiUtils.setSystemLookAndFeel();
-			ImageJ.main( args );
-			final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-//		plugIn.run( null );
-//		plugIn.run( "samples/FakeTracks.xml" );
-			plugIn.run( "samples/MAX_Merged.xml" );
-//		plugIn.run( "c:/Users/tinevez/Development/TrackMateWS/TrackMate-Cellpose/samples/R2_multiC.xml" );
-//		plugIn.run( "/Users/tinevez/Desktop/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg/230901_DeltaRcsB-ZipA-mCh_timestep5min_Stage9_reg_merge65.xml" );
-		}
-		catch ( final Throwable t )
-		{
-			t.printStackTrace();
 		}
 	}
 }
