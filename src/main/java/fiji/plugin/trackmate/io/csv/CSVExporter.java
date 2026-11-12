@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.csv;
 
 import java.io.File;
 import java.io.FileWriter;
