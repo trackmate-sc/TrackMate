@@ -95,7 +95,7 @@ public class IOUtils
 	}
 
 	/**
-	 * Prompts the user for a xml file to save to.
+	 * Prompts the user for a GEFF file to save to.
 	 *
 	 * @param file
 	 *            a default file, will be used to display a default choice in
@@ -109,21 +109,41 @@ public class IOUtils
 	 */
 	public static File askForFileForSaving( final File file, final Frame parent )
 	{
+		return askForFileForSaving( file, parent, "geff" );
+	}
+
+	/**
+	 * Prompts the user for a file to save to.
+	 *
+	 * @param file
+	 *            a default file, will be used to display a default choice in
+	 *            the file chooser.
+	 * @param parent
+	 *            the {@link Frame} to lock on this dialog. It can be
+	 *            <code>null</code>; in that case, native dialogs will not be
+	 *            used on Macs.
+	 * @param extension
+	 *            the extension to use for the file filter.
+	 * @return the selected file, or <code>null</code> if the user pressed the
+	 *         "cancel" button.
+	 */
+	public static File askForFileForSaving( final File file, final Frame parent, final String extension )
+	{
 		if ( IJ.isMacintosh() && parent != null )
 		{
 			// use the native file dialog on the mac
-			final FileDialog dialog = new FileDialog( parent, "Save to a GEFF file", FileDialog.SAVE );
+			final FileDialog dialog = new FileDialog( parent, "Save to a " + extension.toUpperCase() + " file", FileDialog.SAVE );
 			dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			dialog.setDirectory( file.getParent() );
 			dialog.setFile( file.getName() );
-			final FilenameFilter filter = ( dir, name ) -> name.endsWith( ".geff" );
+			final FilenameFilter filter = ( dir, name ) -> name.endsWith( '.' + extension );
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
 			String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
 				return null;
-			if ( !selectedFile.endsWith( ".geff" ) )
-				selectedFile += ".geff";
+			if ( !selectedFile.endsWith( '.' + extension ) )
+				selectedFile += '.' + extension;
 			return new File( dialog.getDirectory(), selectedFile );
 		}
 		else
@@ -141,7 +161,7 @@ public class IOUtils
 				}
 			};
 			fileChooser.setSelectedFile( file );
-			final FileNameExtensionFilter filter = new FileNameExtensionFilter( "GEFF files", "geff" );
+			final FileNameExtensionFilter filter = new FileNameExtensionFilter( extension.toUpperCase() + " files", extension );
 			fileChooser.setFileFilter( filter );
 
 			final int returnVal = fileChooser.showSaveDialog( parent );
@@ -172,11 +192,11 @@ public class IOUtils
 		if ( IJ.isMacintosh() )
 		{
 			// use the native file dialog on the mac
-			System.setProperty( "apple.awt.fileDialogForDirectories", "true" );
+//			System.setProperty( "apple.awt.fileDialogForDirectories", "true" );
 			final FileDialog dialog = new FileDialog( parent, title, FileDialog.LOAD );
 			dialog.setIconImage( TRACKMATE_ICON.getImage() );
-			dialog.setDirectory( file.getParent() );
-			dialog.setFile( file.getName() );
+//			dialog.setDirectory( file.getParent() );
+//			dialog.setFile( file.getName() );
 			final FilenameFilter filter = new FilenameFilter()
 			{
 				@Override
