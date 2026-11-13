@@ -38,7 +38,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import org.janelia.saalfeldlab.n5.N5Reader;
@@ -87,6 +86,7 @@ import ij.ImagePlus;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.impl.nio.BufferMesh.Triangles;
 import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
@@ -282,6 +282,10 @@ public class TmGeffReader implements TrackMateFileReader
 			final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet = new HashMap<>();
 			readEdges( model, is2D, spotIdMap, spotTrackIDMap, graph, connectedVertexSet, connectedEdgeSet );
 
+			// Add all spots as vertices in the graph.
+			for ( final Spot spot : model.getSpots().iterable( false ) )
+				graph.addVertex( spot );
+
 			// Tracks sub-file: track visibility, names and feature values. It is
 			// absent when the model has no tracks.
 			final Map< Integer, Boolean > visibility = new HashMap<>();
@@ -352,8 +356,9 @@ public class TmGeffReader implements TrackMateFileReader
 	 * default {@code true} visibility and a default {@code Track_<n>} name.
 	 * No per-track feature value is restored, except the track id itself.
 	 * <p>
-	 * Spots not referenced by any edge are left out of the track model: they
-	 * remain in the spot collection as untracked spots.
+	 * Every spot is a vertex of the graph, but only components with edges are
+	 * turned into tracks: isolated spots remain untracked, as they do in a
+	 * TrackMate model after tracking (cf. {@link fiji.plugin.trackmate.TrackModel}).
 	 *
 	 * @param model
 	 *            the model being built (to access its feature model).
@@ -387,6 +392,9 @@ public class TmGeffReader implements TrackMateFileReader
 		int trackID = 0;
 		for ( final Set< Spot > component : components )
 		{
+			if ( component.size() < 2 )
+				continue; // Not a track.
+
 			visibility.put( Integer.valueOf( trackID ), Boolean.TRUE );
 			savedTrackNames.put( Integer.valueOf( trackID ), "Track_" + trackID );
 			connectedVertexSet.put( Integer.valueOf( trackID ), component );
@@ -531,7 +539,10 @@ public class TmGeffReader implements TrackMateFileReader
 			 * the features that are not bound in the builders.
 			 */
 			final List< Spot > spotList = builder.spots();
-			final LongSupplier idSupplier = Suppliers.asLongSupplier( props.id() );
+			// The GEFF id is normally stored as u8, but some writers use other
+			// integer dtypes. Convert it to a common type before reading it,
+			// so that the supplier below works for all of them.
+			final IntSupplier idSupplier = Suppliers.asIntSupplier( props.id().convert( UnsignedIntType::new ) );
 			final String trackIdProp = metadata.getTrackNodeProps() == null
 					? null
 					: metadata.getTrackNodeProps().get( "lineage" );
@@ -545,7 +556,7 @@ public class TmGeffReader implements TrackMateFileReader
 				final Spot spot = spotList.get( i );
 
 				// GEFF id -> spot.
-				spotIdMap.put( ( int ) idSupplier.getAsLong(), spot );
+				spotIdMap.put( idSupplier.getAsInt(), spot );
 
 				// spot -> TrackMate track id.
 				if ( trackIdSupplier != null )
@@ -776,7 +787,11 @@ public class TmGeffReader implements TrackMateFileReader
 			 * core properties have GEFF-conventional names, and must be mapped
 			 * back to the TrackMate feature keys.
 			 */
-			final IntSupplier idSupplier = Suppliers.asIntSupplier( props.id() );
+			// The GEFF id is normally stored as u8, but some writers (e.g. old
+			// TrackMate versions) use other integer dtypes. Convert it to a
+			// common type before reading it, so that the supplier below works
+			// for all of them.
+			final IntSupplier idSupplier = Suppliers.asIntSupplier( props.id().convert( UnsignedIntType::new ) );
 			for ( int i = 0; i < props.numElements(); i++ )
 			{
 				props.elementIndex().set( i );
