@@ -29,7 +29,14 @@ import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -303,5 +310,35 @@ public class IOUtils
 	{
 		final File dir = new File( path ).getParentFile();
 		return dir == null ? false : dir.mkdirs();
+	}
+
+	/**
+	 * Deletes the content at the given path, recursively if it is a directory.
+	 * Does nothing if nothing exists there.
+	 *
+	 * @param target
+	 *            the path to the file or directory to delete.
+	 * @throws IOException
+	 *             if an I/O error occurs while deleting.
+	 */
+	public static void deleteRecursively( final Path target ) throws IOException
+	{
+		if ( !Files.exists( target ) )
+			return;
+
+		if ( !Files.isDirectory( target ) )
+		{
+			Files.delete( target );
+			return;
+		}
+
+		// Children first (reverse order), then the directory itself.
+		final List< Path > paths;
+		try (final Stream< Path > stream = Files.walk( target ))
+		{
+			paths = stream.sorted( Comparator.reverseOrder() ).collect( Collectors.toList() );
+		}
+		for ( final Path path : paths )
+			Files.delete( path );
 	}
 }

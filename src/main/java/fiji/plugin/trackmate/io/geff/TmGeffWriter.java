@@ -70,6 +70,7 @@ import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.json.FeatureModelIO;
 import fiji.plugin.trackmate.io.json.SettingsIO;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -557,6 +558,12 @@ public class TmGeffWriter
 	/**
 	 * Writes the model to the GEFF file at the path specified in the
 	 * constructor.
+	 * <p>
+	 * A GEFF file is a directory-based Zarr store. Any content already
+	 * present at the target path is removed before writing: otherwise a
+	 * re-save would merge the new content with the stale one (e.g. the
+	 * {@code edges} group of a previous save would resurrect deleted tracks
+	 * in a model that now has none).
 	 *
 	 * @throws IOException
 	 *             if an I/O error occurs.
@@ -564,6 +571,10 @@ public class TmGeffWriter
 	public void write() throws IOException
 	{
 		// TODO: log?
+
+		// Delete if file exists.
+		IOUtils.deleteRecursively( Paths.get( geffPath ) );
+
 		try (final N5Writer n5 = new N5ZarrWriter( geffPath ))
 		{
 			if ( spotWriter != null )
@@ -586,6 +597,7 @@ public class TmGeffWriter
 			GeffMetadata.writeToZarr( trackMetadata, trackGeffPath );
 		}
 	}
+
 
 	public int getChunkSize()
 	{
