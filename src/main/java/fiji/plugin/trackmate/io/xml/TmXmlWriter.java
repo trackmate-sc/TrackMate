@@ -133,6 +133,8 @@ import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.geff.TmGeffWriter;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.kalman.AdvancedKalmanTrackerFactory;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import net.imglib2.mesh.Mesh;
@@ -407,7 +409,23 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.trackerFactory )
 		{
-			final String error = marshal( settings.trackerSettings, el );
+			final String error;
+
+			// Special cases for backward compatibility.
+			if ( settings.trackerFactory instanceof SparseLAPTrackerFactory )
+			{
+				error = SparseLAPTrackerFactory.marshal( settings.trackerSettings, el );
+			}
+			else if ( settings.trackerFactory instanceof AdvancedKalmanTrackerFactory )
+			{
+				error = AdvancedKalmanTrackerFactory.marshal( settings.trackerSettings, el );
+			}
+			else
+			{
+				// 'Normal' case.
+				error = marshal( settings.trackerSettings, el );
+			}
+
 			if ( error != null )
 				logger.error( error );
 			else

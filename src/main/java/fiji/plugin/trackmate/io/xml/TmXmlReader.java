@@ -151,6 +151,8 @@ import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.kalman.AdvancedKalmanTrackerFactory;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.mesh.Mesh;
@@ -1599,6 +1601,19 @@ public class TmXmlReader implements TrackMateFileReader
 		// We get the class of the attribute to unmarshal from the default map.
 		final Map< String, Object > defaultSettings = factory.getDefaultSettings();
 
+		// Deal with special factories for backward compatibility.
+		if ( factory instanceof AdvancedKalmanTrackerFactory )
+		{
+			final AdvancedKalmanTrackerFactory advancedKalmanFactory = ( AdvancedKalmanTrackerFactory ) factory;
+			return advancedKalmanFactory.unmarshal( element, defaultSettings );
+		}
+		else if ( factory instanceof SparseLAPTrackerFactory )
+		{
+			final SparseLAPTrackerFactory lapFactory = ( SparseLAPTrackerFactory ) factory;
+			return lapFactory.unmarshal( element, defaultSettings );
+		}
+
+		// 'Normal' case.
 		settings.clear();
 		for ( final Object key : element.getAttributes() )
 		{
