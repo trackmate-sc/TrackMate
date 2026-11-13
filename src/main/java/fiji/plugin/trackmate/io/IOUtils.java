@@ -162,10 +162,10 @@ public class IOUtils
 	 */
 	public static File askForFileForLoading( File file, final String title, final Frame parent, final Logger logger )
 	{
-
 		if ( IJ.isMacintosh() )
 		{
 			// use the native file dialog on the mac
+			System.setProperty( "apple.awt.fileDialogForDirectories", "true" );
 			final FileDialog dialog = new FileDialog( parent, title, FileDialog.LOAD );
 			dialog.setIconImage( TRACKMATE_ICON.getImage() );
 			dialog.setDirectory( file.getParent() );
@@ -180,6 +180,7 @@ public class IOUtils
 			};
 			dialog.setFilenameFilter( filter );
 			dialog.setVisible( true );
+			System.setProperty( "apple.awt.fileDialogForDirectories", "false" );
 			final String selectedFile = dialog.getFile();
 			if ( null == selectedFile )
 			{
