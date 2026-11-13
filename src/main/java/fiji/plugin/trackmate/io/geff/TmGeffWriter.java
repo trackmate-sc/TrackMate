@@ -633,14 +633,14 @@ public class TmGeffWriter
 		// 'x', 'y', 'z' and 't' (not the TrackMate feature keys).
 		final List< GeffAxis > axes = new ArrayList<>();
 		final double[] minMaxT = FeatureUtils.autoMinMax( model, TrackMateObject.SPOTS, FRAME, false );
-		axes.add( GeffAxis.createTimeAxis( "t", timeUnits, minMaxT[ 0 ], minMaxT[ 1 ] ) );
+		axes.add( GeffAxis.createTimeAxis( "t", timeUnits, boundIfFinite( minMaxT[ 0 ] ), boundIfFinite( minMaxT[ 1 ] ) ) );
 		final String[] spaceFeatures = is2D
 				? new String[] { POSITION_X, POSITION_Y }
 				: new String[] { POSITION_X, POSITION_Y, POSITION_Z };
 		for ( int i = 0; i < spaceFeatures.length; i++ )
 		{
 			final double[] minMax = FeatureUtils.autoMinMax( model, TrackMateObject.SPOTS, spaceFeatures[ i ], false );
-			axes.add( GeffAxis.createSpaceAxis( "xyz".substring( i, i + 1 ), spaceUnits, minMax[ 0 ], minMax[ 1 ] ) );
+			axes.add( GeffAxis.createSpaceAxis( "xyz".substring( i, i + 1 ), spaceUnits, boundIfFinite( minMax[ 0 ] ), boundIfFinite( minMax[ 1 ] ) ) );
 		}
 		metadata.setGeffAxes( axes );
 
@@ -753,14 +753,14 @@ public class TmGeffWriter
 		// Axes. Same as for the spots, but over the track features.
 		final List< GeffAxis > axes = new ArrayList<>();
 		final double[] minMaxT = FeatureUtils.autoMinMax( model, TrackMateObject.TRACKS, TRACK_START, false );
-		axes.add( GeffAxis.createTimeAxis( "t", timeUnits, minMaxT[ 0 ], minMaxT[ 1 ] ) );
+		axes.add( GeffAxis.createTimeAxis( "t", timeUnits, boundIfFinite( minMaxT[ 0 ] ), boundIfFinite( minMaxT[ 1 ] ) ) );
 		final String[] spaceFeatures = is2D
 				? new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION }
 				: new String[] { TrackLocationAnalyzer.X_LOCATION, TrackLocationAnalyzer.Y_LOCATION, TrackLocationAnalyzer.Z_LOCATION };
 		for ( int i = 0; i < spaceFeatures.length; i++ )
 		{
 			final double[] minMax = FeatureUtils.autoMinMax( model, TrackMateObject.TRACKS, spaceFeatures[ i ], false );
-			axes.add( GeffAxis.createSpaceAxis( "xyz".substring( i, i + 1 ), spaceUnits, minMax[ 0 ], minMax[ 1 ] ) );
+			axes.add( GeffAxis.createSpaceAxis( "xyz".substring( i, i + 1 ), spaceUnits, boundIfFinite( minMax[ 0 ] ), boundIfFinite( minMax[ 1 ] ) ) );
 		}
 		trackMetadata.setGeffAxes( axes );
 
@@ -824,6 +824,11 @@ public class TmGeffWriter
 	private static double z( final Spot spot )
 	{
 		return spot.getDoublePosition( 2 );
+	}
+
+	private static final Double boundIfFinite( final double value )
+	{
+		return Double.isFinite( value ) ? Double.valueOf( value ) : null;
 	}
 
 	private static Maybe.MaybeDouble radius( final Spot spot )
