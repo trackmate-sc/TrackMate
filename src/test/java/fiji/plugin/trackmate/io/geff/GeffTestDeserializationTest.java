@@ -11,15 +11,20 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.presentation.StandardRepresentation;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import fiji.plugin.trackmate.FeatureModel;
+import fiji.plugin.trackmate.features.track.TrackDurationAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
+import fiji.plugin.trackmate.features.track.TrackLocationAnalyzer;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackModel;
@@ -73,6 +78,104 @@ public class GeffTestDeserializationTest extends GeffTestBase
 	public void testSpotMixedSerialization() throws Exception
 	{
 		testModelSerialization( SPOT_MIXED_PATH );
+	}
+
+	/**
+	 * Tests that an empty model (no spots at all) can be saved to and read
+	 * back from a GEFF file. The GEFF file then contains zero-length node
+	 * datasets, which the reference python implementation also writes for
+	 * empty graphs.
+	 */
+	@Test
+	public void testEmptyModelSerialization() throws Exception
+	{
+		final Model emptyModel = new Model();
+		emptyModel.setPhysicalUnits( "µm", "min" );
+
+		final String geffFile = new File( temporaryFolder.getRoot(), "empty.geff" ).getAbsolutePath();
+		final TmGeffWriter geffWriter = new TmGeffWriter( geffFile );
+		geffWriter.appendModel( emptyModel );
+		geffWriter.write();
+
+		final TmGeffReader geffReader = new TmGeffReader( geffFile );
+		final Model readBackModel = geffReader.getModel();
+		assertThat( readBackModel )
+				.as( "empty model is read back" )
+				.isNotNull();
+		assertThat( readBackModel.getSpots().iterable( false ) )
+				.as( "no spots in the read-back model" )
+				.isEmpty();
+		assertThat( readBackModel.getTrackModel().nTracks( false ) )
+				.as( "no tracks in the read-back model" )
+				.isEqualTo( 0 );
+	}
+
+	/**
+	 * Tests that re-saving over an existing GEFF file does not keep stale
+	 * content: A GEFF file is a directory-based Zarr store, so a re-save
+	 * merges with what is already there unless the store is deleted first.
+	 * Here we save a model with a track, then save an empty model to the same
+	 * path; the reloaded model must be empty, and in particular must not
+	 * resurrect the edges of the first save.
+	 */
+	@Test
+	public void testOverwriteErasesStaleContent() throws Exception
+	{
+		// A model with 2 spots joined by an edge, forming 1 track.
+		final Model model = new Model();
+		model.setPhysicalUnits( "µm", "min" );
+		final Spot spot0 = new SpotBase( 10, 10, 0, 2., 1., "Spot_0" );
+		final Spot spot1 = new SpotBase( 20, 10, 0, 2., 1., "Spot_1" );
+		spot0.putFeature( Spot.FRAME, 0. );
+		spot1.putFeature( Spot.FRAME, 1. );
+		model.getSpots().add( spot0, 0 );
+		model.getSpots().add( spot1, 1 );
+		final SimpleWeightedGraph< Spot, DefaultWeightedEdge > graph = new SimpleWeightedGraph<>( DefaultWeightedEdge.class );
+		graph.addVertex( spot0 );
+		graph.addVertex( spot1 );
+		final DefaultWeightedEdge edge = graph.addEdge( spot0, spot1 );
+		model.getTrackModel().from(
+				graph,
+				Map.of( 0, Set.of( spot0, spot1 ) ),
+				Map.of( 0, Set.of( edge ) ),
+				Map.of( 0, true ),
+				Map.of( 0, "Track_0" ) );
+		// The track features the writer uses for the core track properties.
+		final FeatureModel fm = model.getFeatureModel();
+		fm.putTrackFeature( 0, TrackIndexAnalyzer.TRACK_ID, 0. );
+		fm.putTrackFeature( 0, TrackDurationAnalyzer.TRACK_START, 0. );
+		fm.putTrackFeature( 0, TrackLocationAnalyzer.X_LOCATION, 15. );
+		fm.putTrackFeature( 0, TrackLocationAnalyzer.Y_LOCATION, 10. );
+
+		final String geffFile = new File( temporaryFolder.getRoot(), "overwrite.geff" ).getAbsolutePath();
+		final TmGeffWriter writer = new TmGeffWriter( geffFile );
+		writer.appendModel( model );
+		writer.write();
+
+		final TmGeffReader firstReader = new TmGeffReader( geffFile );
+		assertThat( firstReader.getModel().getTrackModel().nTracks( false ) )
+				.as( "first save has 1 track" )
+				.isEqualTo( 1 );
+
+		// Save an empty model over the same path.
+		final Model emptyModel = new Model();
+		emptyModel.setPhysicalUnits( "µm", "min" );
+		final TmGeffWriter overwriter = new TmGeffWriter( geffFile );
+		overwriter.appendModel( emptyModel );
+		overwriter.write();
+
+		final TmGeffReader secondReader = new TmGeffReader( geffFile );
+		final Model readBackModel = secondReader.getModel();
+		assertThat( readBackModel ).isNotNull();
+		assertThat( readBackModel.getSpots().iterable( false ) )
+				.as( "re-save erases the spots of the first save" )
+				.isEmpty();
+		assertThat( readBackModel.getTrackModel().nTracks( false ) )
+				.as( "re-save erases the tracks of the first save" )
+				.isEqualTo( 0 );
+		assertThat( readBackModel.getTrackModel().edgeSet() )
+				.as( "the stale edges group of the first save is gone" )
+				.isEmpty();
 	}
 
 	/**
