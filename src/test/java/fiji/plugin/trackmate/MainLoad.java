@@ -21,7 +21,10 @@ public class MainLoad extends GeffTestBase
 			GuiUtils.setSystemLookAndFeel();
 			ImageJ.main( args );
 			final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-			plugIn.run( "samples/MAX_Merged.geff" );
+			plugIn.run( "" );
+//			plugIn.run( "samples/FakeTracks.geff" );
+//			plugIn.run( "samples/MAX_Merged.geff" );
+//			plugIn.run( "samples/CElegans3D-smoothed-mask-orig.geff" );
 		}
 		catch ( final Throwable t )
 		{
