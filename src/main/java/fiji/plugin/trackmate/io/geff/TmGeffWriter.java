@@ -247,7 +247,10 @@ public class TmGeffWriter
 
 		// TrackMate ID and name.
 		writer.add( TRACKMATE_SPOT_ID_PROP, Spot::ID );
-		writer.add( NAME_PROP, TmGeffWriter::name );
+		// Only write the 'name' property name if there is at least one spot with a name.
+		final boolean hasSpotNames = spotList.stream().anyMatch( Spot::hasName );
+		if ( hasSpotNames )
+			writer.add( NAME_PROP, TmGeffWriter::name );
 
 		// Track ID, mapped to the GEFF 'lineage' track node prop in the
 		// metadata. Possibly missing, for spots that are not part of a track.
@@ -296,7 +299,7 @@ public class TmGeffWriter
 		// Store the writer for later use in write().
 		this.spotWriter = writer;
 
-		return new SpotsReport( spotToId, spotFeatureKeys, hasRoi, hasMesh );
+		return new SpotsReport( spotToId, spotFeatureKeys, hasRoi, hasMesh, hasSpotNames );
 	}
 
 	/**
@@ -503,7 +506,8 @@ public class TmGeffWriter
 			TObjectIntMap< Spot > spotToId,
 			Set< String > featureKeys,
 			boolean hasRoi,
-			boolean hasMesh )
+			boolean hasMesh,
+			boolean hasNames )
 	{}
 
 	/** The things returned by {@link #appendEdges(Model, boolean, TObjectIntMap)}. */
@@ -622,6 +626,7 @@ public class TmGeffWriter
 		final Set< String > spotFeatureKeys = spotsReport.featureKeys();
 		final boolean hasRoi = spotsReport.hasRoi();
 		final boolean hasMesh = spotsReport.hasMesh();
+		final boolean hasNames = spotsReport.hasNames();
 		final boolean hasTracks = tracksReport.hasTracks();
 
 		// Axes. Space and time axes use the GEFF conventional names
@@ -659,7 +664,8 @@ public class TmGeffWriter
 			nodePropsMetadata.put( "z", new PropMetadata( "z", "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( POSITION_Z ), null ) );
 		nodePropsMetadata.put( RADIUS_PROP_NAME, new PropMetadata( RADIUS_PROP_NAME, "float64", false, spaceUnits, Spot.FEATURE_NAMES.get( RADIUS ), "The radius of the spot" ) );
 		nodePropsMetadata.put( TRACKMATE_SPOT_ID_PROP, new PropMetadata( TRACKMATE_SPOT_ID_PROP, "uint32", false, null, "TrackMate ID", "The TrackMate internal ID of spots" ) );
-		nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
+		if ( hasNames )
+			nodePropsMetadata.put( NAME_PROP, new PropMetadata( NAME_PROP, "uint8", true, null, "Spot name", "The name of the spot" ) );
 
 		// Track ID, mapped to the GEFF 'lineage' track node prop. Only when
 		// the model has tracks (the property would consist of only missing
