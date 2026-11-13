@@ -1122,6 +1122,10 @@ public class TmXmlReader implements TrackMateFileReader
 			savedTrackNames.put( trackID, trackName );
 		}
 
+		// Add all spots as vertices to the graph, even the lonely ones.
+		for ( final Spot spot : model.getSpots().iterable( false ) )
+			graph.addVertex( spot );
+
 		/*
 		 * Now on to the visibility.
 		 */
