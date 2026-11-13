@@ -259,4 +259,36 @@ public class GeffTestForeignFilesTest extends GeffTestBase
 		final Set< ForeignSpot > expected1 = Set.of( SPOTS.get( 3 ), SPOTS.get( 4 ) );
 		assertEquals( Set.of( expected0, expected1 ), groups );
 	}
+
+	/**
+	 * A foreign file in which some spots are not referenced by any edge: they
+	 * remain untracked (as they do in a TrackMate model after tracking, where
+	 * single-spot components are discarded), but they are still vertices of
+	 * the track graph, which e.g. the spot table navigation relies on.
+	 */
+	@Test
+	public void testForeignFileWithOrphanSpot() throws IOException, org.litt.geff.GeffException
+	{
+		// One component with 2 spots; the other 3 spots are orphans.
+		final List< ForeignEdge > edges = List.of( new ForeignEdge( 0, 1 ) );
+		final Path dir = Files.createTempDirectory( "GeffTestForeignFilesTest" );
+		final Path file = writeForeignFile( dir, null, edges );
+
+		final TmGeffReader reader = new TmGeffReader( file.toString() );
+		final Model model = reader.getModel();
+		checkModel( model );
+
+		final TrackModel trackModel = model.getTrackModel();
+
+		// One track, made of the two spots joined by the single edge.
+		assertEquals( 1, trackModel.nTracks( false ) );
+		final Set< Spot > trackedSpots = new HashSet<>();
+		for ( final Integer trackID : trackModel.trackIDs( false ) )
+			for ( final Spot spot : trackModel.trackSpots( trackID ) )
+				assertTrue( trackedSpots.add( spot ) );
+		assertEquals( 2, trackedSpots.size() );
+
+		// Every spot is a vertex of the track graph, orphan or not.
+		assertEquals( model.getSpots().getNSpots( false ), trackModel.vertexSet().size() );
+	}
 }
