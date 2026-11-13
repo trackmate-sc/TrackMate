@@ -880,7 +880,9 @@ public class TMUtils
 			 * Warn the user that the file cannot be reloaded properly because
 			 * the source image does not match a file.
 			 */
-			logger.error( "Warning: The source image does not match a file on the system." + "TrackMate won't be able to reload it when opening this GEFF file.\n" + "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
+			logger.error( "Warning: The source image does not match a file on the system."
+					+ "TrackMate won't be able to reload it when opening this GEFF file.\n"
+					+ "To fix this, save the source image to a TIF file before saving the TrackMate session.\n" );
 			settings.imageFolder = "";
 		}
 
