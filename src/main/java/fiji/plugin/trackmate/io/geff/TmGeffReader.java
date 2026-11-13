@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -775,11 +776,11 @@ public class TmGeffReader implements TrackMateFileReader
 			 * core properties have GEFF-conventional names, and must be mapped
 			 * back to the TrackMate feature keys.
 			 */
-			final LongSupplier idSupplier = Suppliers.asLongSupplier( props.id() );
+			final IntSupplier idSupplier = Suppliers.asIntSupplier( props.id() );
 			for ( int i = 0; i < props.numElements(); i++ )
 			{
 				props.elementIndex().set( i );
-				final int trackID = ( int ) idSupplier.getAsLong();
+				final int trackID = idSupplier.getAsInt();
 
 				// TRACK_ID as a track feature.
 				fm.putTrackFeature( trackID, TRACK_ID, Double.valueOf( trackID ) );
