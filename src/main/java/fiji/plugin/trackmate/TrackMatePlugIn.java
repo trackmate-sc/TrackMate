@@ -37,7 +37,6 @@ import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
@@ -174,16 +173,5 @@ public class TrackMatePlugIn implements PlugIn
 	protected DisplaySettings createDisplaySettings()
 	{
 		return DisplaySettingsIO.readUserDefault().copy( "CurrentDisplaySettings" );
-	}
-
-	public static void main( final String[] args )
-	{
-//		GuiUtils.setSystemLookAndFeel();
-		ImageJ.main( args );
-//		new TrackMatePlugIn().run( "samples/Stack.tif" );
-//		new TrackMatePlugIn().run( "samples/Merged.tif" );
-		new TrackMatePlugIn().run( "samples/MAX_Merged.tif" );
-//		new TrackMatePlugIn().run( "samples/Mask.tif" );
-//		new TrackMatePlugIn().run( "samples/FakeTracks.tif" );
 	}
 }
