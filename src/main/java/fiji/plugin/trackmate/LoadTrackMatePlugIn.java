@@ -104,8 +104,6 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		final TrackMateFileReader reader = TrackMateFileReaders.open( file.getPath(), logger );
 
 		final String version = reader.getVersion();
-		logger.log( "TrackMate file version: " + ( null == version ? "unknown" : version ) + '\n' );
-
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( reader.getErrorMessage() );
