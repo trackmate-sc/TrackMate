@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -224,6 +224,7 @@ public class SpotOverlay extends Roi
 		final double ys = ( yp - ycorner ) * magnification;
 
 		// Get a painter adequate for the spot and config we have.
+		final Color color = g2d.getColor();
 		@SuppressWarnings( "rawtypes" )
 		final TrackMatePainter painter = getPainter( spot );
 		@SuppressWarnings( "unchecked" )
@@ -232,7 +233,8 @@ public class SpotOverlay extends Roi
 		if ( textPos >= 0 && displaySettings.isSpotShowName() )
 		{
 			final int windowWidth = imp.getWindow().getWidth();
-			drawString( g2d, fm, windowWidth, spot.toString(), xs, ys, textPos );
+			g2d.setColor( color );
+			drawString( g2d, fm, windowWidth, spot.getName(), xs, ys, textPos );
 		}
 	}
 
