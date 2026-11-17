@@ -89,6 +89,8 @@ public class DisplaySettingsIO
 	{
 		final Gson gson = getGson();
 		final DisplaySettings ds = gson.fromJson( gson.toJsonTree( displaySettingsJson ), DisplaySettings.class );
+		if ( ds == null )
+			return DisplaySettings.defaultStyle();
 		sanitize( ds );
 		return ds;
 	}
