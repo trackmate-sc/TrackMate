@@ -15,6 +15,7 @@ import com.google.gson.stream.JsonWriter;
 
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMateModule;
+import fiji.plugin.trackmate.detection.ManualDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
@@ -28,6 +29,7 @@ import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
+import fiji.plugin.trackmate.tracking.manual.ManualTrackerFactory;
 import ij.gui.Roi;
 
 public class SettingsIO
@@ -71,6 +73,8 @@ public class SettingsIO
 		 * settings maps as a template, using the default value types to
 		 * properly case numbers.
 		 */
+		if ( updateTarget.detectorFactory == null )
+			updateTarget.detectorFactory = new ManualDetectorFactory<>();
 		final Map< String, Object > detectorDS = updateTarget.detectorFactory.getDefaultSettings();
 		for ( final String key : detectorDS.keySet() )
 		{
@@ -79,6 +83,8 @@ public class SettingsIO
 				updateTarget.detectorSettings.put( key, ( ( Double ) val ).intValue() );
 		}
 
+		if ( updateTarget.trackerFactory == null )
+			updateTarget.trackerFactory = new ManualTrackerFactory();
 		final Map< String, Object > trackerDS = updateTarget.trackerFactory.getDefaultSettings();
 		for ( final String key : trackerDS.keySet() )
 		{
