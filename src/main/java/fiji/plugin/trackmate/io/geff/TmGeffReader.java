@@ -83,6 +83,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
+import net.imglib2.mesh.Meshes;
 import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.impl.nio.BufferMesh.Triangles;
 import net.imglib2.mesh.impl.nio.BufferMesh.Vertices;
@@ -1051,23 +1052,17 @@ public class TmGeffReader implements TrackMateFileReader
 				@FromProperty( RADIUS_PROP_NAME ) final Maybe.MaybeDouble r,
 				@FromProperty( TRACKMATE_SPOT_ID_PROP ) final OptionalInt trackmateId,
 				@FromProperty( MESH_V_PROP ) final Optional< float[] > meshVertices,
-				@FromProperty( MESH_VN_PROP ) final Optional< float[] > meshNormals,
 				@FromProperty( MESH_F_PROP ) final Optional< long[] > meshTriangles,
 				@FromProperty( NAME_PROP ) final Optional< String > name )
 		{
 			final Spot spot;
-			if ( !meshVertices.isPresent() || !meshNormals.isPresent() || !meshTriangles.isPresent() )
+			if ( !meshVertices.isPresent() || !meshTriangles.isPresent() )
 			{
 				spot = new SpotBase( spotId( trackmateId ) );
 			}
 			else
 			{
-				spot = new SpotMesh( spotId( trackmateId ), buildMesh( meshVertices.get(), meshNormals.get(), meshTriangles.get() ) );
-				// NB: The SpotMesh constructor re-centers the mesh and sets
-				// the spot position and radius from it. The mesh vertices are
-				// already relative to the spot center, so its center is (0, 0,
-				// 0) up to numerical error, and the call to setUp below
-				// restores the position and radius from the file.
+				spot = new SpotMesh( spotId( trackmateId ), buildMesh2( meshVertices.get(), meshTriangles.get() ) );
 			}
 			setUp( spot, x, y, z, t, r, name );
 		}
@@ -1075,25 +1070,24 @@ public class TmGeffReader implements TrackMateFileReader
 
 	/**
 	 * Builds a {@link BufferMesh} from the interleaved vertex coordinates and
-	 * normals, and flattened triangle indices, as stored in the GEFF file.
+	 * flattened triangle indices, as stored in the GEFF file.
 	 */
-	private static BufferMesh buildMesh( final float[] v, final float[] vn, final long[] f )
+	private static BufferMesh buildMesh2( final float[] v, final long[] f )
 	{
 		final int nVertices = v.length / 3;
 		final int nTriangles = f.length / 3;
-		final BufferMesh mesh = new BufferMesh( nVertices, nTriangles );
+		final BufferMesh tmp = new BufferMesh( nVertices, nTriangles );
 
-		final Vertices vertices = mesh.vertices();
+		final Vertices vertices = tmp.vertices();
 		for ( int i = 0; i < nVertices; i++ )
-			vertices.addf(
-					v[ 3 * i ], v[ 3 * i + 1 ], v[ 3 * i + 2 ],
-					vn[ 3 * i ], vn[ 3 * i + 1 ], vn[ 3 * i + 2 ],
-					0, 0 );
+			vertices.addf( v[ 3 * i ], v[ 3 * i + 1 ], v[ 3 * i + 2 ] );
 
-		final Triangles triangles = mesh.triangles();
+		final Triangles triangles = tmp.triangles();
 		for ( int i = 0; i < nTriangles; i++ )
 			triangles.add( ( int ) f[ 3 * i ], ( int ) f[ 3 * i + 1 ], ( int ) f[ 3 * i + 2 ], 0f, 0f, 0f );
 
+		final BufferMesh mesh = new BufferMesh( tmp.vertices().size(), tmp.triangles().size() );
+		Meshes.calculateNormals( tmp, mesh );
 		return mesh;
 	}
 
