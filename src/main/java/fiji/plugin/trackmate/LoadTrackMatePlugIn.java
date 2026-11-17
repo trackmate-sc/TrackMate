@@ -28,7 +28,12 @@ import java.awt.Dimension;
 import java.io.File;
 
 import javax.swing.JFrame;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.scijava.ui.config.utils.FileChooser;
+import org.scijava.ui.config.utils.FileChooser.DialogType;
+import org.scijava.ui.config.utils.FileChooser.SelectionMode;
 import org.scijava.util.VersionUtils;
 
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
@@ -42,7 +47,6 @@ import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
 import fiji.plugin.trackmate.gui.wizard.descriptors.StartDialogDescriptor;
-import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.SettingsPersistence;
 import fiji.plugin.trackmate.io.TrackMateFileReader;
 import fiji.plugin.trackmate.io.TrackMateFileReaders;
@@ -71,7 +75,11 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		{
 			final Settings lastUsedSettings = SettingsPersistence.readLastUsedSettings( null, logger );
 			file = TMUtils.proposeTrackMateSaveFile( lastUsedSettings, Logger.VOID_LOGGER );
-			file = IOUtils.askForFileForLoading( file, "Load a TrackMate GEFF file", null, logger );
+
+			final FileFilter fileFilter = new FileNameExtensionFilter( "TrackMate GEFF file", "geff", "xml" );
+			final DialogType dialogType = DialogType.LOAD;
+			final SelectionMode selectionMode = SelectionMode.FILES_AND_DIRECTORIES;
+			file = FileChooser.chooseFile( true, null, file.getAbsolutePath(), fileFilter, "Load a TrackMate GEFF file", dialogType, selectionMode );
 			if ( null == file )
 				return;
 		}

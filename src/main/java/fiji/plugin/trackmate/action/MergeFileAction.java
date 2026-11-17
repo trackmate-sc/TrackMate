@@ -32,15 +32,19 @@ import java.util.HashMap;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.config.utils.FileChooser;
+import org.scijava.ui.config.utils.FileChooser.DialogType;
+import org.scijava.ui.config.utils.FileChooser.SelectionMode;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 
@@ -74,7 +78,10 @@ public class MergeFileAction extends AbstractTMAction
 			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
 		}
 
-		final File tmpFile = IOUtils.askForFileForLoading( file, "Merge a TrackMate XML file", parent, logger );
+		final FileFilter fileFilter = new FileNameExtensionFilter( "TrackMate GEFF file", "geff", "xml" );
+		final DialogType dialogType = DialogType.LOAD;
+		final SelectionMode selectionMode = SelectionMode.FILES_AND_DIRECTORIES;
+		final File tmpFile = FileChooser.chooseFile( null, file.getAbsolutePath(), fileFilter, "Load a TrackMate GEFF file", dialogType, selectionMode );
 		if ( null == tmpFile )
 			return;
 		file = tmpFile;
