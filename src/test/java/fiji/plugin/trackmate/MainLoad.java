@@ -1,7 +1,10 @@
 package fiji.plugin.trackmate;
 
-import fiji.plugin.trackmate.gui.GuiUtils;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
+
 import fiji.plugin.trackmate.io.geff.GeffTestBase;
+import ij.IJ;
 import ij.ImageJ;
 
 /**
@@ -18,13 +21,17 @@ public class MainLoad extends GeffTestBase
 	{
 		try
 		{
-			GuiUtils.setSystemLookAndFeel();
+			if ( IJ.isMacintosh() )
+				FlatMacLightLaf.setup();
+			else
+				FlatLightLaf.setup();
 			ImageJ.main( args );
 			final LoadTrackMatePlugIn plugIn = new LoadTrackMatePlugIn();
-			plugIn.run( "" );
+//			plugIn.run( "" );
+//			plugIn.run( "samples/test-cube-mesh.geff" );
 //			plugIn.run( "samples/FakeTracks.geff" );
 //			plugIn.run( "samples/MAX_Merged.geff" );
-//			plugIn.run( "samples/CElegans3D-smoothed-mask-orig.geff" );
+			plugIn.run( "samples/CElegans3D-smoothed-mask-orig.geff" );
 		}
 		catch ( final Throwable t )
 		{
