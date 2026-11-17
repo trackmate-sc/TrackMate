@@ -21,7 +21,7 @@ import net.imglib2.view.Views;
  * Iterative n-dimensional flood fill for arbitrary neighborhoods.
  * <p>
  * This class is modifed from the original
- * {@link net.imglib2.algorithm.floodfill.FloodFill} class to be able to return
+ * {@link net.imglib2.algorithm.fill.FloodFill} class to be able to return
  * the bounding-box (as interval) of the filled region.
  *
  * @author Philipp Hanslovsky

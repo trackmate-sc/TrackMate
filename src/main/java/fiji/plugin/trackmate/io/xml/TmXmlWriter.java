@@ -8,89 +8,89 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.xml;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.XML_ATTRIBUTE_DETECTOR_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_TSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_XEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_XSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_YSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_ABOVE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_FEATURE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ATTRIBUTE;
-import static fiji.plugin.trackmate.io.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_HEIGHT_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_NFRAMES_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_NSLICES_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.IMAGE_WIDTH_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.LOG_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.MODEL_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.ROOT_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FILTER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_FRAME_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_ID_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.SPOT_NAME_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TIME_UNITS_ATTRIBUTE_NAME;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACKER_SETTINGS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ANALYSERS_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_EDGE_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
-import static fiji.plugin.trackmate.io.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYSER_KEY_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ANALYZER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_TEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_TSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_XEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_XSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_YEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_YSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ZEND_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.CROP_ZSTART_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.DETECTOR_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.DISPLAY_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.EDGE_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.EDGE_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_DECLARATIONS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_DIMENSION_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_ISINT_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_NAME_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FEATURE_SHORT_NAME_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTERED_TRACK_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_ABOVE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_FEATURE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FILTER_VALUE_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.FRAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ATTRIBUTE;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.GUI_STATE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_FILENAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_FOLDER_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_HEIGHT_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_NFRAMES_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_NSLICES_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_PIXEL_HEIGHT_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_PIXEL_WIDTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_TIME_INTERVAL_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_VOXEL_DEPTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.IMAGE_WIDTH_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.INITIAL_SPOT_FILTER_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.LOG_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.MODEL_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.PLUGIN_VERSION_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ROI_N_POINTS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.ROOT_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPATIAL_UNITS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_COLLECTION_NSPOTS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_FRAME_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_ID_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.SPOT_NAME_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TIME_UNITS_ATTRIBUTE_NAME;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACKER_SETTINGS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ANALYSERS_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_EDGE_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_FEATURES_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_FILTER_COLLECTION_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_ID_ELEMENT_KEY;
+import static fiji.plugin.trackmate.io.xml.TmXmlKeys.TRACK_NAME_ATTRIBUTE_NAME;
 import static fiji.plugin.trackmate.tracking.TrackerKeys.XML_ATTRIBUTE_TRACKER_NAME;
 
 import java.io.File;
@@ -131,11 +131,21 @@ import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.io.IOUtils;
+import fiji.plugin.trackmate.io.geff.TmGeffWriter;
+import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTrackerFactory;
+import fiji.plugin.trackmate.tracking.kalman.AdvancedKalmanTrackerFactory;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import net.imglib2.mesh.Mesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 import net.imglib2.mesh.view.TranslateMesh;
+
+/**
+ * Deprecated in TrackMate v9.
+ * <p>
+ * We now use the GEFF file format. Check {@link TmGeffWriter}.
+ */
 
 public class TmXmlWriter
 {
@@ -165,6 +175,7 @@ public class TmXmlWriter
 	 * @param file
 	 *            the xml file to write to, will be overwritten.
 	 */
+
 	public TmXmlWriter( final File file )
 	{
 		this( file, new Logger.StringBuilderLogger() );
@@ -178,6 +189,7 @@ public class TmXmlWriter
 	 * @param logger
 	 *            a logger instance to log writing progress and errors.
 	 */
+
 	public TmXmlWriter( final File file, final Logger logger )
 	{
 		this.root = new Element( ROOT_ELEMENT_KEY );
@@ -203,6 +215,7 @@ public class TmXmlWriter
 	 * @see #appendModel(Model)
 	 * @see #appendSettings(Settings)
 	 */
+
 	public void writeToFile() throws FileNotFoundException, IOException
 	{
 		try (FileOutputStream fos = new FileOutputStream( file ))
@@ -238,6 +251,7 @@ public class TmXmlWriter
 	 * @param model
 	 *            the {@link Model} to write.
 	 */
+
 	public void appendModel( final Model model )
 	{
 		final Element modelElement = new Element( MODEL_ELEMENT_KEY );
@@ -267,6 +281,7 @@ public class TmXmlWriter
 	 * @param settings
 	 *            the {@link Settings} to write.
 	 */
+
 	public void appendSettings( final Settings settings )
 	{
 		final Element settingsElement = new Element( SETTINGS_ELEMENT_KEY );
@@ -304,6 +319,7 @@ public class TmXmlWriter
 	 * @param log
 	 *            the log content, as a String.
 	 */
+
 	public void appendLog( final String log )
 	{
 		if ( null != log )
@@ -321,6 +337,7 @@ public class TmXmlWriter
 	 * @param currentPanelIdentifier
 	 *            the key to the panel currently displaying.
 	 */
+
 	public void appendGUIState( final String currentPanelIdentifier )
 	{
 		final Element guiel = new Element( GUI_STATE_ELEMENT_KEY );
@@ -369,7 +386,7 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.detectorFactory )
 		{
-			final String errorMessage = settings.detectorFactory.marshal( settings.detectorSettings, el );
+			final String errorMessage = marshal( settings.detectorSettings, el );
 			if ( errorMessage != null )
 				logger.error( errorMessage );
 			else
@@ -392,7 +409,23 @@ public class TmXmlWriter
 		// Marshal the rest.
 		if ( null != settings.trackerFactory )
 		{
-			final String error = settings.trackerFactory.marshal( settings.trackerSettings, el );
+			final String error;
+
+			// Special cases for backward compatibility.
+			if ( settings.trackerFactory instanceof SparseLAPTrackerFactory )
+			{
+				error = SparseLAPTrackerFactory.marshal( settings.trackerSettings, el );
+			}
+			else if ( settings.trackerFactory instanceof AdvancedKalmanTrackerFactory )
+			{
+				error = AdvancedKalmanTrackerFactory.marshal( settings.trackerSettings, el );
+			}
+			else
+			{
+				// 'Normal' case.
+				error = marshal( settings.trackerSettings, el );
+			}
+
 			if ( error != null )
 				logger.error( error );
 			else
@@ -829,5 +862,19 @@ public class TmXmlWriter
 			logger.error( "Problem writing the mesh file:\n" + e.getMessage() );
 			e.printStackTrace();
 		}
+	}
+
+	private static String marshal( final Map< String, Object > settings, final Element element )
+	{
+		for ( final Map.Entry< String, Object > entry : settings.entrySet() )
+		{
+			final String key = entry.getKey();
+			final Object value = entry.getValue();
+			if ( null == value )
+				return "No value set for parameter " + key;
+
+			element.setAttribute( key, value.toString() );
+		}
+		return null;
 	}
 }

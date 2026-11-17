@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -38,6 +38,8 @@ import java.util.Iterator;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.Spot.SpotVisitor;
+import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.SpotRoi;
@@ -70,11 +72,7 @@ public class SpotOverlay extends Roi
 
 	protected final Model model;
 
-	private final PaintSpotRoi paintSpotRoi;
-
-	private final PaintSpotSphere paintSpotSphere;
-
-	private final PaintSpotMesh paintSpotMesh;
+	private final SpotPainter painter;
 
 	/*
 	 * CONSTRUCTOR
@@ -87,9 +85,7 @@ public class SpotOverlay extends Roi
 		this.imp = imp;
 		this.calibration = TMUtils.getSpatialCalibration( imp );
 		this.displaySettings = displaySettings;
-		this.paintSpotSphere = new PaintSpotSphere( imp, calibration, displaySettings );
-		this.paintSpotRoi = new PaintSpotRoi( imp, calibration, displaySettings );
-		this.paintSpotMesh = new PaintSpotMesh( imp, calibration, displaySettings );
+		this.painter = new SpotPainter();
 	}
 
 	/*
@@ -115,6 +111,7 @@ public class SpotOverlay extends Roi
 		final float alpha = ( float ) displaySettings.getSpotTransparencyAlpha();
 
 		final Graphics2D g2d = ( Graphics2D ) g;
+		painter.setGraphics( g2d );
 
 		// Save graphic device original settings
 		final AffineTransform originalTransform = g2d.getTransform();
@@ -223,31 +220,16 @@ public class SpotOverlay extends Roi
 		final double xs = ( xp - xcorner ) * magnification;
 		final double ys = ( yp - ycorner ) * magnification;
 
-		// Get a painter adequate for the spot and config we have.
-		@SuppressWarnings( "rawtypes" )
-		final TrackMatePainter painter = getPainter( spot );
-		@SuppressWarnings( "unchecked" )
-		final int textPos = painter.paint( g2d, spot );
+		final Color color = g2d.getColor();
+		spot.accept( painter );
+		final int textPos = painter.getTextPos();
 
 		if ( textPos >= 0 && displaySettings.isSpotShowName() )
 		{
 			final int windowWidth = imp.getWindow().getWidth();
-			drawString( g2d, fm, windowWidth, spot.toString(), xs, ys, textPos );
+			g2d.setColor( color );
+			drawString( g2d, fm, windowWidth, spot.getName(), xs, ys, textPos );
 		}
-	}
-
-	private TrackMatePainter< ? extends Spot > getPainter( final Spot spot )
-	{
-		if ( !displaySettings.isSpotDisplayedAsRoi() )
-			return paintSpotSphere;
-
-		if ( spot instanceof SpotRoi )
-			return paintSpotRoi;
-
-		if ( spot instanceof SpotMesh )
-			return paintSpotMesh;
-
-		return paintSpotSphere;
 	}
 
 	private static final void drawString(
@@ -267,5 +249,60 @@ public class SpotOverlay extends Roi
 		final int yindent = fm.getAscent() / 2;
 		final int ytext = ( int ) ys + yindent;
 		g2d.drawString( str, xtext, ytext );
+	}
+
+	private class SpotPainter implements SpotVisitor
+	{
+
+		private final PaintSpotRoi paintSpotRoi;
+
+		private final PaintSpotSphere paintSpotSphere;
+
+		private final PaintSpotMesh paintSpotMesh;
+
+		private Graphics2D g2d;
+
+		private int textPos;
+
+		public SpotPainter()
+		{
+			this.paintSpotSphere = new PaintSpotSphere( imp, calibration, displaySettings );
+			this.paintSpotRoi = new PaintSpotRoi( imp, calibration, displaySettings );
+			this.paintSpotMesh = new PaintSpotMesh( imp, calibration, displaySettings );
+		}
+
+		/**
+		 * Returns the last text position for spot name calculated by the last
+		 * call to {@link #visit(Spot)}.
+		 *
+		 * @return the text position X indent.
+		 */
+		public int getTextPos()
+		{
+			return textPos;
+		}
+
+		private void setGraphics( final Graphics2D g2d )
+		{
+			this.g2d = g2d;
+		}
+
+		@Override
+		public void visit( final SpotBase spot )
+		{
+			textPos = paintSpotSphere.paint( g2d, spot );
+		}
+
+		@Override
+		public void visit( final SpotRoi spot )
+		{
+			textPos = paintSpotRoi.paint( g2d, spot );
+		}
+
+		@Override
+		public void visit( final SpotMesh spot )
+		{
+			textPos = paintSpotMesh.paint( g2d, spot );
+		}
 	}
 }

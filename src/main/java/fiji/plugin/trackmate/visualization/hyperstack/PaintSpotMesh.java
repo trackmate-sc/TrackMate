@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,7 +23,6 @@ package fiji.plugin.trackmate.visualization.hyperstack;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.function.DoubleUnaryOperator;
@@ -88,14 +87,15 @@ public class PaintSpotMesh extends TrackMatePainter< SpotMesh >
 			return -1;
 		}
 
-
+		double maxTextPos = 0.;
 		if ( displaySettings.isSpotFilled() )
 		{
 			// Should not be null.
 			shape.reset();
 			for ( final Contour c : slice )
 			{
-				toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				final double tmp = toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				maxTextPos = Math.max( maxTextPos, tmp );
 				if ( c.isInterior() )
 					shape.add( new Area( polygon ) );
 				else
@@ -109,12 +109,11 @@ public class PaintSpotMesh extends TrackMatePainter< SpotMesh >
 		{
 			for ( final Contour c : slice )
 			{
-				toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				final double tmp = toPolygon( spot, c, polygon, this::toScreenX, this::toScreenY );
+				maxTextPos = Math.max( maxTextPos, tmp );
 				g2d.draw( polygon );
 			}
 		}
-		final Rectangle bounds = shape.getBounds();
-		final int maxTextPos = bounds.x + bounds.width;
 		return ( int ) ( maxTextPos - xs );
 	}
 

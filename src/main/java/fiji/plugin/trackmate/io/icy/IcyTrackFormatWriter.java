@@ -8,18 +8,18 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.icy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,8 +32,6 @@ import java.util.Map;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -233,46 +231,4 @@ public class IcyTrackFormatWriter implements Algorithm, Benchmark
 	{
 		return errorMessage;
 	}
-
-	/*
-	 * MAIN
-	 */
-
-	public static void main( final String[] args ) throws JDOMException, IOException
-	{
-		final File source = new File( "/Users/tinevez/Projects/JYTinevez/CelegansLineage/Data/LSM700U/10-03-17-3hours_bis.xml" );
-		final TmXmlReader reader = new TmXmlReader( source );
-
-		final Model model = reader.getModel();
-		final double[] calibration = readCalibration( source );
-
-		final File target = new File( "/Users/tinevez/Desktop/IcyConverstion.xml" );
-		final IcyTrackFormatWriter exporter = new IcyTrackFormatWriter( target, model, calibration );
-		if ( !exporter.checkInput() || !exporter.process() )
-		{
-			System.out.println( exporter.getErrorMessage() );
-		}
-		else
-		{
-			System.out.println( "Export done in " + exporter.getProcessingTime() + " ms." );
-		}
-	}
-
-	private static double[] readCalibration( final File source ) throws JDOMException, IOException
-	{
-		final SAXBuilder sb = new SAXBuilder();
-		final Document document = sb.build( source );
-		final Element root = document.getRootElement();
-
-		final double[] calibration = new double[ 3 ];
-
-		final Element settings = root.getChild( "Settings" );
-		final Element imageData = settings.getChild( "ImageData" );
-
-		calibration[ 0 ] = imageData.getAttribute( "pixelwidth" ).getDoubleValue();
-		calibration[ 1 ] = imageData.getAttribute( "pixelheight" ).getDoubleValue();
-		calibration[ 2 ] = imageData.getAttribute( "voxeldepth" ).getDoubleValue();
-		return calibration;
-	}
-
 }

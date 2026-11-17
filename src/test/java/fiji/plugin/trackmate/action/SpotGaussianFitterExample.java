@@ -23,8 +23,6 @@ package fiji.plugin.trackmate.action;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
-import java.io.File;
-
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -38,7 +36,7 @@ import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import ij.ImageJ;
 import ij.ImagePlus;
 import net.imglib2.type.numeric.RealType;
@@ -52,7 +50,7 @@ public class SpotGaussianFitterExample
 		ImageJ.main( args );
 		// final TmXmlReader reader = new TmXmlReader( new File(
 		// "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
-		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( "samples/FakeTracks.xml" );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		imp.show();

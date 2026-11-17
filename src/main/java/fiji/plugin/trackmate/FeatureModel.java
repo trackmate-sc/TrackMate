@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,12 +61,12 @@ public class FeatureModel
 	 * track to its feature map. The feature map maps each feature to the double
 	 * value for the specified feature.
 	 */
-	Map< Integer, Map< String, Double > > trackFeatureValues = new ConcurrentHashMap<>();
+	transient Map< Integer, Map< String, Double > > trackFeatureValues = new ConcurrentHashMap<>();
 
 	/**
 	 * Feature storage for edges.
 	 */
-	private final ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double > > edgeFeatureValues = new ConcurrentHashMap<>();
+	private final transient ConcurrentHashMap< DefaultWeightedEdge, ConcurrentHashMap< String, Double > > edgeFeatureValues = new ConcurrentHashMap<>();
 
 	private final Collection< String > edgeFeatures = new LinkedHashSet<>();
 
@@ -88,7 +88,7 @@ public class FeatureModel
 
 	private final Map< String, Boolean > spotFeatureIsInt = new HashMap<>();
 
-	private final Model model;
+	private transient final Model model;
 
 	/*
 	 * CONSTRUCTOR
@@ -165,7 +165,7 @@ public class FeatureModel
 
 	/**
 	 * Remove the value of the designated feature for the specified edge.
-	 * 
+	 *
 	 * @param edge
 	 *            the edge
 	 * @param feature
@@ -284,7 +284,7 @@ public class FeatureModel
 
 	/**
 	 * Returns the track features that are dealt with in this model.
-	 * 
+	 *
 	 * @return the collection of track features managed in this model.
 	 */
 	public Collection< String > getTrackFeatures()
@@ -341,7 +341,7 @@ public class FeatureModel
 	/**
 	 * Returns the name mapping of the track features that are dealt with in
 	 * this model.
-	 * 
+	 *
 	 * @return the feature name.
 	 */
 	public Map< String, String > getTrackFeatureNames()
@@ -363,7 +363,7 @@ public class FeatureModel
 	/**
 	 * Returns the dimension mapping of the track features that are dealt with
 	 * in this model.
-	 * 
+	 *
 	 * @return the feature dimension.
 	 */
 	public Map< String, Dimension > getTrackFeatureDimensions()
@@ -410,7 +410,7 @@ public class FeatureModel
 	/**
 	 * Remove the value of the designated feature for the track with the
 	 * specified ID.
-	 * 
+	 *
 	 * @param trackID
 	 *            the track ID
 	 * @param feature
@@ -604,7 +604,7 @@ public class FeatureModel
 
 	/**
 	 * Echoes the full content of this {@link FeatureModel}.
-	 * 
+	 *
 	 * @return a String representation of the full content of this model.
 	 */
 	public String echo()
