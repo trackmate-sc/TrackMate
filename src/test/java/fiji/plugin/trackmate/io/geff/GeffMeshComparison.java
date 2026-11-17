@@ -5,6 +5,7 @@ import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_VN_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.MESH_V_PROP;
 import static fiji.plugin.trackmate.io.geff.TmGeffWriter.TRACKMATE_SPOT_ID_PROP;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,7 +24,10 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotMesh;
 import fiji.plugin.trackmate.io.xml.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlWriter;
 import net.imglib2.mesh.Mesh;
+import net.imglib2.mesh.Meshes;
+import net.imglib2.mesh.impl.nio.BufferMesh;
 import net.imglib2.mesh.io.ply.PLYMeshIO;
 
 /**
@@ -61,12 +65,19 @@ import net.imglib2.mesh.io.ply.PLYMeshIO;
 public class GeffMeshComparison extends GeffTestBase
 {
 
-	private static final String GEFF_DEFAULT = "samples/CElegans3D-smoothed-mask-orig.geff";
+	private static final String GEFF_DEFAULT = "samples/test-cube-mesh.geff";
 
-	private static final String XML_DEFAULT = "samples/CElegans3D-smoothed-mask-orig.xml";
+	private static final String XML_DEFAULT = "samples/test-cube-mesh.xml";
 
 	public static void main( final String[] args ) throws Exception
 	{
+		final Model model = new Model();
+		model.getSpots().add( cubeMesh(), 0 );
+
+//		final ImagePlus imp = ViewUtils.makeEmptyImagePlus( 10, 10, 10, 2, new double[] { 1., 1., 1. } );
+//		final GuiModel gm = new GuiModel( model, imp );
+//		new TrackMateBVV<>( gm ).render();
+
 		final String geffPath = args.length > 0 ? args[ 0 ] : GEFF_DEFAULT;
 		final String xmlPath = args.length > 1 ? args[ 1 ] : XML_DEFAULT;
 		final String outDir = args.length > 2
@@ -74,6 +85,18 @@ public class GeffMeshComparison extends GeffTestBase
 				: Files.createTempDirectory( "geffmesh" ).toAbsolutePath().toString();
 		Files.createDirectories( Paths.get( outDir ) );
 		System.out.println( "Output folder: " + outDir );
+
+		/*
+		 * Level 0: save to GEFF and XML
+		 */
+
+		final TmGeffWriter geffWriter = new TmGeffWriter( geffPath );
+		geffWriter.appendModel( model );
+		geffWriter.write();
+
+		final TmXmlWriter xmlWriter = new TmXmlWriter( new File( xmlPath ) );
+		xmlWriter.appendModel( model );
+		xmlWriter.writeToFile();
 
 		/*
 		 * Level 1: raw file data.
@@ -94,6 +117,11 @@ public class GeffMeshComparison extends GeffTestBase
 			System.err.println( "Could not read GEFF file: " + geffReader.getErrorMessage() );
 			return;
 		}
+		// Test that we can detect a diff in the model.
+//		final SpotMesh next = ( SpotMesh ) geffModel.getSpots().iterator( false ).next();
+//		final Vertices vertices = next.getMesh().vertices();
+//		vertices.set( 0, -3., -3., -3. );
+
 		final TmXmlReader xmlReader = new TmXmlReader( xmlPath );
 		final Model xmlModel = xmlReader.getModel();
 		if ( xmlModel == null )
@@ -329,4 +357,37 @@ public class GeffMeshComparison extends GeffTestBase
 		final double dz = Double.parseDouble( pa[ 4 ] ) - Double.parseDouble( pb[ 4 ] );
 		return Math.sqrt( dx * dx + dy * dy + dz * dz );
 	}
+
+	private static SpotMesh cubeMesh()
+	{
+		final BufferMesh mesh = new BufferMesh( 8, 12 );
+
+		final long v0 = mesh.vertices().add( -1, -1, -1 );
+		final long v1 = mesh.vertices().add( 1, -1, -1 );
+		final long v2 = mesh.vertices().add( 1, 1, -1 );
+		final long v3 = mesh.vertices().add( -1, 1, -1 );
+		final long v4 = mesh.vertices().add( -1, -1, 1 );
+		final long v5 = mesh.vertices().add( 1, -1, 1 );
+		final long v6 = mesh.vertices().add( 1, 1, 1 );
+		final long v7 = mesh.vertices().add( -1, 1, 1 );
+
+		mesh.triangles().add( v4, v5, v6 );
+		mesh.triangles().add( v4, v6, v7 );
+		mesh.triangles().add( v1, v0, v3 );
+		mesh.triangles().add( v1, v3, v2 );
+		mesh.triangles().add( v7, v6, v2 );
+		mesh.triangles().add( v7, v2, v3 );
+		mesh.triangles().add( v0, v1, v5 );
+		mesh.triangles().add( v0, v5, v4 );
+		mesh.triangles().add( v5, v1, v2 );
+		mesh.triangles().add( v5, v2, v6 );
+		mesh.triangles().add( v0, v4, v7 );
+		mesh.triangles().add( v0, v7, v3 );
+
+		Meshes.translate( mesh, new double[] { 2., 2., 2. } );
+
+		final SpotMesh spot = new SpotMesh( mesh, -1. );
+		return spot;
+	}
+
 }
