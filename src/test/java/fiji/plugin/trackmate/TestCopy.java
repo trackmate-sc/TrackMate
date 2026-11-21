@@ -21,15 +21,13 @@
  */
 package fiji.plugin.trackmate;
 
-import java.io.File;
-
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import ij.ImageJ;
 import ij.ImagePlus;
 
@@ -42,7 +40,7 @@ public class TestCopy
 		ImageJ.main( args );
 
 		final String path = "samples/FakeTracks.xml";
-		final TmXmlReader reader = new TmXmlReader( new File( path ) );
+		final TmXmlReader reader = new TmXmlReader( path );
 		if ( !reader.isReadingOk() )
 		{
 			System.err.println( reader.getErrorMessage() );

@@ -9,7 +9,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 /**
- * An {@link EditCommand} that stores before/after snapshots of label indices.
+ * A command that stores before/after snapshots of label indices.
  * <p>
  * The command captures the pixel values in a region before and after an edit
  * operation (brush stroke or flood fill). Undo restores the before state, redo

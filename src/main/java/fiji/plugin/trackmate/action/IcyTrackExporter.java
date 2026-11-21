@@ -33,7 +33,7 @@ import org.scijava.plugin.Plugin;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.io.IcyTrackFormatWriter;
+import fiji.plugin.trackmate.io.icy.IcyTrackFormatWriter;
 
 public class IcyTrackExporter extends AbstractTMAction
 {

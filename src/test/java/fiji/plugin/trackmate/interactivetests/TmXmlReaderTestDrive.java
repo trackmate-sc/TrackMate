@@ -28,7 +28,7 @@ import org.scijava.util.AppUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
 import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
@@ -46,7 +46,7 @@ public class TmXmlReaderTestDrive
 
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 		System.out.println( "Opening file: " + file.getAbsolutePath() );
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 
 		final ImagePlus imp = reader.readImage();

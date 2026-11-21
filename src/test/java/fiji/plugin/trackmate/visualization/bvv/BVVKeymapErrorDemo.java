@@ -1,7 +1,6 @@
 package fiji.plugin.trackmate.visualization.bvv;
 
 import java.awt.EventQueue;
-import java.io.File;
 
 import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 
@@ -11,7 +10,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.WindowManager;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import ij.ImageJ;
 import ij.ImagePlus;
 
@@ -48,7 +47,7 @@ public class BVVKeymapErrorDemo
 
 		// Load a TrackMate file (3D data required for BVV)
 		final String filePath = "samples/CElegans3D-smoothed-mask-orig-02.xml";
-		final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
+		final TmXmlReader reader = new TmXmlReader( filePath );
 		if ( !reader.isReadingOk() )
 		{
 			System.err.println( "Error reading TrackMate file: " + reader.getErrorMessage() );

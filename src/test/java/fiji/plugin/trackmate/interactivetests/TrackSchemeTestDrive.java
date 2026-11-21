@@ -31,7 +31,7 @@ import fiji.plugin.trackmate.features.edges.EdgeSpeedAnalyzer;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
 public class TrackSchemeTestDrive
@@ -42,7 +42,7 @@ public class TrackSchemeTestDrive
 
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 		System.out.println( model.getFeatureModel().echo() );
 

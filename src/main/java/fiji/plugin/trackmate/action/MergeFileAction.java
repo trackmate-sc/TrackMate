@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,16 +32,20 @@ import java.util.HashMap;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.config.utils.FileChooser;
+import org.scijava.ui.config.utils.FileChooser.DialogType;
+import org.scijava.ui.config.utils.FileChooser.SelectionMode;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotBase;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class MergeFileAction extends AbstractTMAction
@@ -74,13 +78,16 @@ public class MergeFileAction extends AbstractTMAction
 			file = new File( folder.getPath() + File.separator + "TrackMateData.xml" );
 		}
 
-		final File tmpFile = IOUtils.askForFileForLoading( file, "Merge a TrackMate XML file", parent, logger );
+		final FileFilter fileFilter = new FileNameExtensionFilter( "TrackMate GEFF file", "geff", "xml" );
+		final DialogType dialogType = DialogType.LOAD;
+		final SelectionMode selectionMode = SelectionMode.FILES_AND_DIRECTORIES;
+		final File tmpFile = FileChooser.chooseFile( null, file.getAbsolutePath(), fileFilter, "Load a TrackMate GEFF file", dialogType, selectionMode );
 		if ( null == tmpFile )
 			return;
 		file = tmpFile;
 
 		// Read the file content
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		if ( !reader.isReadingOk() )
 		{
 			logger.error( reader.getErrorMessage() );

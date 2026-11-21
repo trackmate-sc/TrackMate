@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -58,7 +58,7 @@ import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.io.TmXmlWriter;
+import fiji.plugin.trackmate.io.xml.TmXmlWriter;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -78,7 +78,7 @@ import net.imglib2.util.Util;
  * Cell-Tracking-Challenge convention.
  * <p>
  * See http://celltrackingchallenge.net/
- * 
+ *
  * @author Jean-Yves Tinevez
  *
  */
@@ -174,7 +174,7 @@ public class CTCExporter
 
 	/**
 	 * Saves the settings part as XML for reference.
-	 * 
+	 *
 	 * @param exportRootFolder
 	 *            the root folder for exporting.
 	 * @param saveId
@@ -205,7 +205,7 @@ public class CTCExporter
 	 * For instance the first id return will be '1', which means that the
 	 * original image data will be saved under the folder '01'. If '01' already
 	 * exists, then this method will return 2, etc.
-	 * 
+	 *
 	 * @param exportRootFolder
 	 *            the root folder in which to export the data.
 	 * @return an integer id that can be passed in the other method of this
@@ -272,7 +272,7 @@ public class CTCExporter
 	 * <p>
 	 * Only exports the spots that have a ROI, and write only the frames that
 	 * have at least one spot with a ROI.
-	 * 
+	 *
 	 * @param exportRootFolder
 	 *            the root of the export folder.
 	 * @param saveId
@@ -342,7 +342,7 @@ public class CTCExporter
 		final Function< Long, String > tifNameGen = nFrames > 999
 				? i -> String.format( "man_seg%04d.tif", i )
 				: i -> String.format( "man_seg%03d.tif", i );
-				
+
 		// Only save frames with spots in.
 		for ( final int frame : framesToWrite )
 		{
@@ -512,7 +512,7 @@ public class CTCExporter
 
 	/**
 	 * Returns the folder in which the tracking data will be exported.
-	 * 
+	 *
 	 * @param exportRootFolder
 	 *            the root folder to export in.
 	 * @param saveId
@@ -563,7 +563,7 @@ public class CTCExporter
 					final Spot s2 = spots.get( j );
 					final double r2 = s2.getFeature( Spot.RADIUS ).doubleValue();
 					final double d = Math.sqrt( s1.squareDistanceTo( s2 ) );
-					
+
 					if ( fudgeFactor * r1 > ( d + r2 ) || fudgeFactor * r2 > ( d + r1 ) )
 					{
 						// They overlap too much. We must fix this.
@@ -613,7 +613,7 @@ public class CTCExporter
 							else
 								sources.add( trackModel.getEdgeSource( edge ) );
 						}
-						
+
 						model.beginUpdate();
 						try
 						{

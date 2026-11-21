@@ -50,6 +50,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.scijava.ui.config.utils.FileChooser;
+import org.scijava.ui.config.utils.FileChooser.DialogType;
+import org.scijava.ui.config.utils.FileChooser.SelectionMode;
+
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
@@ -61,9 +65,6 @@ import fiji.plugin.trackmate.features.manual.ManualSpotColorAnalyzerFactory;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.FileChooser;
-import fiji.plugin.trackmate.util.FileChooser.DialogType;
-import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
 import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;

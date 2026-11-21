@@ -17,6 +17,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Install native Blosc library
+        # Needed by the GEFF I/O tests, which write and read GEFF files
+        # compressed with Blosc through JNA. The package installs the shared
+        # library into /usr/lib/x86_64-linux-gnu, one of the locations the
+        # tests search for it.
+        run: sudo apt-get update && sudo apt-get install -y libblosc-dev
       - name: Set up Java
         uses: actions/setup-java@v3
         with:

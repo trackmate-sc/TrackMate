@@ -19,11 +19,9 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package fiji.plugin.trackmate.io;
+package fiji.plugin.trackmate.io.csv;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -301,29 +299,6 @@ public class CSVExporter
 			}
 
 			writer.writeNext( content );
-		}
-	}
-
-	public static void main( final String[] args ) throws IOException
-	{
-		final String filename = "samples/FakeTracks.xml";
-		final TmXmlReader reader = new TmXmlReader( new File( filename ) );
-		if ( !reader.isReadingOk() )
-		{
-			System.out.println( reader.getErrorMessage() );
-			return;
-		}
-
-		final String csvFile = filename.replace( ".xml", "-spots_in_tracks.csv" );
-		CSVExporter.exportSpots( csvFile, reader.getModel(), false );
-
-		System.out.println( "Done." );
-		System.out.println( "__________________" );
-		try (BufferedReader br = new BufferedReader( new FileReader( csvFile ) ))
-		{
-			String line;
-			while ( ( line = br.readLine() ) != null )
-				System.out.println( line );
 		}
 	}
 }

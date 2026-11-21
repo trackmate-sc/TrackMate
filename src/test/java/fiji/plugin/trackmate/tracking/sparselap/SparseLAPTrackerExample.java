@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -55,7 +55,7 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.GuiModel;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.tracking.jaqaman.SparseLAPTracker;
 
 public class SparseLAPTrackerExample
@@ -64,7 +64,7 @@ public class SparseLAPTrackerExample
 	public static void main( final String[] args )
 	{
 		final File file = new File( "samples/FakeTracks.xml" );
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 
 		final Settings settings0 = reader.readSettings( null );

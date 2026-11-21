@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -36,7 +36,7 @@ import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.wizard.WizardPanelDescriptor;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.io.TmXmlWriter;
+import fiji.plugin.trackmate.io.geff.TmGeffWriter;
 import fiji.plugin.trackmate.util.TMUtils;
 
 public class SaveDescriptor extends WizardPanelDescriptor
@@ -92,7 +92,7 @@ public class SaveDescriptor extends WizardPanelDescriptor
 		 * Write model, settings and GUI state
 		 */
 
-		final TmXmlWriter writer = new TmXmlWriter( file, logger );
+		final TmGeffWriter writer = new TmGeffWriter( file.getAbsolutePath() );
 
 		writer.appendLog( logPanel.getTextContent() );
 		writer.appendModel( guiModel.getModel() );
@@ -102,7 +102,7 @@ public class SaveDescriptor extends WizardPanelDescriptor
 
 		try
 		{
-			writer.writeToFile();
+			writer.write();
 			logger.log( "Data saved to: " + file.toString() + '\n' );
 		}
 		catch ( final FileNotFoundException e )
