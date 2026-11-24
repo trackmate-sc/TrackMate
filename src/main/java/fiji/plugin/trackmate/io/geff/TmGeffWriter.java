@@ -728,6 +728,8 @@ public class TmGeffWriter
 		// Shape declarations: declare which node property holds the shapes,
 		// as mandated by the GEFF specification.
 		metadata.setSphere( RADIUS_PROP_NAME );
+		if ( hasRoi )
+			metadata.setPolygon( POLYGON_PROP );
 		if ( hasMesh )
 			metadata.setMesh( new MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
 	}
