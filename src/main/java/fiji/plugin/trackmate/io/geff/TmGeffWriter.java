@@ -285,9 +285,11 @@ public class TmGeffWriter
 		}
 
 		// SpotRoi: polygon vertices, relative to the spot center,
-		// interleaved XY as mandated by the GEFF spec.
+		// interleaved XY as mandated by the GEFF spec. Written as a 2D
+		// var-length property: each entry is an (n_points, 2) array of
+		// points, flattened X,Y-interleaved.
 		if ( hasRoi )
-			writer.add( POLYGON_PROP, TmGeffWriter::polygon );
+			writer.add( POLYGON_PROP, TmGeffWriter::polygon, 2, TmGeffWriter::polygonDims );
 
 		// SpotMesh: vertices positions and normals, triangle indices.
 		if ( hasMesh )
@@ -919,6 +921,19 @@ public class TmGeffWriter
 			return new Maybe.MaybeDoubleArray( p );
 		}
 		return new Maybe.MaybeDoubleArray();
+	}
+
+	/**
+	 * Returns the per-element dimensions of the polygon property for the
+	 * specified spot: {@code (n_points, 2)} in imglib2 order (last dimension
+	 * fastest). Only called for spots that have a polygon, but kept safe
+	 * against non-ROI spots.
+	 */
+	private static final long[] polygonDims( final Spot spot )
+	{
+		if ( spot instanceof SpotRoi )
+			return new long[] { ( ( SpotRoi ) spot ).nPoints(), 2 };
+		return new long[] { 0, 2 };
 	}
 
 	/**
