@@ -16,7 +16,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
+import org.janelia.saalfeldlab.n5.N5Writer;
 import org.junit.Test;
 import org.litt.geff.GeffAxis;
 import org.litt.geff.GeffDisplayHints;
@@ -97,7 +97,7 @@ public class GeffTestForeignFilesTest extends GeffTestBase
 						.id( ( FunctionTypes.ToLongArrayFunction< ForeignEdge > ) e -> new long[] { e.source(), e.target() }, 2, "<u8" )
 						.createGeffProperties();
 
-		try (final N5ZarrWriter n5 = new N5ZarrWriter( zarrPath ))
+		try (final N5Writer n5 = IoUtils.createZarrWriter( zarrPath ))
 		{
 			IoUtils.writeProperties( n5, props, null, 0, null );
 			if ( edgeProps != null )

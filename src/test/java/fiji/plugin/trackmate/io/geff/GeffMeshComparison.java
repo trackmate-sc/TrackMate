@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
+import org.janelia.saalfeldlab.n5.N5Reader;
 import org.litt.geff.io.IoUtils;
 import org.litt.geff.props.ElementType;
 import org.litt.geff.props.GeffProperties;
@@ -148,7 +148,7 @@ public class GeffMeshComparison extends GeffTestBase
 	private static void dumpGeffRaw( final String geffPath, final String outPath ) throws Exception
 	{
 		try (final PrintWriter w = new PrintWriter( outPath, "UTF-8" );
-				final N5ZarrReader n5 = new N5ZarrReader( geffPath, true ))
+				final N5Reader n5 = IoUtils.openZarrReader( geffPath ))
 		{
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 			final long nNodes = props.numElements();

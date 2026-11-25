@@ -23,7 +23,6 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.litt.geff.GeffAxis;
 import org.litt.geff.GeffDisplayHints;
 import org.litt.geff.GeffException;
@@ -209,7 +208,7 @@ final class GeffWriterDemos
 				+ ", directed = " + metadata.isDirected()
 				+ ", axes = " + Arrays.toString( metadata.getAxisNames() ) );
 
-		try (final N5Reader n5 = new N5ZarrReader( path ))
+		try (final N5Reader n5 = IoUtils.openZarrReader( path ))
 		{
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 			System.out.println( props );
