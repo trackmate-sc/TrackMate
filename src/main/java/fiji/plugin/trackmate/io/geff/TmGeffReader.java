@@ -41,7 +41,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -482,7 +481,7 @@ public class TmGeffReader implements TrackMateFileReader
 			final TObjectIntMap< Spot > spotTrackIDMap ) throws IOException, GeffException
 	{
 		final SpotCollection spots = model.getSpots();
-		try (final N5Reader n5 = new N5ZarrReader( geffPath ))
+		try (final N5Reader n5 = IoUtils.openZarrReader( geffPath ))
 		{
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 
@@ -629,7 +628,7 @@ public class TmGeffReader implements TrackMateFileReader
 			final Map< Integer, Set< Spot > > connectedVertexSet,
 			final Map< Integer, Set< DefaultWeightedEdge > > connectedEdgeSet ) throws IOException, GeffException
 	{
-		try (final N5Reader n5 = new N5ZarrReader( geffPath ))
+		try (final N5Reader n5 = IoUtils.openZarrReader( geffPath ))
 		{
 			// The file might not have any edge at all.
 			if ( !n5.datasetExists( "edges/ids" ) )
@@ -753,7 +752,7 @@ public class TmGeffReader implements TrackMateFileReader
 			return false;
 
 		final FeatureModel fm = model.getFeatureModel();
-		try (final N5Reader n5 = new N5ZarrReader( trackGeffPath.toString() ))
+		try (final N5Reader n5 = IoUtils.openZarrReader( trackGeffPath.toString() ))
 		{
 			final GeffProperties props = IoUtils.loadProperties( n5, ElementType.NODE );
 

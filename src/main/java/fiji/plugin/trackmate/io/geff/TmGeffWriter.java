@@ -35,7 +35,6 @@ import java.util.function.ToLongFunction;
 import org.janelia.saalfeldlab.n5.Compression;
 import org.janelia.saalfeldlab.n5.N5Writer;
 import org.janelia.saalfeldlab.n5.blosc.BloscCompression;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.litt.geff.GeffAxis;
 import org.litt.geff.GeffDisplayHints;
@@ -44,6 +43,7 @@ import org.litt.geff.MeshMetadata;
 import org.litt.geff.PropMetadata;
 import org.litt.geff.RelatedObjects;
 import org.litt.geff.io.GeffPropertyWriter;
+import org.litt.geff.io.IoUtils;
 import org.litt.geff.props.ElementType;
 import org.litt.geff.props.FunctionTypes.ToLongArrayFunction;
 import org.litt.geff.props.FunctionTypes.ToMaybeDoubleFunction;
@@ -577,7 +577,7 @@ public class TmGeffWriter
 		// Delete if file exists.
 		IOUtils.deleteRecursively( Paths.get( geffPath ) );
 
-		try (final N5Writer n5 = new N5ZarrWriter( geffPath ))
+		try (final N5Writer n5 = IoUtils.createZarrWriter( geffPath ))
 		{
 			if ( spotWriter != null )
 				spotWriter.write( n5, compression, chunkSize );
@@ -592,7 +592,7 @@ public class TmGeffWriter
 		if ( trackWriter != null )
 		{
 			final String trackGeffPath = Paths.get( geffPath, TRACK_GEFF_NAME ).toString();
-			try (final N5Writer trackN5 = new N5ZarrWriter( trackGeffPath ))
+			try (final N5Writer trackN5 = IoUtils.createZarrWriter( trackGeffPath ))
 			{
 				trackWriter.write( trackN5, compression, chunkSize );
 			}
