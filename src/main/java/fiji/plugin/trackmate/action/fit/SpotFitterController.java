@@ -36,6 +36,7 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.Icons;
 import fiji.plugin.trackmate.util.EverythingDisablerAndReenabler;
@@ -45,24 +46,21 @@ import ij.ImagePlus;
 public class SpotFitterController
 {
 
-	private final TrackMate trackmate;
-
-	private final SelectionModel selectionModel;
-
 	private final SpotFitterPanel gui;
 
 	private final Logger logger;
 
 	private final Map< Spot, double[] > undo;
 
-	public SpotFitterController( final TrackMate trackmate, final SelectionModel selectionModel, final Logger logger )
+	private final GuiModel guiModel;
+
+	public SpotFitterController( final GuiModel guiModel, final Logger logger )
 	{
-		this.trackmate = trackmate;
-		this.selectionModel = selectionModel;
+		this.guiModel = guiModel;
 		this.logger = logger;
 		this.undo = new HashMap<>();
 
-		final Settings settings = trackmate.getSettings();
+		final Settings settings = guiModel.getSettings();
 		final List< String > fits = getAvailableFits( DetectionUtils.is2D( settings.imp ) );
 		final List< String > docs = getDocs( DetectionUtils.is2D( settings.imp ) );
 		this.gui = new SpotFitterPanel( fits, docs, settings.imp.getNChannels() );
@@ -94,13 +92,14 @@ public class SpotFitterController
 				}
 				logger.setProgress( 0. );
 				// Recompute features.
+				final TrackMate trackmate = guiModel.getTrackMate();
 				trackmate.computeSpotFeatures( true );
 				trackmate.computeEdgeFeatures( true );
 				trackmate.computeTrackFeatures( true );
 				logger.log( "Undoing done.\n" );
 
 				// Notify changes happened.
-				trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
+				guiModel.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 			}
 			finally
 			{
@@ -117,7 +116,7 @@ public class SpotFitterController
 		{
 			try
 			{
-				final ImagePlus imp = trackmate.getSettings().imp;
+				final ImagePlus imp = guiModel.getSettings().imp;
 				// 1-based to 0-based.
 				final int channel = gui.getSelectedChannel() - 1;
 				final int index = gui.getSelectedFitIndex();
@@ -141,12 +140,13 @@ public class SpotFitterController
 					else
 						throw new IllegalArgumentException( "Index points to an unknown fit model: " + index );
 				}
-				fitter.setNumThreads( trackmate.getNumThreads() );
+				fitter.setNumThreads( guiModel.getTrackMate().getNumThreads() );
 
 				// Get spots to fit.
+				final SelectionModel selectionModel = guiModel.getSelectionModel();
 				final Iterable< Spot > spots;
 				if ( gui.rdbtnAll.isSelected() )
-					spots = trackmate.getModel().getSpots().iterable( true );
+					spots = guiModel.getModel().getSpots().iterable( true );
 				else if ( gui.rdbtnSelection.isSelected() )
 					spots = selectionModel.getSpotSelection();
 				else
@@ -173,12 +173,13 @@ public class SpotFitterController
 				fitter.process( spots, logger );
 
 				// Recompute features.
+				final TrackMate trackmate = guiModel.getTrackMate();
 				trackmate.computeSpotFeatures( true );
 				trackmate.computeEdgeFeatures( true );
 				trackmate.computeTrackFeatures( true );
 
 				// Notify changes happened.
-				trackmate.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
+				guiModel.getModel().getModelChangeListener().forEach( l -> l.modelChanged( new ModelChangeEvent( this, ModelChangeEvent.MODEL_MODIFIED ) ) );
 			}
 			finally
 			{
@@ -196,7 +197,7 @@ public class SpotFitterController
 		frame.setIconImage( Icons.SPOT_ICON.getImage() );
 		frame.setSize( 300, 300 );
 		frame.getContentPane().add( gui );
-		GuiUtils.positionWindow( frame, trackmate.getSettings().imp.getCanvas() );
+		GuiUtils.positionWindow( frame, guiModel.getSettings().imp.getCanvas() );
 		frame.setVisible( true );
 	}
 

@@ -35,12 +35,10 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.CaptureOverlayAction;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.util.Threads;
 
@@ -49,7 +47,7 @@ public class ActionChooserPanel extends ModuleChooserPanel< TrackMateActionFacto
 
 	private static final long serialVersionUID = 1L;
 
-	public ActionChooserPanel( final ActionProvider actionProvider, final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings )
+	public ActionChooserPanel( final ActionProvider actionProvider, final GuiModel guiModel )
 	{
 		super( actionProvider, "action", CaptureOverlayAction.KEY );
 		
@@ -94,11 +92,7 @@ public class ActionChooserPanel extends ModuleChooserPanel< TrackMateActionFacto
 						else
 						{
 							action.setLogger( logger );
-							action.execute(
-									trackmate,
-									selectionModel,
-									displaySettings,
-									( JFrame ) SwingUtilities.getWindowAncestor( ActionChooserPanel.this ) );
+							action.execute( guiModel, ( JFrame ) SwingUtilities.getWindowAncestor( ActionChooserPanel.this ) );
 						}
 					}
 					finally

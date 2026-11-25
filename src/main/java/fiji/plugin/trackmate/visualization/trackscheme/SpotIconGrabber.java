@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -74,7 +74,7 @@ public class SpotIconGrabber< T extends RealType< T > >
 	 *            a factor that determines the size of the thumbnail. The
 	 *            thumbnail will have a size equal to the spot diameter times
 	 *            this radius.
-	 * @return a base64-encoded PNG image string representing the spot.
+	 * @return a Base64 representation of the spot image.
 	 */
 	public String getImageString( final Spot spot, final double radiusFactor )
 	{
@@ -125,7 +125,7 @@ public class SpotIconGrabber< T extends RealType< T > >
 
 	/**
 	 * Returns a 2D slice extract around the specified coordinates.
-	 *
+	 * 
 	 * @param x
 	 *            top-left x coordinate.
 	 * @param y
@@ -172,7 +172,7 @@ public class SpotIconGrabber< T extends RealType< T > >
 
 	/**
 	 * Returns a 3D cropped copy around the specified coordinates.
-	 *
+	 * 
 	 * @param x
 	 *            top-left x coordinate.
 	 * @param y

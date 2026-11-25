@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 
 /**
  * The mother class for all the configuration panels.
- *
+ * 
  * @author Jean-Yves Tinevez
  *
  */
@@ -46,16 +46,17 @@ public abstract class ConfigurationPanel extends JPanel
 
 	/**
 	 * Echoes the parameters of the given settings on this panel.
-	 *
+	 * 
 	 * @param settings
-	 *            the settings map to use to set the values of this panel.
+	 *            the settings as a map.
 	 */
 	public abstract void setSettings( final Map< String, Object > settings );
 
 	/**
-	 * Collects the current values of this panel into a settings map.
-	 *
-	 * @return a new settings map object with its values set by this panel.
+	 * Returns a new settings map of string-object with its values set by this
+	 * panel.
+	 * 
+	 * @return a new map.
 	 */
 	public abstract Map< String, Object > getSettings();
 

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -63,12 +63,25 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 
 	private static final String KEY = "Start";
 
+
+	public static final String PUB0_URL = "https://doi.org/10.1016/j.ymeth.2016.09.016";
+
+	public static final String PUB0_TXT = "Tinevez JY, Perry N. Schindelin J, et al. "
+			+ "'TrackMate: An open and extensible platform for single-particle tracking', "
+			+ "Methods (2017).";
+
 	public static final String PUB1_URL = "https://doi.org/10.1038/s41592-022-01507-1";
 
-	public static final String PUB1_TXT = "Ershov, D., Phan, MS., Pylvänäinen, J.W., Rigaud S.U., et al. "
-			+ "TrackMate 7: integrating state-of-the-art segmentation algorithms into tracking pipelines. "
-			+ "Nat Methods (2022). https://doi.org/10.1038/s41592-022-01507-1";
-	
+	public static final String PUB1_TXT = "Ershov D, Phan MS, Pylvänäinen JW, Rigaud SU, et al. "
+			+ "'TrackMate 7: integrating state-of-the-art segmentation algorithms into tracking pipelines' "
+			+ "Nature Methods (2022).";
+
+	public static final String PUB2_URL = "https://doi.org/10.1002/cpz1.70369";
+
+	public static final String PUB2_TXT = "Anselmet M, et al. "
+			+ "'Automated optimization of bacterial tracking pipelines with trackmate 8' "
+			+ "Current Protocols (2026).";
+
 	private final Settings settings;
 
 	private final Logger logger;
@@ -89,12 +102,14 @@ public class StartDialogDescriptor extends WizardPanelDescriptor
 		logger.log( welcomeMessage, Logger.BLUE_COLOR );
 		logger.log( "Please note that TrackMate is available through Fiji, and is based on a publication. "
 				+ "If you use it successfully for your research please be so kind to cite our work:\n" );
+		logger.log( PUB2_TXT + "\n", Logger.GREEN_COLOR );
+		logger.log( PUB2_URL + "\n", Logger.BLUE_COLOR );
+		logger.log( "and / or:\n" );
 		logger.log( PUB1_TXT + "\n", Logger.GREEN_COLOR );
 		logger.log( PUB1_URL + "\n", Logger.BLUE_COLOR );
 		logger.log( "and / or:\n" );
-		logger.log( "Tinevez, JY.; Perry, N. & Schindelin, J. et al. (2017), 'TrackMate: An open and extensible platform for single-particle tracking.', "
-				+ "Methods 115: 80-90, PMID 27713081.\n", Logger.GREEN_COLOR );
-		logger.log( "https://www.sciencedirect.com/science/article/pii/S1046202316303346\n", Logger.BLUE_COLOR );
+		logger.log( PUB0_TXT + "\n", Logger.GREEN_COLOR );
+		logger.log( PUB0_URL + "\n", Logger.BLUE_COLOR );
 
 		logger.log( "\nNumerical feature analyzers:\n", Logger.BLUE_COLOR );
 		logger.log( settings.toStringFeatureAnalyzersInfo() );

@@ -32,10 +32,9 @@ import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotRoi;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.Icons;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.OvalRoi;
@@ -86,14 +85,13 @@ public class IJRoiExporter
 
 	public void export( final Spot spot )
 	{
-		final SpotRoi sroi = spot.getRoi();
 		final Roi roi;
-		if ( sroi != null )
+		if ( spot instanceof SpotRoi )
 		{
-			final double[] xs = sroi.toPolygonX( dx, 0., spot.getDoublePosition( 0 ), 1. );
-			final double[] ys = sroi.toPolygonY( dy, 0., spot.getDoublePosition( 1 ), 1. );
-			final float[] xp = toFloat( xs );
-			final float[] yp = toFloat( ys );
+			final SpotRoi sroi = ( SpotRoi ) spot;
+			final double[][] out = sroi.toArray( 0., 0., 1 / dx, 1 / dy );
+			final float[] xp = toFloat( out[ 0 ] );
+			final float[] yp = toFloat( out[ 1 ] );
 			roi = new PolygonRoi( xp, yp, PolygonRoi.POLYGON );
 		}
 		else
@@ -132,7 +130,7 @@ public class IJRoiExporter
 	{
 
 		@Override
-		public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+		public void execute( final GuiModel guiModel, final Frame parent )
 		{
 			// Show dialog.
 			final GenericDialog dialog = new GenericDialog( "Export spots to IJ ROIs", parent );
@@ -147,10 +145,11 @@ public class IJRoiExporter
 				return;
 
 			// Execute.
+			final SelectionModel selectionModel = guiModel.getSelectionModel();
 			final Iterable< Spot > spots;
 			final int choice = Arrays.asList( choices ).indexOf( dialog.getNextRadioButton() );
 			if ( choice == 0 )
-				spots = trackmate.getModel().getSpots().iterable( true );
+				spots = guiModel.getModel().getSpots().iterable( true );
 			else if ( choice == 1 )
 				spots = selectionModel.getSpotSelection();
 			else
@@ -161,7 +160,7 @@ public class IJRoiExporter
 				spots = selectionModel.getSpotSelection();
 			}
 
-			final IJRoiExporter exporter = new IJRoiExporter( trackmate.getSettings().imp, logger );
+			final IJRoiExporter exporter = new IJRoiExporter( guiModel.getSettings().imp, logger );
 			exporter.export( spots );
 		}
 	}

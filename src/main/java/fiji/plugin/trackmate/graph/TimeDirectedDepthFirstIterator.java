@@ -24,47 +24,47 @@
  */
 package fiji.plugin.trackmate.graph;
 
-import fiji.plugin.trackmate.Spot;
-
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import fiji.plugin.trackmate.Spot;
+
 public class TimeDirectedDepthFirstIterator extends SortedDepthFirstIterator< Spot, DefaultWeightedEdge >
 {
 
-	public TimeDirectedDepthFirstIterator( Graph< Spot, DefaultWeightedEdge > g, Spot startVertex )
+	private final boolean reversed;
+
+	public TimeDirectedDepthFirstIterator( final Graph< Spot, DefaultWeightedEdge > g, final Spot startVertex )
+	{
+		this( g, startVertex, false );
+	}
+
+	public TimeDirectedDepthFirstIterator( final Graph< Spot, DefaultWeightedEdge > g, final Spot startVertex, final boolean reversed )
 	{
 		super( g, startVertex, null );
+		this.reversed = reversed;
 	}
 
 	@Override
-	protected void addUnseenChildrenOf( Spot vertex )
+	protected void addUnseenChildrenOf( final Spot vertex )
 	{
 
-		int ts = vertex.getFeature( Spot.FRAME ).intValue();
-		for ( DefaultWeightedEdge edge : specifics.edgesOf( vertex ) )
+		final int ts = vertex.getFeature( Spot.FRAME ).intValue();
+		for ( final DefaultWeightedEdge edge : specifics.edgesOf( vertex ) )
 		{
 			if ( nListeners != 0 )
-			{
 				fireEdgeTraversed( createEdgeTraversalEvent( edge ) );
-			}
 
-			Spot oppositeV = Graphs.getOppositeVertex( graph, edge, vertex );
-			int tt = oppositeV.getFeature( Spot.FRAME ).intValue();
-			if ( tt <= ts )
-			{
+			final Spot oppositeV = Graphs.getOppositeVertex( graph, edge, vertex );
+			final int tt = oppositeV.getFeature( Spot.FRAME ).intValue();
+			if ( reversed ? tt >= ts : tt <= ts )
 				continue;
-			}
 
 			if ( seen.containsKey( oppositeV ) )
-			{
 				encounterVertexAgain( oppositeV, edge );
-			}
 			else
-			{
 				encounterVertex( oppositeV, edge );
-			}
 		}
 	}
 

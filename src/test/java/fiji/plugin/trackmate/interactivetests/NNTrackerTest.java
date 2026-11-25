@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -31,13 +31,10 @@ import org.scijava.util.AppUtils;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.tracking.kdtree.NearestNeighborTracker;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 
 public class NNTrackerTest
@@ -54,7 +51,7 @@ public class NNTrackerTest
 
 		// 1 - Load test spots
 		System.out.println( "Opening file: " + file.getAbsolutePath() );
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 
@@ -89,7 +86,7 @@ public class NNTrackerTest
 		// Load Image
 		ij.ImageJ.main( args );
 
-		final TrackMateModelView sd2d = new HyperStackDisplayer( model, new SelectionModel( model ), imp, DisplaySettings.defaultStyle().copy() );
-		sd2d.render();
+		final GuiModel guiModel = new GuiModel( model, imp );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 }

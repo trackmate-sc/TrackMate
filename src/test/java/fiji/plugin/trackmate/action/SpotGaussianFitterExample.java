@@ -23,24 +23,20 @@ package fiji.plugin.trackmate.action;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
-import java.io.File;
-
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.fit.SpotFitterController;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.TrackMateWizardSequence;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import ij.ImageJ;
 import ij.ImagePlus;
 import net.imglib2.type.numeric.RealType;
@@ -54,21 +50,20 @@ public class SpotGaussianFitterExample
 		ImageJ.main( args );
 		// final TmXmlReader reader = new TmXmlReader( new File(
 		// "samples/MAX_1.5x-timelqpe_2021-04-02-1.xml" ) );
-		final TmXmlReader reader = new TmXmlReader( new File( "samples/FakeTracks.xml" ) );
+		final TmXmlReader reader = new TmXmlReader( "samples/FakeTracks.xml" );
 		final Model model = reader.getModel();
 		final ImagePlus imp = reader.readImage();
 		imp.show();
 		final Settings settings = reader.readSettings( imp );
-		final TrackMate trackmate = new TrackMate( model, settings );
+		final DisplaySettings displaySettings = reader.getDisplaySettings();
+		final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
+		final TrackMate trackmate = guiModel.getTrackMate();
 		trackmate.setNumThreads( 1 );
 
 		// Main view.
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings displaySettings = reader.getDisplaySettings();
-		final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, settings.imp, displaySettings );
-		displayer.render();
+		guiModel.getWindowManager().createHyperStackDisplayer();
 
-		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( trackmate, selectionModel, displaySettings );
+		final TrackMateWizardSequence sequence = new TrackMateWizardSequence( guiModel );
 		sequence.setCurrent( "ConfigureViews" );
 		final JFrame frame = sequence.run( "Test Gauss-fitting action" );
 		frame.setIconImage( TRACKMATE_ICON.getImage() );
@@ -76,7 +71,7 @@ public class SpotGaussianFitterExample
 		frame.setVisible( true );
 
 		// Launch fitting controller.
-		final SpotFitterController controller = new SpotFitterController( trackmate, selectionModel, Logger.DEFAULT_LOGGER );
+		final SpotFitterController controller = new SpotFitterController( guiModel, Logger.DEFAULT_LOGGER );
 		controller.show();
 	}
 }

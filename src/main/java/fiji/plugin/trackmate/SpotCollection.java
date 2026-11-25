@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.util.Threads;
+import net.imglib2.RealLocalizable;
 import net.imglib2.algorithm.MultiThreaded;
 
 /**
@@ -379,7 +380,7 @@ public class SpotCollection implements MultiThreaded
 	}
 
 	/**
-	 * Returns the {@link Spot} at the given location (encoded as a Spot),
+	 * Returns the {@link Spot} at the given location (in world coordinates),
 	 * contained in the frame <code>frame</code>. A spot is returned <b>only</b>
 	 * if there exists a spot such that the given location is within the spot
 	 * radius. Otherwise <code>null</code> is returned.
@@ -395,7 +396,7 @@ public class SpotCollection implements MultiThreaded
 	 *         radius, member of this collection, or <code>null</code> is such a
 	 *         spots cannot be found.
 	 */
-	public final Spot getSpotAt( final Spot location, final int frame, final boolean visibleSpotsOnly )
+	public final Spot getSpotAt( final RealLocalizable location, final int frame, final boolean visibleSpotsOnly )
 	{
 		final Set< Spot > spots = content.get( frame );
 		if ( null == spots || spots.isEmpty() )

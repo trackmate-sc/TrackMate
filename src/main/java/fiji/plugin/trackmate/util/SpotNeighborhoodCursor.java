@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -61,24 +61,22 @@ public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor
 	/**
 	 * Stores the relative <b>calibrated</b> position with respect to the
 	 * neighborhood center.
-	 *
+	 * 
 	 * @param position
-	 *            the array in which to write the position.
+	 *            an array to store to relative position in.
 	 */
 	public void getRelativePosition( final double[] position )
 	{
 		cursor.localize( pos );
 		for ( int d = 0; d < center.length; d++ )
-		{
 			position[ d ] = calibration[ d ] * ( pos[ d ] - center[ d ] );
-		}
 	}
 
 	/**
 	 * Returns the square distance measured from the center of the domain to the
 	 * current cursor position, in <b>calibrated</b> units.
-	 *
-	 * @return the square distance in calibrated units.
+	 * 
+	 * @return the square distance.
 	 */
 	public double getDistanceSquared()
 	{
@@ -99,8 +97,8 @@ public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor
 	 * <p>
 	 * In spherical coordinates, the inclination is the angle between the Z axis
 	 * and the line OM where O is the sphere center and M is the point location.
-	 *
-	 * @return the inclination angle in radians.
+	 * 
+	 * @return the inclination.
 	 */
 	public double getTheta()
 	{
@@ -117,8 +115,8 @@ public class SpotNeighborhoodCursor< T extends RealType< T > > implements Cursor
 	 * In spherical coordinates, the azimuth is the angle measured in the plane
 	 * XY between the X axis and the line OH where O is the sphere center and H
 	 * is the orthogonal projection of the point M on the XY plane.
-	 *
-	 * @return the azimuth angle in radians.
+	 * 
+	 * @return the azimuth.
 	 */
 	public double getPhi()
 	{

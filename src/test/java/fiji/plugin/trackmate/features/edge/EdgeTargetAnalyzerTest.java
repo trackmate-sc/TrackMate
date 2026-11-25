@@ -23,11 +23,6 @@ package fiji.plugin.trackmate.features.edge;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +31,13 @@ import java.util.HashSet;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.junit.Before;
 import org.junit.Test;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
+import fiji.plugin.trackmate.ModelChangeListener;
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotBase;
+import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
 
 public class EdgeTargetAnalyzerTest
 {
@@ -73,7 +75,7 @@ public class EdgeTargetAnalyzerTest
 
 				for ( int j = 0; j <= DEPTH; j++ )
 				{
-					final Spot spot = new Spot( 0d, 0d, 0d, 1d, -1d );
+					final Spot spot = new SpotBase( 0d, 0d, 0d, 1d, -1d );
 					model.addSpotTo( spot, j );
 					if ( null != previous )
 					{

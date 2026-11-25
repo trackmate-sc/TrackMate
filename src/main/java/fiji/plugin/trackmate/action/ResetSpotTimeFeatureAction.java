@@ -34,11 +34,9 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 
@@ -53,14 +51,14 @@ public class ResetSpotTimeFeatureAction extends AbstractTMAction {
 
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log("Reset spot time.\n");
-		double dt = trackmate.getSettings().dt;
+		double dt = guiModel.getSettings().dt;
 		if (dt == 0) {
 			dt = 1;
 		}
-		final SpotCollection spots = trackmate.getModel().getSpots();
+		final SpotCollection spots = guiModel.getModel().getSpots();
 		final Set<Integer> frames = spots.keySet();
 		for(final int frame : frames) {
 			for (final Iterator<Spot> iterator = spots.iterator(frame, true); iterator.hasNext();) {

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -200,9 +200,9 @@ public class SpotFitterPanel extends JPanel
 	}
 
 	/**
-	 * Get the selected channel from the slider. 1-based.
-	 *
-	 * @return the selected channel index.
+	 * Returns the selected channel. 1-based.
+	 * 
+	 * @return the selected channel.
 	 */
 	public int getSelectedChannel()
 	{

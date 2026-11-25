@@ -28,7 +28,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -53,16 +52,9 @@ import javax.swing.table.TableRowSorter;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import ij.ImageJ;
-import ij.ImagePlus;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class MotilityLabExporter extends AbstractTMAction
 {
@@ -96,13 +88,9 @@ public class MotilityLabExporter extends AbstractTMAction
 			Double.class );
 
 	@Override
-	public void execute(
-			final TrackMate trackmate,
-			final SelectionModel selectionModel,
-			final DisplaySettings displaySettings,
-			final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		final JPanel panel = createSpotTable( trackmate.getModel() );
+		final JPanel panel = createSpotTable( guiModel.getModel() );
 		
 		final JFrame frame = new JFrame( "TrackMate MotilityLab table export" );
 		frame.setIconImage( TRACK_TABLES_ICON.getImage() );
@@ -304,20 +292,4 @@ public class MotilityLabExporter extends AbstractTMAction
 			return TRACK_TABLES_ICON;
 		}
 	}
-
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-		
-		final TmXmlReader reader = new TmXmlReader(  new File("samples/MAX_Merged.xml" ));
-		final Model model = reader.getModel();
-		final ImagePlus imp = reader.readImage();
-		final Settings settings = reader.readSettings( imp );
-		new MotilityLabExporter().execute(
-				new TrackMate( model, settings ),
-				new SelectionModel( model ),
-				DisplaySettingsIO.readUserDefault(),
-				null );
-	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -133,7 +133,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 	 * @param startVertex
 	 *            the vertex iteration to be started.
 	 * @param comparator
-	 *            the comparator to sort the vertices when branching.
+	 *            used to compare the several children of a vertex, and
+	 *            specifies in what order they are iterated.
 	 * @throws IllegalArgumentException
 	 *             if <code>g==null</code> or does not contain
 	 *             <code>startVertex</code>
@@ -277,11 +278,8 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		return new UndirectedSpecifics<>( g );
 	}
 
-	/**
+	/*
 	 * This is where we add the multiple children in proper sorted order.
-	 *
-	 * @param vertex
-	 *            the vertex whose unseen children to add.
 	 */
 	protected void addUnseenChildrenOf( final V vertex )
 	{
@@ -356,29 +354,12 @@ public class SortedDepthFirstIterator< V, E > extends AbstractGraphIterator< V, 
 		}
 	}
 
-	/**
-	 * Executed when we encounter a vertex for the first time.
-	 *
-	 * @param vertex
-	 *            the vertex encountered.
-	 * @param edge
-	 *            the edge via which we encountered it.
-	 */
 	protected void encounterVertex( final V vertex, final E edge )
 	{
 		seen.put( vertex, VisitColor.WHITE );
 		stack.addLast( vertex );
 	}
 
-	/**
-	 * Executed when we encounter a vertex that has already been seen, but is
-	 * still WHITE (meaning it is on the stack).
-	 *
-	 * @param vertex
-	 *            the vertex encountered again.
-	 * @param edge
-	 *            the edge via which we encountered it.
-	 */
 	protected void encounterVertexAgain( final V vertex, final E edge )
 	{
 		final VisitColor color = seen.get( vertex );

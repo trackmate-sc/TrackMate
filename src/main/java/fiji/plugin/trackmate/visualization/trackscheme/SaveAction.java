@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -42,6 +42,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import org.bounce.DefaultFileFilter;
+
 import com.itextpdf.awt.PdfGraphics2D;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfContentByte;
@@ -59,8 +61,6 @@ import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.util.png.mxPngEncodeParam;
 import com.mxgraph.util.png.mxPngImageEncoder;
 import com.mxgraph.view.mxGraph;
-
-import fiji.plugin.trackmate.util.DefaultFileFilter;
 
 public class SaveAction extends AbstractAction
 {
@@ -81,13 +81,13 @@ public class SaveAction extends AbstractAction
 	 * Saves XML+PNG format.
 	 *
 	 * @param frame
-	 *            the TrackScheme frame to capture from.
+	 *            the TrackScheme frame to capture.
 	 * @param filename
 	 *            the file to save to.
 	 * @param bg
-	 *            the background color, or null for transparent.
+	 *            the color of the background in the exported image.
 	 * @throws IOException
-	 *             if something goes wrong when writing the file.
+	 *             if an error happens while writing.
 	 */
 	protected void saveXmlPng( final TrackSchemeFrame frame, final String filename, final Color bg ) throws IOException
 	{
@@ -170,7 +170,7 @@ public class SaveAction extends AbstractAction
 		}
 
 		// Adds filter that accepts all supported image formats
-		fc.addChoosableFileFilter( new DefaultFileFilter.ImageFileFilter( "All Images" ) );
+		fc.addChoosableFileFilter( new ImageFileFilter( "All Images" ) );
 		fc.setFileFilter( defaultFilter );
 		final int rc = fc.showDialog( null, "Save" );
 		dialogShown = true;
@@ -182,18 +182,8 @@ public class SaveAction extends AbstractAction
 		filename = fc.getSelectedFile().getAbsolutePath();
 		selectedFilter = fc.getFileFilter();
 
-		if ( selectedFilter instanceof DefaultFileFilter )
-		{
-			final String ext = ( ( DefaultFileFilter ) selectedFilter ).getExtension();
-
-			if ( !filename.toLowerCase().endsWith( ext ) )
-			{
-				filename += ext;
-			}
-		}
-
 		if ( new File( filename ).exists() && JOptionPane.showConfirmDialog( graphComponent, "Overwrite existing file?" ) != JOptionPane.YES_OPTION )
-		{ return; }
+			return;
 
 		try
 		{
@@ -218,7 +208,6 @@ public class SaveAction extends AbstractAction
 			else if ( selectedFilter == vmlFileFilter )
 			{
 				mxUtils.writeFile( mxXmlUtils.getXml( mxCellRenderer.createVmlDocument( graph, null, 1, null, null ).getDocumentElement() ), filename );
-
 			}
 			else if ( ext.equalsIgnoreCase( "html" ) )
 			{
@@ -311,6 +300,73 @@ public class SaveAction extends AbstractAction
 			if ( null != g2 )
 				g2.dispose();
 			document.close();
+		}
+	}
+
+	/**
+	 * Utility file filter to accept all image formats supported by image io.
+	 *
+	 * @see ImageIO#getReaderFormatNames()
+	 */
+	public static class ImageFileFilter extends FileFilter
+	{
+
+		/**
+		 * Holds the accepted file format extensions for images.
+		 */
+		protected static String[] imageFormats = ImageIO.getReaderFormatNames();
+
+		/**
+		 * Description of the filter.
+		 */
+		protected String desc;
+
+		/**
+		 * Constructs a new file filter for all supported image formats using
+		 * the specified description.
+		 *
+		 * @param description
+		 *            The description to use for the file filter.
+		 */
+		public ImageFileFilter( final String description )
+		{
+			desc = description;
+		}
+
+		/**
+		 * Returns true if the file is a directory or ends with a known image
+		 * extension.
+		 *
+		 * @param file
+		 *            The file to be checked.
+		 * @return Returns true if the file is accepted.
+		 */
+		@Override
+		public boolean accept( final File file )
+		{
+			if ( file.isDirectory() )
+				return true;
+
+			final String filename = file.toString().toLowerCase();
+
+			for ( int j = 0; j < imageFormats.length; j++ )
+			{
+				if ( filename.endsWith( "." + imageFormats[ j ].toLowerCase() ) )
+					return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Returns the description.
+		 *
+		 * @return Returns the description.
+		 */
+		@Override
+		public String getDescription()
+		{
+			return desc;
 		}
 	}
 }

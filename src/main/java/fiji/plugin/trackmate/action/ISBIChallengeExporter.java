@@ -44,11 +44,9 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.io.IOUtils;
 
 public class ISBIChallengeExporter extends AbstractTMAction
@@ -68,15 +66,16 @@ public class ISBIChallengeExporter extends AbstractTMAction
 			"</html>";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
 		logger.log( "Exporting tracks to ISBI challenge file format.\n" );
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
+		final Settings settings = guiModel.getSettings();
 		File file;
 		final File folder = new File( System.getProperty( "user.dir" ) ).getParentFile().getParentFile();
 		try
 		{
-			String filename = trackmate.getSettings().imageFileName;
+			String filename = settings.imageFileName;
 			filename = filename.substring( 0, filename.indexOf( "." ) );
 			file = new File( folder.getPath() + File.separator + filename + "_ISBI.xml" );
 		}
@@ -91,7 +90,7 @@ public class ISBIChallengeExporter extends AbstractTMAction
 			return;
 		}
 
-		exportToFile( model, trackmate.getSettings(), file, logger );
+		exportToFile( model, settings, file, logger );
 	}
 
 	public static void exportToFile( final Model model, final Settings settings, final File file )

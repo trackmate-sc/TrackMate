@@ -68,10 +68,11 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.scijava.ui.config.visitors.gui.elements.ColorIcon;
+
 import com.opencsv.CSVWriter;
 
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.gui.displaysettings.ColorIcon;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 

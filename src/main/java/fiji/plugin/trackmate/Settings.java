@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,8 +35,9 @@ import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactoryBase;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.tracking.SpotTrackerFactory;
 import ij.ImagePlus;
@@ -55,7 +56,7 @@ public class Settings
 	 * {@link fiji.plugin.trackmate.visualization.TrackMateModelView} as a GUI
 	 * target.
 	 */
-	public final ImagePlus imp;
+	public final transient ImagePlus imp;
 
 	public double dt;
 
@@ -112,15 +113,15 @@ public class Settings
 	 */
 	public SpotDetectorFactoryBase< ? > detectorFactory;
 
-	/** The the tracker to use. */
-	public SpotTrackerFactory trackerFactory;
-
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.detection.SpotDetector}.
 	 *
 	 * @see fiji.plugin.trackmate.detection.DetectorKeys
 	 */
 	public Map< String, Object > detectorSettings = new HashMap<>();
+
+	/** The the tracker to use. */
+	public SpotTrackerFactory trackerFactory;
 
 	/**
 	 * Settings map for {@link fiji.plugin.trackmate.tracking.SpotTracker}.
@@ -132,20 +133,20 @@ public class Settings
 	// Filters
 
 	/**
-	 * The feature filter list.
-	 */
-	protected List< FeatureFilter > spotFilters = new ArrayList<>();
-
-	/**
 	 * The initial quality filter value that is used to clip spots of low
 	 * quality from spots.
 	 */
 	public Double initialSpotFilterValue = Double.valueOf( 0 );
 
+	/**
+	 * The feature filter list.
+	 */
+	protected List< FeatureFilter > spotFilters = new ArrayList<>();
+
 	/** The track filter list that is used to prune track and spots. */
 	protected List< FeatureFilter > trackFilters = new ArrayList<>();
 
-	protected String errorMessage;
+	protected transient String errorMessage;
 
 	// Spot features
 
@@ -532,24 +533,37 @@ public class Settings
 	 */
 	public void addAllAnalyzers()
 	{
+		// Base spot analyzers.
 		final SpotAnalyzerProvider spotAnalyzerProvider = new SpotAnalyzerProvider( imp == null ? 1 : imp.getNChannels() );
 		final List< String > spotAnalyzerKeys = spotAnalyzerProvider.getKeys();
 		for ( final String key : spotAnalyzerKeys )
 			addSpotAnalyzerFactory( spotAnalyzerProvider.getFactory( key ) );
 
+		// Shall we add 2D morphology analyzers?
 		if ( imp != null && DetectionUtils.is2D( imp ) && detectorFactory != null && detectorFactory.has2Dsegmentation() )
 		{
-			final SpotMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new SpotMorphologyAnalyzerProvider( imp.getNChannels() );
+			final Spot2DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot2DMorphologyAnalyzerProvider( imp.getNChannels() );
 			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
 			for ( final String key : spotMorphologyAnaylyzerKeys )
 				addSpotAnalyzerFactory( spotMorphologyAnalyzerProvider.getFactory( key ) );
 		}
 
+		// Shall we add 3D morphology analyzers?
+		if ( imp != null && !DetectionUtils.is2D( imp ) && detectorFactory != null && detectorFactory.has3Dsegmentation() )
+		{
+			final Spot3DMorphologyAnalyzerProvider spotMorphologyAnalyzerProvider = new Spot3DMorphologyAnalyzerProvider( imp.getNChannels() );
+			final List< String > spotMorphologyAnaylyzerKeys = spotMorphologyAnalyzerProvider.getKeys();
+			for ( final String key : spotMorphologyAnaylyzerKeys )
+				addSpotAnalyzerFactory( spotMorphologyAnalyzerProvider.getFactory( key ) );
+		}
+
+		// Edge analyzers.
 		final EdgeAnalyzerProvider edgeAnalyzerProvider = new EdgeAnalyzerProvider();
 		final List< String > edgeAnalyzerKeys = edgeAnalyzerProvider.getKeys();
 		for ( final String key : edgeAnalyzerKeys )
 			addEdgeAnalyzer( edgeAnalyzerProvider.getFactory( key ) );
 
+		// Track analyzers.
 		final TrackAnalyzerProvider trackAnalyzerProvider = new TrackAnalyzerProvider();
 		final List< String > trackAnalyzerKeys = trackAnalyzerProvider.getKeys();
 		for ( final String key : trackAnalyzerKeys )

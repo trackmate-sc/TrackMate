@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -40,19 +40,21 @@ import fiji.plugin.trackmate.action.ExportTracksToXML;
 import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.track.TrackBranchingAnalyzer;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.gui.GuiUtils;
 import fiji.plugin.trackmate.gui.components.LogPanel;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.wizard.WizardSequence;
 import fiji.plugin.trackmate.gui.wizard.descriptors.ConfigureViewsDescriptor;
 import fiji.plugin.trackmate.gui.wizard.descriptors.LogPanelDescriptor2;
-import fiji.plugin.trackmate.io.TmXmlWriter;
+import fiji.plugin.trackmate.io.xml.TmXmlWriter;
 import fiji.plugin.trackmate.tracking.TrackerKeys;
 import fiji.plugin.trackmate.util.LogRecorder;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.util.SplitString;
+import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -296,15 +298,14 @@ public class TrackMateRunner extends TrackMatePlugIn
 				}
 
 				/*
-				 * Instantiate TrackMate.
+				 * Instantiate GUImodel.
 				 */
 
 				final Settings settings = createSettings( imp );
 				final Model model = createModel( imp );
-				final SelectionModel selectionModel = new SelectionModel( model );
 				model.setLogger( logger );
-				final TrackMate trackmate = createTrackMate( model, settings );
 				final DisplaySettings displaySettings = createDisplaySettings();
+				final GuiModel guiModel = new GuiModel( model, settings, displaySettings );
 
 				/*
 				 * Configure default settings.
@@ -402,12 +403,12 @@ public class TrackMateRunner extends TrackMatePlugIn
 						imp.show();
 					}
 					GuiUtils.userCheckImpDimensions( imp );
+
 					// Main view.
-					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
-					displayer.render();
+					guiModel.getWindowManager().createHyperStackDisplayer();
 
 					// Wizard.
-					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					final WizardSequence sequence = createSequence( guiModel );
 					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
 					frame.setIconImage( TRACKMATE_ICON.getImage() );
 					GuiUtils.positionWindow( frame, imp.getWindow() );
@@ -415,6 +416,7 @@ public class TrackMateRunner extends TrackMatePlugIn
 					return;
 				}
 
+				final TrackMate trackmate = guiModel.getTrackMate();
 				final String welcomeMessage = TrackMate.PLUGIN_NAME_STR + " v" + TrackMate.PLUGIN_NAME_VERSION + " started on:\n" + TMUtils.getCurrentTimeString() + '\n';
 				logger.log( welcomeMessage );
 				if ( !trackmate.checkInput() || !trackmate.process() )
@@ -434,8 +436,8 @@ public class TrackMateRunner extends TrackMatePlugIn
 					final TmXmlWriter writer = new TmXmlWriter( save_path, logger );
 
 					writer.appendLog( logger.toString() );
-					writer.appendModel( trackmate.getModel() );
-					writer.appendSettings( trackmate.getSettings() );
+					writer.appendModel( model );
+					writer.appendSettings( settings );
 
 					try
 					{
@@ -501,11 +503,11 @@ public class TrackMateRunner extends TrackMatePlugIn
 					 */
 
 					// Main view.
-					final TrackMateModelView displayer = new HyperStackDisplayer( model, selectionModel, imp, displaySettings );
+					final TrackMateModelView displayer = new HyperStackDisplayer( guiModel );
 					displayer.render();
 
 					// Wizard.
-					final WizardSequence sequence = createSequence( trackmate, selectionModel, displaySettings );
+					final WizardSequence sequence = createSequence( guiModel );
 					sequence.setCurrent( ConfigureViewsDescriptor.KEY );
 					final JFrame frame = sequence.run( "TrackMate on " + imp.getShortTitle() );
 					frame.setIconImage( TRACKMATE_ICON.getImage() );

@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,13 +31,13 @@ import net.imglib2.util.Util;
 /**
  * A {@link CostMatrixCreator} that build a cost matrix from 3 lists containing
  * the sources, the targets and the associated costs.
- *
+ * 
  * @author Jean-Yves Tinevez - 2014
- *
+ * 
  * @param <K>
- *            the type of the source objects (rows).
+ *            the type of sources.
  * @param <J>
- *            the type of the target objects (columns).
+ *            the type of targets.
  */
 public class DefaultCostMatrixCreator< K extends Comparable< K >, J extends Comparable< J > > implements CostMatrixCreator< K, J >
 {

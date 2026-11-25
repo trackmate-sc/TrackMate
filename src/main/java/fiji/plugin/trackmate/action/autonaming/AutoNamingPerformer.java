@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -44,20 +44,29 @@ public class AutoNamingPerformer
 
 	public static void autoNameSpots( final Model model, final AutoNamingRule rule )
 	{
-		final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
-		for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
+		model.beginUpdate();
+		try
 		{
-			final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborIndex, true, false );
-			final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
-			processTrack( rule, model.getTrackModel(), branchGraph );
+			final TimeDirectedNeighborIndex neighborIndex = model.getTrackModel().getDirectedNeighborIndex();
+			for ( final Integer trackID : model.getTrackModel().unsortedTrackIDs( true ) )
+			{
+				final TrackBranchDecomposition branchDecomposition = ConvexBranchesDecomposition.processTrack( trackID, model.getTrackModel(), neighborIndex, true, false );
+				final SimpleDirectedGraph< List< Spot >, DefaultEdge > branchGraph = ConvexBranchesDecomposition.buildBranchGraph( branchDecomposition );
+				processTrack( rule, model, branchGraph );
+			}
+		}
+		finally
+		{
+			model.endUpdate();
 		}
 	}
 
 	private static void processTrack(
-			final AutoNamingRule rule, 
-			final TrackModel model,
+			final AutoNamingRule rule,
+			final Model model,
 			final SimpleDirectedGraph< List< Spot >, DefaultEdge > graph )
 	{
+		final TrackModel trackModel = model.getTrackModel();
 		// Find the roots. Might be several.
 		final List< List< Spot > > roots = graph.vertexSet().stream()
 				.filter( key -> graph.incomingEdgesOf( key ).size() == 0 )
@@ -67,13 +76,15 @@ public class AutoNamingPerformer
 		{
 			// Name the spots in the root branch.
 			final Spot first = root.get( 0 );
-			rule.nameRoot( first, model );
+			model.beforeEdit( first ); // undo name changes.
+			rule.nameRoot( first, trackModel );
 
 			// Other spots in the root branch.
 			Spot predecessor = first;
 			for ( int i = 1; i < root.size(); i++ )
 			{
 				final Spot current = root.get( i );
+				model.beforeEdit( current ); // undo name changes.
 				rule.nameSpot( current, predecessor );
 				predecessor = current;
 			}
@@ -102,8 +113,10 @@ public class AutoNamingPerformer
 				final Spot mother = currentBranch.get( currentBranch.size() - 1 );
 
 				// Name the branch first spots.
+				for ( final Spot sibling : siblings )
+					model.beforeEdit( sibling ); // undo name changes.
 				rule.nameBranches( mother, siblings );
-				
+
 				// Name the spots inside each branch.
 				for ( final List< Spot > cb : childrenBranches )
 				{
@@ -111,6 +124,7 @@ public class AutoNamingPerformer
 					for ( int i = 1; i < cb.size(); i++ )
 					{
 						final Spot current = cb.get( i );
+						model.beforeEdit( current ); // undo name changes.
 						rule.nameSpot( current, parent );
 						parent = current;
 					}

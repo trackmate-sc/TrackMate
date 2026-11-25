@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,13 +35,10 @@ import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.util.SpotUtil;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.visualization.GlasbeyLut;
 import ij.ImagePlus;
@@ -79,7 +76,7 @@ public class LabelImgExporter extends AbstractTMAction
 	public static final String NAME = "Export label image";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame gui )
+	public void execute( final GuiModel guiModel, final Frame gui )
 	{
 		/*
 		 * Ask use for option.
@@ -117,78 +114,9 @@ public class LabelImgExporter extends AbstractTMAction
 		 * Generate label image.
 		 */
 
-		createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ).show();
-	}
-
-	/**
-	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted with their shape, with their track ID as pixel value.
-	 *
-	 * @param trackmate
-	 *            the trackmate instance from which we takes the spots to paint.
-	 *            The label image will have the same calibration, name and
-	 *            dimension from the input image stored in the trackmate
-	 *            settings. The output label image will have the same size that
-	 *            of this input image, except for the number of channels, which
-	 *            will be 1.
-	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots. If
-	 *            <code>false</code> they will be painted with their shape.
-	 * @param exportTracksOnly
-	 *            if <code>true</code>, only the spots belonging to visible
-	 *            tracks will be painted. If <code>false</code>, spots not
-	 *            belonging to a track will be painted with a unique ID,
-	 *            different from the track IDs and different for each spot.
-	 * @param labeIdPainting
-	 *            specifies how to paint the label ID of spots.
-	 *
-	 * @return a new {@link ImagePlus}.
-	 */
-	public static final ImagePlus createLabelImagePlus(
-			final TrackMate trackmate,
-			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly,
-			final LabelIdPainting labeIdPainting
-			)
-	{
-		return createLabelImagePlus( trackmate, exportSpotsAsDots, exportTracksOnly, labeIdPainting, Logger.VOID_LOGGER );
-	}
-
-	/**
-	 * Creates a new label {@link ImagePlus} where the spots of the specified
-	 * model are painted with their shape, with their track ID as pixel value.
-	 *
-	 * @param trackmate
-	 *            the trackmate instance from which we takes the spots to paint.
-	 *            The label image will have the same calibration, name and
-	 *            dimension from the input image stored in the trackmate
-	 *            settings. The output label image will have the same size that
-	 *            of this input image, except for the number of channels, which
-	 *            will be 1.
-	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
-	 * @param exportTracksOnly
-	 *            if <code>true</code>, only the spots belonging to visible
-	 *            tracks will be painted. If <code>false</code>, spots not
-	 *            belonging to a track will be painted with a unique ID,
-	 *            different from the track IDs and different for each spot.
-	 * @param labelIdPainting
-	 *            specifies how to paint the label ID of spots.
-	 * @param logger
-	 *            a {@link Logger} instance, to report progress of the export
-	 *            process.
-	 *
-	 * @return a new {@link ImagePlus}.
-	 */
-	public static final ImagePlus createLabelImagePlus(
-			final TrackMate trackmate,
-			final boolean exportSpotsAsDots,
-			final boolean exportTracksOnly,
-			final LabelIdPainting labelIdPainting,
-			final Logger logger )
-	{
-		return createLabelImagePlus( trackmate.getModel(), trackmate.getSettings().imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger );
+		final Model model = guiModel.getModel();
+		final ImagePlus imp = guiModel.getSettings().imp;
+		createLabelImagePlus( model, imp, exportSpotsAsDots, exportTracksOnly, labelIdPainting, logger ).show();
 	}
 
 	/**
@@ -203,8 +131,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            source image, except for the number of channels, which will be
 	 *            1.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -237,8 +165,8 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            source image, except for the number of channels, which will be
 	 *            1.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -286,12 +214,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param calibration
-	 *            the desired calibration of the output image (pixel width,
-	 *            pixel height, pixel depth, frame interval) as a 4 element
-	 *            double array.
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -324,12 +251,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            nZSlices, nFrames) as a 4 element int array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param calibration
-	 *            the desired calibration of the output image (pixel width,
-	 *            pixel height, pixel depth, frame interval) as a 4 element
-	 *            double array.
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -376,12 +302,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param calibration
-	 *            the desired calibration of the output image (pixel width,
-	 *            pixel height, pixel depth, frame interval) as a 4 element
-	 *            double array.
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -414,12 +339,11 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param calibration
-	 *            the desired calibration of the output image (pixel width,
-	 *            pixel height, pixel depth, frame interval) as a 4 element
-	 *            double.
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param exportTracksOnly
 	 *            if <code>true</code>, only the spots belonging to visible
 	 *            tracks will be painted. If <code>false</code>, spots not
@@ -470,8 +394,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< FloatType > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
-					: new SpotRoiWriter<>( imgCT );
-			idGenerator.nextFrame();
+					: new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
@@ -487,9 +410,9 @@ public class LabelImgExporter extends AbstractTMAction
 
 
 	/**
-	 * Creates a new label {@link ImgPlus} of specified pixel type where the
-	 * spots are painted with an ID. All visible spots are painted, whether they
-	 * are in a track or not.
+	 * Creates a new label {@link ImgPlus} of {@link FloatType} where the spots
+	 * are painted with an ID. All visible spots are painted, whether they are
+	 * in a track or not.
 	 *
 	 * @param spots
 	 *            the spots to paint.
@@ -498,24 +421,23 @@ public class LabelImgExporter extends AbstractTMAction
 	 *            nZSlices, nFrames) as a 4 element long array. Spots outside
 	 *            these dimensions are ignored.
 	 * @param calibration
-	 *            the desired calibration of the output image (pixel width,
-	 *            pixel height, pixel depth, frame interval) as a 4 element
-	 *            double array.
+	 *            the pixel size to map physical spot coordinates to pixel
+	 *            coordinates.
 	 * @param exportSpotsAsDots
-	 *            if <code>true</code>, spots will be painted as single dots
-	 *            instead of their shape.
+	 *            if <code>true</code>, spots will be painted as single dots. If
+	 *            <code>false</code> they will be painted with their shape.
 	 * @param labelIdPainting
 	 *            specifies how to paint the label ID of spots. The
 	 *            {@link LabelIdPainting#LABEL_IS_TRACK_ID} is not supported and
 	 *            defaults to {@link LabelIdPainting#LABEL_IS_SPOT_ID}.
 	 * @param outputType
-	 *            the output pixel type.
+	 *            the pixel type of the output image.
 	 * @param logger
 	 *            a {@link Logger} instance, to report progress of the export
 	 *            process.
-	 * @param <T>
-	 *            the pixel type of the output image.
 	 * @return a new {@link ImgPlus}.
+	 * @param <T>
+	 *            the pixel type.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ImgPlus< T > createLabelImg(
 			final SpotCollection spots,
@@ -569,7 +491,7 @@ public class LabelImgExporter extends AbstractTMAction
 			final ImgPlus< T > imgCT = TMUtils.hyperSlice( imgPlus, 0, frame );
 			final SpotWriter spotWriter = exportSpotsAsDots
 					? new SpotAsDotWriter<>( imgCT )
-					: new SpotRoiWriter<>( imgCT );
+					: new SpotShapeWriter<>( imgCT );
 			idGenerator.nextFrame();
 
 			for ( final Spot spot : spots.iterable( frame, true ) )
@@ -627,12 +549,12 @@ public class LabelImgExporter extends AbstractTMAction
 		public void write( Spot spot, int id );
 	}
 
-	public static final class SpotRoiWriter< T extends RealType< T > > implements SpotWriter
+	public static final class SpotShapeWriter< T extends RealType< T > > implements SpotWriter
 	{
 
 		private final ImgPlus< T > img;
 
-		public SpotRoiWriter( final ImgPlus< T > img )
+		public SpotShapeWriter( final ImgPlus< T > img )
 		{
 			this.img = img;
 		}
@@ -640,7 +562,7 @@ public class LabelImgExporter extends AbstractTMAction
 		@Override
 		public void write( final Spot spot, final int id )
 		{
-			for ( final T pixel : SpotUtil.iterable( spot, img ) )
+			for ( final T pixel : spot.iterable( img ) )
 				pixel.setReal( id );
 		}
 	}

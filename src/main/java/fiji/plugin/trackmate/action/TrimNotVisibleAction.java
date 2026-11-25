@@ -32,12 +32,10 @@ import javax.swing.ImageIcon;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
+import fiji.plugin.trackmate.gui.GuiModel;
 
 public class TrimNotVisibleAction extends AbstractTMAction
 {
@@ -60,13 +58,13 @@ public class TrimNotVisibleAction extends AbstractTMAction
 	public static final String NAME = "Trim non-visible data";
 
 	@Override
-	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
+	public void execute( final GuiModel guiModel, final Frame parent )
 	{
-		final Model model = trackmate.getModel();
+		final Model model = guiModel.getModel();
 		final TrackModel tm = model.getTrackModel();
 
 		final SpotCollection spots = new SpotCollection();
-		spots.setNumThreads( trackmate.getNumThreads() );
+		spots.setNumThreads( guiModel.getTrackMate().getNumThreads() );
 		final Collection< Spot > toRemove = new ArrayList<>();
 
 		for ( final Integer trackID : tm.unsortedTrackIDs( false ) )

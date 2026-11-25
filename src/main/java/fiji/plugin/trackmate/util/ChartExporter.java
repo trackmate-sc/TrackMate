@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -43,15 +43,15 @@ import com.itextpdf.text.pdf.PdfWriter;
 /**
  * A collection of static utilities made to export a JPanel to various scalable
  * file format.
- *
+ * 
  * @author Jean-Yves Tinevez, 2011 - 2021
  */
 public class ChartExporter
 {
 
 	/**
-	 * Exports a JFreeChart to SVG.
-	 *
+	 * Export a JFreeChart to SVG.
+	 * 
 	 * @param svgFile
 	 *            the target svg file.
 	 * @param chart
@@ -61,9 +61,7 @@ public class ChartExporter
 	 * @param height
 	 *            the height of the panel the chart is painted in.
 	 * @throws UnsupportedEncodingException
-	 *             if the encoding is not supported.
-	 * @throws IOException
-	 *             on IO error.
+	 *             If the UTF-8 encoding is not supported.
 	 */
 	public static void exportChartAsSVG( final File svgFile, final JFreeChart chart, final int width, final int height ) throws UnsupportedEncodingException, IOException
 	{
@@ -86,7 +84,7 @@ public class ChartExporter
 
 	/**
 	 * Export a JFreeChart to PDF.
-	 *
+	 * 
 	 * @param pdfFile
 	 *            the target pdf file.
 	 * @param chart

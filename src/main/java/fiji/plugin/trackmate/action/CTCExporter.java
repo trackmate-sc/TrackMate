@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -50,14 +50,15 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.action.LabelImgExporter.SpotRoiWriter;
+import fiji.plugin.trackmate.action.LabelImgExporter.SpotShapeWriter;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.GraphUtils;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.io.TmXmlWriter;
+import fiji.plugin.trackmate.io.xml.TmXmlWriter;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -184,7 +185,7 @@ public class CTCExporter
 	 * @param logger
 	 *            a logger to report progress.
 	 * @throws IOException
-	 *             if a problem happens during writing.
+	 *             if there's any problem writing.
 	 */
 	public static void exportSettingsFile( final String exportRootFolder, final int saveId, final TrackMate trackmate, final Logger logger ) throws IOException
 	{
@@ -316,15 +317,16 @@ public class CTCExporter
 		for ( int frame = 0; frame < dims[ 3 ]; frame++ )
 		{
 			final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-			final SpotRoiWriter< UnsignedShortType > spotWriter = new SpotRoiWriter<>( imgCT );
+			final SpotShapeWriter< UnsignedShortType > spotWriter = new SpotShapeWriter<>( imgCT );
 
 			for ( final Spot spot : model.getSpots().iterable( frame, true ) )
 			{
-				if ( spot.getRoi() == null )
-					continue;
-				final int id = idGen.getAndIncrement();
-				spotWriter.write( spot, id );
-				framesToWrite.add( Integer.valueOf( frame ) );
+				if ( spot instanceof SpotRoi )
+				{
+					final int id = idGen.getAndIncrement();
+					spotWriter.write( spot, id );
+					framesToWrite.add( Integer.valueOf( frame ) );
+				}
 			}
 		}
 
@@ -411,8 +413,8 @@ public class CTCExporter
 		Files.createDirectories( path.getParent() );
 		logger.log( "Exporting tracking text file to " + path.toString() );
 
-		try (FileOutputStream fos = new FileOutputStream( path.toFile() );
-				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
+		try (final FileOutputStream fos = new FileOutputStream( path.toFile() );
+				final BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( fos ) ))
 		{
 
 			for ( final Integer trackID : trackModel.trackIDs( true ) )
@@ -448,7 +450,7 @@ public class CTCExporter
 					{
 						final long frame = spot.getFeature( Spot.FRAME ).longValue();
 						final ImgPlus< UnsignedShortType > imgCT = TMUtils.hyperSlice( labelImg, 0, frame );
-						final SpotRoiWriter< UnsignedShortType > spotRoiWriter = new SpotRoiWriter<>( imgCT );
+						final SpotShapeWriter< UnsignedShortType > spotRoiWriter = new SpotShapeWriter<>( imgCT );
 						spotRoiWriter.write( spot, currentID );
 					}
 

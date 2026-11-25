@@ -2,7 +2,7 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2010 - 2026 TrackMate developers.
+ * Copyright (C) 2010 - 2024 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -59,13 +59,13 @@ public class InitFilterPanel extends JPanel
 	private double[] values;
 
 	/**
-	 * Creates a panel to set an initial feature filter on quality.
+	 * Default constructor, initialize component.
 	 *
 	 * @param filter
-	 *            the initial feature filter to display.
+	 *            the filter to initialize the panel with.
 	 * @param valueCollector
-	 *            a function that, given a feature key, returns an array of
-	 *            double values for all spots for that feature.
+	 *            a function that can return the value collection of a specified
+	 *            feature.
 	 */
 	public InitFilterPanel( final FeatureFilter filter, final Function< String, double[] > valueCollector )
 	{
@@ -139,8 +139,8 @@ public class InitFilterPanel extends JPanel
 
 	/**
 	 * Returns the feature threshold on quality set by this panel.
-	 *
-	 * @return the feature threshold on quality set by this panel.
+	 * 
+	 * @return the feature threshold.
 	 */
 	public FeatureFilter getFeatureThreshold()
 	{

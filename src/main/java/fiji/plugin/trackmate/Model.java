@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -32,6 +32,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.undo.UndoRedoStack;
 
 /**
  * The model for the data managed by TrackMate.
@@ -43,7 +44,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
  * built in coherent sets.
  * </p>
  *
- * @author Jean-Yves Tinevez &lt;tinevez@pasteur.fr&gt; - 2010-2013
+ * @author Jean-Yves Tinevez - 2010-2026
  */
 public class Model
 {
@@ -81,13 +82,18 @@ public class Model
 	 */
 	private int updateLevel = 0;
 
-	private final HashSet< Spot > spotsAdded = new HashSet< >();
+	private final HashSet< Spot > spotsAdded = new HashSet<>();
 
-	private final HashSet< Spot > spotsRemoved = new HashSet< >();
+	private final HashSet< Spot > spotsRemoved = new HashSet<>();
 
-	private final HashSet< Spot > spotsMoved = new HashSet< >();
+	private final HashSet< Spot > spotsMoved = new HashSet<>();
 
-	private final HashSet< Spot > spotsUpdated = new HashSet< >();
+	private final HashSet< Spot > spotsUpdated = new HashSet<>();
+
+	/**
+	 * Track IDs whose names were modified during the current transaction.
+	 */
+	private final HashSet< Integer > tracksNamedModified = new HashSet<>();
 
 	/**
 	 * The event cache. During a transaction, some modifications might trigger
@@ -96,15 +102,15 @@ public class Model
 	 * the event ID in this cache in the meantime. The event cache contains only
 	 * the int IDs of the events listed in {@link ModelChangeEvent}, namely
 	 * <ul>
-	 * <li> {@link ModelChangeEvent#SPOTS_COMPUTED}
-	 * <li> {@link ModelChangeEvent#TRACKS_COMPUTED}
-	 * <li> {@link ModelChangeEvent#TRACKS_VISIBILITY_CHANGED}
+	 * <li>{@link ModelChangeEvent#SPOTS_COMPUTED}
+	 * <li>{@link ModelChangeEvent#TRACKS_COMPUTED}
+	 * <li>{@link ModelChangeEvent#TRACKS_VISIBILITY_CHANGED}
 	 * </ul>
 	 * The {@link ModelChangeEvent#MODEL_MODIFIED} cannot be cached this way,
 	 * for it needs to be configured with modification spot and edge targets, so
 	 * it uses a different system (see {@link #flushUpdate()}).
 	 */
-	private final HashSet< Integer > eventCache = new HashSet< >();
+	private final HashSet< Integer > eventCache = new HashSet<>();
 
 	// OTHERS
 
@@ -120,7 +126,9 @@ public class Model
 	/**
 	 * The list of listeners listening to model content change.
 	 */
-	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet< >();
+	Set< ModelChangeListener > modelChangeListeners = new LinkedHashSet<>();
+
+	private final UndoRedoStack undoRedoStack;
 
 	/*
 	 * CONSTRUCTOR
@@ -128,8 +136,10 @@ public class Model
 
 	public Model()
 	{
-		featureModel = createFeatureModel();
-		trackModel = createTrackModel();
+		this.featureModel = createFeatureModel();
+		this.trackModel = createTrackModel();
+		this.undoRedoStack = new UndoRedoStack( this ); // TODO
+		addModelChangeListener( new SpotMeshSliceCacheInvalidator() );
 	}
 
 	/*
@@ -154,7 +164,7 @@ public class Model
 	 * <p>
 	 * Subclassers can override this method to have the model work with their
 	 * own subclass of {@link FeatureModel}.
-	 * 
+	 *
 	 * @return a new instance of {@link FeatureModel}.
 	 */
 	protected FeatureModel createFeatureModel()
@@ -321,7 +331,7 @@ public class Model
 
 	/**
 	 * Returns the {@link TrackModel} that manages the tracks for this model.
-	 * 
+	 *
 	 * @return the track model.
 	 */
 	public TrackModel getTrackModel()
@@ -447,7 +457,7 @@ public class Model
 	/**
 	 * Set the logger that will receive the messages from the processes
 	 * occurring within this trackmate.
-	 * 
+	 *
 	 * @param logger
 	 *            the {@link Logger} to use.
 	 */
@@ -458,7 +468,7 @@ public class Model
 
 	/**
 	 * Return the logger currently set for this model.
-	 * 
+	 *
 	 * @return the {@link Logger} used.
 	 */
 	public Logger getLogger()
@@ -544,7 +554,7 @@ public class Model
 	 * 	model.endUpdate();
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * @param spotToAdd
 	 *            the spot to add.
 	 * @param toFrame
@@ -593,45 +603,17 @@ public class Model
 			if ( DEBUG )
 				System.out.println( "[TrackMateModel] Removing spot " + spotToRemove + " from frame " + fromFrame );
 
-			trackModel.removeSpot( spotToRemove ); 
-			// changes to edges will be caught automatically by the TrackGraphModel
+			// Flag all tracks for undo before removing spot (may split tracks)
+			undoRedoStack.flagAllTracksForUndo();
+			trackModel.removeSpot( spotToRemove );
+			// changes to edges will be caught automatically by the
+			// TrackGraphModel
 			return spotToRemove;
 		}
 		if ( DEBUG )
 			System.err.println( "[TrackMateModel] The spot " + spotToRemove + " cannot be found in frame " + fromFrame );
 
 		return null;
-	}
-
-	/**
-	 * Mark the specified spot for update. At the end of the model transaction,
-	 * its features will be recomputed, and other edge and track features that
-	 * depends on it will be as well.
-	 * <p>
-	 * For the model update to happen correctly and listeners to be notified
-	 * properly, a call to this method must happen within a transaction, as in:
-	 *
-	 * <pre>
-	 * model.beginUpdate();
-	 * try {
-	 * 	... // model modifications here
-	 * } finally {
-	 * 	model.endUpdate();
-	 * }
-	 * </pre>
-	 *
-	 * @param spotToUpdate
-	 *            the spot to mark for update
-	 */
-	public synchronized void updateFeatures( final Spot spotToUpdate )
-	{
-		spotsUpdated.add( spotToUpdate ); // Enlist for feature update when
-											// transaction is marked as finished
-		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spotToUpdate );
-		if ( null != touchingEdges )
-		{
-			trackModel.edgesModified.addAll( touchingEdges );
-		}
 	}
 
 	/**
@@ -659,6 +641,15 @@ public class Model
 	 */
 	public synchronized DefaultWeightedEdge addEdge( final Spot source, final Spot target, final double weight )
 	{
+		// Check if this edge will merge two tracks
+		final Integer sourceTrackId = trackModel.trackIDOf( source );
+		final Integer targetTrackId = trackModel.trackIDOf( target );
+		if ( sourceTrackId != null && targetTrackId != null && !sourceTrackId.equals( targetTrackId ) )
+		{
+			// Flag both tracks for undo before merging
+			undoRedoStack.flagTrackForUndo( sourceTrackId );
+			undoRedoStack.flagTrackForUndo( targetTrackId );
+		}
 		return trackModel.addEdge( source, target, weight );
 	}
 
@@ -674,6 +665,8 @@ public class Model
 	 */
 	public synchronized DefaultWeightedEdge removeEdge( final Spot source, final Spot target )
 	{
+		// Flag all tracks for undo before removing edge (may split tracks)
+		undoRedoStack.flagAllTracksForUndo();
 		return trackModel.removeEdge( source, target );
 	}
 
@@ -699,6 +692,8 @@ public class Model
 	 */
 	public synchronized boolean removeEdge( final DefaultWeightedEdge edge )
 	{
+		// Flag all tracks for undo before removing edge (may split tracks)
+		undoRedoStack.flagAllTracksForUndo();
 		return trackModel.removeEdge( edge );
 	}
 
@@ -761,12 +756,43 @@ public class Model
 	}
 
 	/**
+	 * Sets the name of the track with the specified ID.
+	 * <p>
+	 * This method captures the current track state for undo support before
+	 * changing the name. For the model update to happen correctly and listeners
+	 * to be notified properly, a call to this method must happen within a
+	 * transaction, as in:
+	 *
+	 * <pre>
+	 * model.beginUpdate();
+	 * try {
+	 * 	model.setTrackName( trackId, "MyTrackName" );
+	 * } finally {
+	 * 	model.endUpdate();
+	 * }
+	 * </pre>
+	 *
+	 * @param trackID
+	 *            the track ID.
+	 * @param name
+	 *            the name for the track.
+	 */
+	public synchronized void setTrackName( final Integer trackID, final String name )
+	{
+		// Capture current track state for undo
+		undoRedoStack.flagTrackForUndo( trackID );
+		trackModel.setName( trackID, name );
+		// Mark track as having its name modified for the event system
+		tracksNamedModified.add( trackID );
+	}
+
+	/**
 	 * Returns a copy of this model.
 	 * <p>
 	 * The copy is made of the same spot objects but on a different graph, that
 	 * can be safely edited. The copy does not include the feature values for
 	 * edges and tracks, but the features are declared.
-	 * 
+	 *
 	 * @return a new model.
 	 */
 	public Model copy()
@@ -810,7 +836,7 @@ public class Model
 				featureModel.getTrackFeatureShortNames(),
 				featureModel.getTrackFeatureDimensions(),
 				featureModel.getTrackFeatureIsInt() );
-		
+
 		// Feature values are not copied.
 		return copy;
 	}
@@ -824,12 +850,11 @@ public class Model
 	 */
 	private void flushUpdate()
 	{
-
 		if ( DEBUG )
 		{
 			System.out.println( "[TrackMateModel] #flushUpdate()." );
 			System.out.println( "[TrackMateModel] #flushUpdate(): Event cache is :" + eventCache );
-			System.out.println( "[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo() );
+//			System.out.println( "[TrackMateModel] #flushUpdate(): Track content is:\n" + trackModel.echo() );
 		}
 
 		/*
@@ -841,7 +866,7 @@ public class Model
 		final int nEdgesToSignal = trackModel.edgesAdded.size() + trackModel.edgesRemoved.size() + trackModel.edgesModified.size();
 
 		// Do we have tracks to update?
-		final HashSet< Integer > tracksToUpdate = new HashSet< >( trackModel.tracksUpdated );
+		final HashSet< Integer > tracksToUpdate = new HashSet<>( trackModel.tracksUpdated );
 
 		// We also want to update the tracks that have edges that were modified
 		for ( final DefaultWeightedEdge modifiedEdge : trackModel.edgesModified )
@@ -849,11 +874,14 @@ public class Model
 			tracksToUpdate.add( trackModel.trackIDOf( modifiedEdge ) );
 		}
 
+		// Add tracks whose names were modified
+		tracksToUpdate.addAll( tracksNamedModified );
+
 		// Deal with new or moved spots: we need to update their features.
 		final int nSpotsToUpdate = spotsAdded.size() + spotsMoved.size() + spotsUpdated.size();
 		if ( nSpotsToUpdate > 0 )
 		{
-			final HashSet< Spot > spotsToUpdate = new HashSet< >( nSpotsToUpdate );
+			final HashSet< Spot > spotsToUpdate = new HashSet<>( nSpotsToUpdate );
 			spotsToUpdate.addAll( spotsAdded );
 			spotsToUpdate.addAll( spotsMoved );
 			spotsToUpdate.addAll( spotsUpdated );
@@ -877,7 +905,10 @@ public class Model
 			}
 			for ( final Spot spot : spotsRemoved )
 			{
-				event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_REMOVED );
+				// Skip spots that were both added and removed in the same transaction
+				// (they are transient and should not be flagged as removed)
+				if ( !spotsAdded.contains( spot ) )
+					event.putSpotFlag( spot, ModelChangeEvent.FLAG_SPOT_REMOVED );
 			}
 			for ( final Spot spot : spotsMoved )
 			{
@@ -913,9 +944,12 @@ public class Model
 		// Configure it with the tracks we found need updating
 		event.setTracksUpdated( tracksToUpdate );
 
+		// Fire the event if there are any changes to signal
+		final boolean hasChanges = nEdgesToSignal + nSpotsToSignal > 0 || !tracksNamedModified.isEmpty();
+
 		try
 		{
-			if ( nEdgesToSignal + nSpotsToSignal > 0 )
+			if ( hasChanges )
 			{
 				if ( DEBUG )
 				{
@@ -950,6 +984,7 @@ public class Model
 			spotsRemoved.clear();
 			spotsMoved.clear();
 			spotsUpdated.clear();
+			tracksNamedModified.clear();
 			trackModel.edgesAdded.clear();
 			trackModel.edgesRemoved.clear();
 			trackModel.edgesModified.clear();
@@ -958,4 +993,88 @@ public class Model
 		}
 	}
 
+	private static class SpotMeshSliceCacheInvalidator implements ModelChangeListener
+	{
+
+		@Override
+		public void modelChanged( final ModelChangeEvent event )
+		{
+			if ( event.getEventID() != ModelChangeEvent.MODEL_MODIFIED )
+				return;
+
+			event.getSpots()
+					.stream()
+					.filter( s -> event.getSpotFlag( s ) == ModelChangeEvent.FLAG_SPOT_MODIFIED )
+					.filter( s -> ( s instanceof SpotMesh ) )
+					.forEach( s -> ( ( SpotMesh ) s ).resetZSliceCache() );
+		}
+	}
+
+	/**
+	 * Pauses the undo recording.
+	 * <p>
+	 * This is useful when a process is going to make a lot of changes to the
+	 * model that we don't want to be recorded in the undo stack.
+	 */
+	public void pauseUndo()
+	{
+		undoRedoStack.pauseUndo();
+	}
+
+	/**
+	 * Resumes the undo recording.
+	 */
+	public void resumeUndo()
+	{
+		undoRedoStack.resumeUndo();
+	}
+
+	/**
+	 * Undo the last action.
+	 */
+	public void undo()
+	{
+		undoRedoStack.undo();
+	}
+
+	/**
+	 * Redo the last undone action.
+	 */
+	public void redo()
+	{
+		undoRedoStack.redo();
+	}
+
+	/**
+	 * Starts the edition of a spot.
+	 * <p>
+	 * This method must be called <i>before</i> a spot is modified (moving it,
+	 * changing a feature value, editing its name, ...), so that the undo stack
+	 * can record its current state. For the model update to happen correctly
+	 * and listeners to be notified properly, a call to this method must happen
+	 * within a transaction, as in:
+	 *
+	 * <pre>
+	 * model.beginUpdate();
+	 * try {
+	 * 	model.beforeEdit( spot );
+	 * 	... // model modifications here
+	 * } finally {
+	 * 	model.endUpdate();
+	 * }
+	 * </pre>
+	 *
+	 * @param spot
+	 *            the spot to mark for update
+	 */
+	public void beforeEdit( final Spot spot )
+	{
+		// Capture current state of the spot for undo
+		undoRedoStack.flagForUndo( spot );
+		// Enlist for feature update when transaction is marked as finished
+		spotsUpdated.add( spot );
+		final Set< DefaultWeightedEdge > touchingEdges = trackModel.edgesOf( spot );
+		if ( null != touchingEdges )
+			trackModel.edgesModified.addAll( touchingEdges );
+	}
 }

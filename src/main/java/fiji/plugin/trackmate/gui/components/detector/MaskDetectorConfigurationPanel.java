@@ -21,8 +21,6 @@
  */
 package fiji.plugin.trackmate.gui.components.detector;
 
-import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-
 import java.util.Map;
 
 import fiji.plugin.trackmate.Model;
@@ -66,8 +64,7 @@ public class MaskDetectorConfigurationPanel extends ThresholdDetectorConfigurati
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		chkboxSimplify.setSelected( ( Boolean ) settings.get( ThresholdDetectorFactory.KEY_SIMPLIFY_CONTOURS ) );
+		setSettingsNonIntensity( settings );
 	}
 
 	/**

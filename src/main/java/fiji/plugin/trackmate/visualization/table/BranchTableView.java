@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -22,10 +22,10 @@
 package fiji.plugin.trackmate.visualization.table;
 
 import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
-import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,41 +54,41 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.scijava.ui.config.utils.FileChooser;
+import org.scijava.ui.config.utils.FileChooser.DialogType;
+import org.scijava.ui.config.utils.FileChooser.SelectionMode;
 
 import fiji.plugin.trackmate.Dimension;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.ModelChangeEvent;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition;
 import fiji.plugin.trackmate.graph.ConvexBranchesDecomposition.TrackBranchDecomposition;
 import fiji.plugin.trackmate.graph.TimeDirectedNeighborIndex;
-import fiji.plugin.trackmate.util.FileChooser;
-import fiji.plugin.trackmate.util.FileChooser.DialogType;
-import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
-import fiji.plugin.trackmate.util.TMUtils;
+import fiji.plugin.trackmate.gui.GuiModel;
+import fiji.plugin.trackmate.gui.Icons;
+import fiji.plugin.trackmate.visualization.AbstractTrackMateModelJFrameView;
 import fiji.plugin.trackmate.visualization.FeatureColorGenerator;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
-public class BranchTableView extends JFrame implements TrackMateModelView
+public class BranchTableView extends AbstractTrackMateModelJFrameView
 {
-
-	private static final long serialVersionUID = 1L;
 
 	private static final String KEY = "SPOT_TABLE";
 
 	private String selectedFile = System.getProperty( "user.home" ) + File.separator + "branches.csv";
 
-	private final Model model;
-
 	private final TablePanel< Branch > branchTable;
 
-	public BranchTableView( final Model model, final SelectionModel selectionModel, final String imageFileName )
+	private final JFrame frame;
+
+	public BranchTableView( final GuiModel guiModel, final String imageFileName )
 	{
-		super( "Branch table" );
-		setIconImage( TRACKMATE_ICON.getImage() );
-		this.model = model;
+		super( guiModel );
 		this.selectedFile = imageFileName + "_branches.csv";
+		final Model model = guiModel.getModel();
+		final SelectionModel selectionModel = guiModel.getSelectionModel();
 
 		/*
 		 * GUI.
@@ -112,8 +112,10 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		toolbar.add( Box.createHorizontalGlue() );
 		mainPanel.add( toolbar, BorderLayout.NORTH );
 
-		getContentPane().add( mainPanel );
-		pack();
+		this.frame = new JFrame( "Branch table" );
+		frame.setIconImage( Icons.TRACKMATE_ICON.getImage() );
+		frame.getContentPane().add( mainPanel );
+		frame.pack();
 	}
 
 	public TablePanel< Branch > getBranchTable()
@@ -124,7 +126,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	public void exportToCsv()
 	{
 		final File file = FileChooser.chooseFile(
-				this,
+				frame,
 				selectedFile,
 				new FileNameExtensionFilter( "CSV files", "csv" ),
 				"Export table to CSV",
@@ -145,7 +147,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		}
 		catch ( final IOException e )
 		{
-			model.getLogger().error( "Problem exporting to file "
+			guiModel.getModel().getLogger().error( "Problem exporting to file "
 					+ csvFile + "\n" + e.getMessage() );
 		}
 	}
@@ -294,7 +296,7 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		final BiFunction< Branch, String, Double > featureFun = ( br, feature ) -> br.getFeature( feature );
 		final Map< String, String > featureUnits = new HashMap<>();
 		BRANCH_FEATURES_DIMENSIONS.forEach(
-				( f, d ) -> featureUnits.put( f, TMUtils.getUnitsFor( d, model.getSpaceUnits(), model.getTimeUnits() ) ) );
+				( f, d ) -> featureUnits.put( f, d.units( model.getSpaceUnits(), model.getTimeUnits() ) ) );
 		final Map< String, String > infoTexts = new HashMap<>();
 		final Function< Branch, String > labelGenerator = b -> b.toString();
 		final BiConsumer< Branch, String > labelSetter = null;
@@ -322,25 +324,19 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 	@Override
 	public void render()
 	{
-		setLocationRelativeTo( null );
-		setVisible( true );
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 	}
 
 	@Override
 	public void refresh()
 	{
-		repaint();
+		frame.repaint();
 	}
 
 	@Override
 	public void centerViewOn( final Spot spot )
 	{}
-
-	@Override
-	public Model getModel()
-	{
-		return model;
-	}
 
 	@Override
 	public String getKey()
@@ -586,5 +582,15 @@ public class BranchTableView extends JFrame implements TrackMateModelView
 		BRANCH_FEATURES_SHORTNAMES.put( MEAN_PREDECESSORS_DELAY, "Pred Delay" );
 		BRANCH_FEATURES_ISINTS.put( MEAN_PREDECESSORS_DELAY, Boolean.FALSE );
 		BRANCH_FEATURES_DIMENSIONS.put( MEAN_PREDECESSORS_DELAY, Dimension.TIME );
+	}
+
+	@Override
+	public void modelChanged( final ModelChangeEvent event )
+	{}
+
+	@Override
+	public Window getWindow()
+	{
+		return frame;
 	}
 }

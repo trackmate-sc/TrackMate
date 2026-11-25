@@ -21,7 +21,6 @@
  */
 package fiji.plugin.trackmate.action.closegaps;
 
-import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.List;
@@ -30,21 +29,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.TrackModel;
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.TrackMateObject;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
-import ij.ImageJ;
-import ij.ImagePlus;
 import net.imglib2.util.Util;
 
 /**
@@ -187,38 +175,5 @@ public class CloseGapsByDetection implements GapClosingMethod
 	public String toString()
 	{
 		return NAME;
-	}
-
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-
-//		final String filePath = "/Users/tinevez/Desktop/GaelleGapClosingWeirdBug/Simple2-211116MovieFDBYFP_Movie0-01-Scene-64-TR114.xml";
-		final String filePath = "/Users/tinevez/Desktop/GaelleGapClosingWeirdBug/211116 Movie FDB YFP_Movie 0-01-Scene-64-TR114-zeroed.xml";
-		final TmXmlReader reader = new TmXmlReader( new File( filePath ) );
-		if ( !reader.isReadingOk() )
-		{
-			System.err.println( reader.getErrorMessage() );
-			return;
-		}
-		final Model model = reader.getModel();
-		final ImagePlus imp = reader.readImage();
-		final Settings settings = reader.readSettings( imp );
-		final TrackMate trackmate = new TrackMate( model, settings );
-		trackmate.setNumThreads( 5 );
-
-		settings.detectorSettings.put( DetectorKeys.KEY_RADIUS, 8. );
-
-		final CloseGapsByDetection gapCloser = new CloseGapsByDetection();
-		gapCloser.getParameters().get( 0 ).value = 2.;
-		gapCloser.execute( trackmate, Logger.DEFAULT_LOGGER );
-
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final DisplaySettings ds = DisplaySettingsIO.readUserDefault();
-		ds.setSpotColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
-		ds.setTrackColorBy( TrackMateObject.TRACKS, TrackIndexAnalyzer.TRACK_INDEX );
-
-		new TrackScheme( model, selectionModel, ds ).render();
-		new HyperStackDisplayer( model, selectionModel, settings.imp, ds ).render();
 	}
 }

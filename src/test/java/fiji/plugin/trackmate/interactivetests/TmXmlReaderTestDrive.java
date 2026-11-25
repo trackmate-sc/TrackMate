@@ -28,11 +28,12 @@ import org.scijava.util.AppUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.io.TmXmlReader;
+import fiji.plugin.trackmate.io.xml.TmXmlReader;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot2DMorphologyAnalyzerProvider;
+import fiji.plugin.trackmate.providers.Spot3DMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
-import fiji.plugin.trackmate.providers.SpotMorphologyAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
 import ij.ImagePlus;
@@ -45,7 +46,7 @@ public class TmXmlReaderTestDrive
 
 		final File file = new File( AppUtils.getBaseDirectory( TrackMate.class ), "samples/FakeTracks.xml" );
 		System.out.println( "Opening file: " + file.getAbsolutePath() );
-		final TmXmlReader reader = new TmXmlReader( file );
+		final TmXmlReader reader = new TmXmlReader( file.getPath() );
 		final Model model = reader.getModel();
 
 		final ImagePlus imp = reader.readImage();
@@ -57,7 +58,8 @@ public class TmXmlReaderTestDrive
 				new SpotAnalyzerProvider( imp.getNChannels() ),
 				new EdgeAnalyzerProvider(),
 				new TrackAnalyzerProvider(),
-				new SpotMorphologyAnalyzerProvider( imp.getNChannels() ) );
+				new Spot2DMorphologyAnalyzerProvider( imp.getNChannels() ),
+				new Spot3DMorphologyAnalyzerProvider( imp.getNChannels() ) );
 
 		System.out.println( settings );
 		System.out.println( model );
