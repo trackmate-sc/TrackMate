@@ -990,13 +990,26 @@ public class TmGeffWriter
 	}
 
 	/**
-	 * Returns the interleaved XYZ coordinates of the mesh vertex normals of the
-	 * specified spot. Empty if the spot is not a {@link SpotMesh}.
+	 * Returns the interleaved XYZ coordinates of the mesh vertex normals of
+	 * the specified spot. Empty if the spot is not a {@link SpotMesh}.
+	 * <p>
+	 * Non-finite values are sanitized to {@code (0,0,0)}. imglib2-mesh's
+	 * {@code Meshes.calculateNormals} divides by the magnitude of the
+	 * area-weighted normal accumulated at each vertex, which yields NaN for
+	 * saddle vertices whose surroundings normals cancel exactly (a legitimate
+	 * geometric situation, with mean curvature zero). The GEFF mesh
+	 * specification requires finite values.
 	 */
 	private static Maybe.MaybeFloatArray meshNormals( final Spot spot )
 	{
 		if ( spot instanceof SpotMesh )
-			return new Maybe.MaybeFloatArray( toArray( ( ( SpotMesh ) spot ).getMesh().vertices().normals() ) );
+		{
+			final float[] n = toArray( ( ( SpotMesh ) spot ).getMesh().vertices().normals() );
+			for ( int i = 0; i < n.length; i++ )
+				if ( !Float.isFinite( n[ i ] ) )
+					n[ i ] = 0f;
+			return new Maybe.MaybeFloatArray( n );
+		}
 		return new Maybe.MaybeFloatArray();
 	}
 
