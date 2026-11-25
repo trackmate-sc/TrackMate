@@ -34,7 +34,7 @@ import java.util.function.ToLongFunction;
 
 import org.janelia.saalfeldlab.n5.Compression;
 import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.saalfeldlab.n5.blosc.BloscCompression;
+import org.janelia.scicomp.n5.zstandard.ZstandardCompression;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.litt.geff.GeffAxis;
 import org.litt.geff.GeffDisplayHints;
@@ -140,8 +140,14 @@ public class TmGeffWriter
 	/** The chunk size to use when writing the GEFF file. */
 	private int chunkSize = 8 * 1024; // 8 kiB;
 
-	/** The compression to use for writing the Zarr. */
-	private Compression compression = new BloscCompression();
+	/**
+	 * The compression to use for writing the Zarr. Zstandard is used because
+	 * its Zarr v3 codec configuration is spec-compliant and readable by other
+	 * implementations (zarr-python), whereas the blosc configuration written
+	 * by n5-zarr contains an n5-specific parameter ("nthreads") that
+	 * zarr-python rejects.
+	 */
+	private Compression compression = new ZstandardCompression();
 
 	/**
 	 * Creates a new writer that will write a GEFF file to the specified path (a
