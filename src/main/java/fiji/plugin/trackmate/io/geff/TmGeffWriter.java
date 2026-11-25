@@ -298,11 +298,14 @@ public class TmGeffWriter
 			writer.add( POLYGON_PROP, TmGeffWriter::polygon, 2, TmGeffWriter::polygonDims );
 
 		// SpotMesh: vertices positions and normals, triangle indices.
+		// Written as 2D var-length properties, as in the GEFF mesh
+		// specification draft: each entry is an (n_vertices, 3) or
+		// (n_triangles, 3) array of values, flattened XYZ-interleaved.
 		if ( hasMesh )
 		{
-			writer.add( MESH_V_PROP, TmGeffWriter::meshVertices );
-			writer.add( MESH_VN_PROP, TmGeffWriter::meshNormals );
-			writer.add( MESH_F_PROP, TmGeffWriter::meshTriangles );
+			writer.add( MESH_V_PROP, TmGeffWriter::meshVertices, 2, TmGeffWriter::meshVertexDims );
+			writer.add( MESH_VN_PROP, TmGeffWriter::meshNormals, 2, TmGeffWriter::meshVertexDims );
+			writer.add( MESH_F_PROP, TmGeffWriter::meshTriangles, 2, TmGeffWriter::meshTriangleDims, "<i8" );
 		}
 
 		// Store the writer for later use in write().
@@ -714,7 +717,7 @@ public class TmGeffWriter
 		{
 			nodePropsMetadata.put( MESH_V_PROP, new PropMetadata( MESH_V_PROP, "float32", true, spaceUnits, "Mesh vertices", "Interleaved XYZ coordinates of the mesh vertices, relative to the spot center" ) );
 			nodePropsMetadata.put( MESH_VN_PROP, new PropMetadata( MESH_VN_PROP, "float32", true, null, "Mesh vertex normals", "Interleaved XYZ coordinates of the mesh vertex normals" ) );
-			nodePropsMetadata.put( MESH_F_PROP, new PropMetadata( MESH_F_PROP, "uint64", true, null, "Mesh triangles", "Flattened indices of the mesh triangles" ) );
+			nodePropsMetadata.put( MESH_F_PROP, new PropMetadata( MESH_F_PROP, "int64", true, null, "Mesh triangles", "Flattened indices of the mesh triangles" ) );
 		}
 
 		metadata.setNodePropsMetadata( nodePropsMetadata );
@@ -737,7 +740,11 @@ public class TmGeffWriter
 		if ( hasRoi )
 			metadata.setPolygon( POLYGON_PROP );
 		if ( hasMesh )
-			metadata.setMesh( new MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null ) );
+		{
+			final MeshMetadata meshMetadata = new MeshMetadata( MESH_V_PROP, MESH_F_PROP, MESH_VN_PROP, null );
+			meshMetadata.setVertexAxes( List.of( "x", "y", "z" ) );
+			metadata.setMesh( meshMetadata );
+		}
 	}
 
 	/**
@@ -942,6 +949,32 @@ public class TmGeffWriter
 		if ( spot instanceof SpotRoi )
 			return new long[] { ( ( SpotRoi ) spot ).nPoints(), 2 };
 		return new long[] { 0, 2 };
+	}
+
+	/**
+	 * Returns the per-element dimensions of the mesh vertices and vertex
+	 * normals properties for the specified spot: {@code (n_vertices, 3)} in
+	 * imglib2 order (last dimension fastest). Only called for spots that
+	 * have a mesh, but kept safe against non-mesh spots.
+	 */
+	private static final long[] meshVertexDims( final Spot spot )
+	{
+		if ( spot instanceof SpotMesh )
+			return new long[] { ( ( SpotMesh ) spot ).getMesh().vertices().size(), 3 };
+		return new long[] { 0, 3 };
+	}
+
+	/**
+	 * Returns the per-element dimensions of the mesh triangles property for
+	 * the specified spot: {@code (n_triangles, 3)} in imglib2 order (last
+	 * dimension fastest). Only called for spots that have a mesh, but kept
+	 * safe against non-mesh spots.
+	 */
+	private static final long[] meshTriangleDims( final Spot spot )
+	{
+		if ( spot instanceof SpotMesh )
+			return new long[] { ( ( SpotMesh ) spot ).getMesh().triangles().size(), 3 };
+		return new long[] { 0, 3 };
 	}
 
 	/**
