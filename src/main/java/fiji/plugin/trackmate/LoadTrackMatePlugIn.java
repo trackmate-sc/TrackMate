@@ -136,7 +136,8 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 		ImagePlus imp = reader.readImage();
 		if ( null == imp )
 			imp = ViewUtils.makeEmpytImagePlus( model );
-
+                
+                
 		/*
 		 * Read settings.
 		 */
@@ -151,6 +152,11 @@ public class LoadTrackMatePlugIn extends TrackMatePlugIn
 					+ "The file did not contain a settings element. Using default values." );
 			settings = new Settings( imp );
 		}
+                
+                /**
+                 * Check if settings and image dimensions don't match in Z and T dimensions
+                 */
+                GuiUtils.checkDimensionsImpAndSettings( imp, settings );
 
 		/*
 		 * Declare the analyzers that are in the settings to the model. This is
